@@ -13,7 +13,93 @@ type CookiesSetBody struct {
     // The cookies property
     cookies []CookieDictable
     // The profile_id property
-    profile_id *string
+    profile_id CookiesSetBody_CookiesSetBody_profile_idable
+    // The session_id property
+    session_id *string
+}
+// CookiesSetBody_CookiesSetBody_profile_id composed type wrapper for classes CookiesSetBody_profile_idMember1able, string
+type CookiesSetBody_CookiesSetBody_profile_id struct {
+    // Composed type representation for type CookiesSetBody_profile_idMember1able
+    cookiesSetBody_profile_idMember1 CookiesSetBody_profile_idMember1able
+    // Composed type representation for type string
+    string *string
+}
+// NewCookiesSetBody_CookiesSetBody_profile_id instantiates a new CookiesSetBody_CookiesSetBody_profile_id and sets the default values.
+func NewCookiesSetBody_CookiesSetBody_profile_id()(*CookiesSetBody_CookiesSetBody_profile_id) {
+    m := &CookiesSetBody_CookiesSetBody_profile_id{
+    }
+    return m
+}
+// CreateCookiesSetBody_CookiesSetBody_profile_idFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateCookiesSetBody_CookiesSetBody_profile_idFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewCookiesSetBody_CookiesSetBody_profile_id()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateCookiesSetBody_profile_idMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(CookiesSetBody_profile_idMember1able); ok {
+                result.SetCookiesSetBodyProfileIdMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetCookiesSetBodyProfileIdMember1 gets the CookiesSetBody_profile_idMember1 property value. Composed type representation for type CookiesSetBody_profile_idMember1able
+// returns a CookiesSetBody_profile_idMember1able when successful
+func (m *CookiesSetBody_CookiesSetBody_profile_id) GetCookiesSetBodyProfileIdMember1()(CookiesSetBody_profile_idMember1able) {
+    return m.cookiesSetBody_profile_idMember1
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *CookiesSetBody_CookiesSetBody_profile_id) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *CookiesSetBody_CookiesSetBody_profile_id) GetIsComposedType()(bool) {
+    return true
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *CookiesSetBody_CookiesSetBody_profile_id) GetString()(*string) {
+    return m.string
+}
+// Serialize serializes information the current object
+func (m *CookiesSetBody_CookiesSetBody_profile_id) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetCookiesSetBodyProfileIdMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetCookiesSetBodyProfileIdMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetCookiesSetBodyProfileIdMember1 sets the CookiesSetBody_profile_idMember1 property value. Composed type representation for type CookiesSetBody_profile_idMember1able
+func (m *CookiesSetBody_CookiesSetBody_profile_id) SetCookiesSetBodyProfileIdMember1(value CookiesSetBody_profile_idMember1able)() {
+    m.cookiesSetBody_profile_idMember1 = value
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *CookiesSetBody_CookiesSetBody_profile_id) SetString(value *string)() {
+    m.string = value
+}
+type CookiesSetBody_CookiesSetBody_profile_idable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetCookiesSetBodyProfileIdMember1()(CookiesSetBody_profile_idMember1able)
+    GetString()(*string)
+    SetCookiesSetBodyProfileIdMember1(value CookiesSetBody_profile_idMember1able)()
+    SetString(value *string)()
 }
 // NewCookiesSetBody instantiates a new CookiesSetBody and sets the default values.
 func NewCookiesSetBody()(*CookiesSetBody) {
@@ -38,7 +124,7 @@ func (m *CookiesSetBody) GetCookies()([]CookieDictable) {
     return m.cookies
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *CookiesSetBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["cookies"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -58,21 +144,36 @@ func (m *CookiesSetBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89
         return nil
     }
     res["profile_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateCookiesSetBody_CookiesSetBody_profile_idFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetProfileId(val.(CookiesSetBody_CookiesSetBody_profile_idable))
+        }
+        return nil
+    }
+    res["session_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
         val, err := n.GetStringValue()
         if err != nil {
             return err
         }
         if val != nil {
-            m.SetProfileId(val)
+            m.SetSessionId(val)
         }
         return nil
     }
     return res
 }
 // GetProfileId gets the profile_id property value. The profile_id property
-// returns a *string when successful
-func (m *CookiesSetBody) GetProfileId()(*string) {
+// returns a CookiesSetBody_CookiesSetBody_profile_idable when successful
+func (m *CookiesSetBody) GetProfileId()(CookiesSetBody_CookiesSetBody_profile_idable) {
     return m.profile_id
+}
+// GetSessionId gets the session_id property value. The session_id property
+// returns a *string when successful
+func (m *CookiesSetBody) GetSessionId()(*string) {
+    return m.session_id
 }
 // Serialize serializes information the current object
 func (m *CookiesSetBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
@@ -89,7 +190,13 @@ func (m *CookiesSetBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a
         }
     }
     {
-        err := writer.WriteStringValue("profile_id", m.GetProfileId())
+        err := writer.WriteObjectValue("profile_id", m.GetProfileId())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteStringValue("session_id", m.GetSessionId())
         if err != nil {
             return err
         }
@@ -111,14 +218,20 @@ func (m *CookiesSetBody) SetCookies(value []CookieDictable)() {
     m.cookies = value
 }
 // SetProfileId sets the profile_id property value. The profile_id property
-func (m *CookiesSetBody) SetProfileId(value *string)() {
+func (m *CookiesSetBody) SetProfileId(value CookiesSetBody_CookiesSetBody_profile_idable)() {
     m.profile_id = value
+}
+// SetSessionId sets the session_id property value. The session_id property
+func (m *CookiesSetBody) SetSessionId(value *string)() {
+    m.session_id = value
 }
 type CookiesSetBodyable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetCookies()([]CookieDictable)
-    GetProfileId()(*string)
+    GetProfileId()(CookiesSetBody_CookiesSetBody_profile_idable)
+    GetSessionId()(*string)
     SetCookies(value []CookieDictable)()
-    SetProfileId(value *string)()
+    SetProfileId(value CookiesSetBody_CookiesSetBody_profile_idable)()
+    SetSessionId(value *string)()
 }

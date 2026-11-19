@@ -33,7 +33,7 @@ func NewAgentRequestBuilder(rawUrl string, requestAdapter i2ae4187f7daee263371cb
     urlParams["request-raw-url"] = rawUrl
     return NewAgentRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Post start agent lane request
+// Post bETA / opt-in. The REST agent lane is disabled by default and returns 404 until enabled for your account/deployment, see the 404 response below. The agent capability is generally available via the MCP `ghostcrawl_agent` tool; this REST surface is still stabilising. Contact support to enable it.
 // returns a []byte when successful
 // returns a ErrorEnvelope error when the service returns a 400 status code
 // returns a Agent404Error error when the service returns a 404 status code
@@ -57,7 +57,7 @@ func (m *AgentRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d9daa3
     }
     return res.([]byte), nil
 }
-// ToPostRequestInformation start agent lane request
+// ToPostRequestInformation bETA / opt-in. The REST agent lane is disabled by default and returns 404 until enabled for your account/deployment, see the 404 response below. The agent capability is generally available via the MCP `ghostcrawl_agent` tool; this REST surface is still stabilising. Contact support to enable it.
 // returns a *RequestInformation when successful
 func (m *AgentRequestBuilder) ToPostRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.AgentRequestable, requestConfiguration *AgentRequestBuilderPostRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.POST, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

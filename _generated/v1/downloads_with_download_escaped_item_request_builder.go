@@ -57,7 +57,7 @@ func (m *DownloadsWithDownload_ItemRequestBuilder) Delete(ctx context.Context, r
     }
     return nil
 }
-// Get gET /v1/downloads/{id} → the download's signed retrieval link / metadata. we do not confirm existence of another tenant's artifact).
+// Get gET /v1/downloads/{id} → the captured artifact bytes (or its metadata). When the capture banked its bytes (the producer path), stream them as an ``application/octet-stream`` attachment so the dashboard's blob download and the SDK both retrieve a real file. Falls back to the metadata JSON for a metadata-only capture. we do not confirm existence of another tenant's artifact).
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *DownloadsWithDownload_ItemRequestBuilder) Get(ctx context.Context, requestConfiguration *DownloadsWithDownload_ItemRequestBuilderGetRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -87,7 +87,7 @@ func (m *DownloadsWithDownload_ItemRequestBuilder) ToDeleteRequestInformation(ct
     requestInfo.Headers.TryAdd("Accept", "application/problem+json")
     return requestInfo, nil
 }
-// ToGetRequestInformation gET /v1/downloads/{id} → the download's signed retrieval link / metadata. we do not confirm existence of another tenant's artifact).
+// ToGetRequestInformation gET /v1/downloads/{id} → the captured artifact bytes (or its metadata). When the capture banked its bytes (the producer path), stream them as an ``application/octet-stream`` attachment so the dashboard's blob download and the SDK both retrieve a real file. Falls back to the metadata JSON for a metadata-only capture. we do not confirm existence of another tenant's artifact).
 // returns a *RequestInformation when successful
 func (m *DownloadsWithDownload_ItemRequestBuilder) ToGetRequestInformation(ctx context.Context, requestConfiguration *DownloadsWithDownload_ItemRequestBuilderGetRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.GET, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

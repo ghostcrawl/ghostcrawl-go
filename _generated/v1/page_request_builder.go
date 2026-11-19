@@ -11,6 +11,16 @@ import (
 type PageRequestBuilder struct {
     i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.BaseRequestBuilder
 }
+// Arrival the arrival property
+// returns a *PageArrivalRequestBuilder when successful
+func (m *PageRequestBuilder) Arrival()(*PageArrivalRequestBuilder) {
+    return NewPageArrivalRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
+// ClosePopups the closePopups property
+// returns a *PageClosePopupsRequestBuilder when successful
+func (m *PageRequestBuilder) ClosePopups()(*PageClosePopupsRequestBuilder) {
+    return NewPageClosePopupsRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
 // NewPageRequestBuilderInternal instantiates a new PageRequestBuilder and sets the default values.
 func NewPageRequestBuilderInternal(pathParameters map[string]string, requestAdapter i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestAdapter)(*PageRequestBuilder) {
     m := &PageRequestBuilder{
@@ -49,10 +59,25 @@ func (m *PageRequestBuilder) Eval()(*PageEvalRequestBuilder) {
 func (m *PageRequestBuilder) Har()(*PageHarRequestBuilder) {
     return NewPageHarRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
 }
+// Mouse the mouse property
+// returns a *PageMouseRequestBuilder when successful
+func (m *PageRequestBuilder) Mouse()(*PageMouseRequestBuilder) {
+    return NewPageMouseRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
 // Scroll the scroll property
 // returns a *PageScrollRequestBuilder when successful
 func (m *PageRequestBuilder) Scroll()(*PageScrollRequestBuilder) {
     return NewPageScrollRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
+// TabVisit the tabVisit property
+// returns a *PageTabVisitRequestBuilder when successful
+func (m *PageRequestBuilder) TabVisit()(*PageTabVisitRequestBuilder) {
+    return NewPageTabVisitRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
+// Touch the touch property
+// returns a *PageTouchRequestBuilder when successful
+func (m *PageRequestBuilder) Touch()(*PageTouchRequestBuilder) {
+    return NewPageTouchRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
 }
 // Upload the upload property
 // returns a *PageUploadRequestBuilder when successful

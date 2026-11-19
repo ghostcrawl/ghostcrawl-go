@@ -29,6 +29,11 @@ func NewCdpRequestBuilder(rawUrl string, requestAdapter i2ae4187f7daee263371cb1c
 func (m *CdpRequestBuilder) Frame()(*CdpFrameRequestBuilder) {
     return NewCdpFrameRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
 }
+// Input the input property
+// returns a *CdpInputRequestBuilder when successful
+func (m *CdpRequestBuilder) Input()(*CdpInputRequestBuilder) {
+    return NewCdpInputRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
 // Url the url property
 // returns a *CdpUrlRequestBuilder when successful
 func (m *CdpRequestBuilder) Url()(*CdpUrlRequestBuilder) {

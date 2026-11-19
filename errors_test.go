@@ -1,6 +1,82 @@
 package ghostcrawl
 
-import "testing"
+import (
+	"errors"
+	"testing"
+
+	genmodels "github.com/GhostCrawl/ghostcrawl-go/v2/models"
+)
+
+// wrapAPIError must carry the canonical fields from a modeled *ProblemDetails
+// straight through — Code, RequestID (instance), Retryable, and RetryAfter — not
+// collapse them to a status-line fallback. This is the regression the battle-test
+// found: RequestID was always "" and every 503 subtype flattened to a generic
+// error because ae.Error() is only the generic Kiota status message.
+func TestWrapAPIError_CarriesProblemDetailsThrough(t *testing.T) {
+	pd := genmodels.NewProblemDetails()
+	pd.SetStatusCode(503)
+	code := genmodels.POOL_EXHAUSTED_ERRORCODE
+	pd.SetCode(&code)
+	inst := "req_model_xyz"
+	pd.SetInstance(&inst)
+	ra := int32(7)
+	pd.SetRetryAfter(&ra)
+
+	err := wrapAPIError(pd)
+	ae, ok := err.(*APIError)
+	if !ok {
+		t.Fatalf("503 ProblemDetails should map to *APIError, got %T", err)
+	}
+	if ae.Code != CodePoolExhausted {
+		t.Errorf("Code = %q, want pool_exhausted (from the modeled body, not the status fallback)", ae.Code)
+	}
+	if ae.RequestID != "req_model_xyz" {
+		t.Errorf("RequestID = %q, want req_model_xyz (must carry through, not be discarded)", ae.RequestID)
+	}
+	if !ae.Retryable {
+		t.Errorf("Retryable = false, want true")
+	}
+	if ae.RetryAfter != 7 {
+		t.Errorf("RetryAfter = %d, want 7", ae.RetryAfter)
+	}
+}
+
+// A ProblemDetails whose modeled code disagrees with the status line must honour
+// the modeled code — proving the model path is preferred over codeForStatus.
+func TestWrapAPIError_ModeledCodeWins(t *testing.T) {
+	pd := genmodels.NewProblemDetails()
+	pd.SetStatusCode(429)
+	code := genmodels.RATE_LIMITED_ERRORCODE
+	pd.SetCode(&code)
+	err := wrapAPIError(pd)
+	rl, ok := err.(*RateLimitError)
+	if !ok {
+		t.Fatalf("429 should map to *RateLimitError, got %T", err)
+	}
+	if rl.Code != CodeRateLimited || !rl.Retryable {
+		t.Errorf("Code=%q retryable=%v, want rate_limited/true", rl.Code, rl.Retryable)
+	}
+}
+
+// A connection-level failure (never reached the API) must surface as the typed
+// *TransportError family, unwrap to the underlying cause, and be marked retryable.
+func TestWrapAPIError_TransportErrorTyped(t *testing.T) {
+	cause := errors.New("dial tcp 127.0.0.1:0: connect: connection refused")
+	err := wrapAPIError(cause)
+	te, ok := err.(*TransportError)
+	if !ok {
+		t.Fatalf("connection failure should map to *TransportError, got %T", err)
+	}
+	if te.StatusCode != 0 || te.Code != "" {
+		t.Errorf("transport error should have no status/code, got status=%d code=%q", te.StatusCode, te.Code)
+	}
+	if !te.Retryable {
+		t.Errorf("Retryable = false, want true (transport failures are transient)")
+	}
+	if !errors.Is(err, cause) {
+		t.Errorf("errors.Is(err, cause) = false, want true (must unwrap to the underlying error)")
+	}
+}
 
 // A 200 result carrying ok:false + result_error must raise a *ScrapeError with
 // the canonical code, retryable flag, and target_status.

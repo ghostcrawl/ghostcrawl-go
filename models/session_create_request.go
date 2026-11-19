@@ -14,7 +14,7 @@ type SessionCreateRequest struct {
     engine *SessionCreateRequest_engine
     // The identity_config property
     identity_config i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
-    // Rehydrates the saved identity bundle for this session, same deterministic fingerprint as /v1/scrape with profile=<name>.
+    // Named persistent profile. Rehydrates the saved identity bundle for this session, the same browser identity as /v1/scrape with profile=<name>.
     profile SessionCreateRequest_SessionCreateRequest_profileable
     // The proxy property
     proxy i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
@@ -178,7 +178,7 @@ func (m *SessionCreateRequest) GetFieldDeserializers()(map[string]func(i878a80d2
 func (m *SessionCreateRequest) GetIdentityConfig()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable) {
     return m.identity_config
 }
-// GetProfile gets the profile property value. Rehydrates the saved identity bundle for this session, same deterministic fingerprint as /v1/scrape with profile=<name>.
+// GetProfile gets the profile property value. Named persistent profile. Rehydrates the saved identity bundle for this session, the same browser identity as /v1/scrape with profile=<name>.
 // returns a SessionCreateRequest_SessionCreateRequest_profileable when successful
 func (m *SessionCreateRequest) GetProfile()(SessionCreateRequest_SessionCreateRequest_profileable) {
     return m.profile
@@ -235,7 +235,7 @@ func (m *SessionCreateRequest) SetEngine(value *SessionCreateRequest_engine)() {
 func (m *SessionCreateRequest) SetIdentityConfig(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)() {
     m.identity_config = value
 }
-// SetProfile sets the profile property value. Rehydrates the saved identity bundle for this session, same deterministic fingerprint as /v1/scrape with profile=<name>.
+// SetProfile sets the profile property value. Named persistent profile. Rehydrates the saved identity bundle for this session, the same browser identity as /v1/scrape with profile=<name>.
 func (m *SessionCreateRequest) SetProfile(value SessionCreateRequest_SessionCreateRequest_profileable)() {
     m.profile = value
 }

@@ -42,8 +42,8 @@ func (m *RecordingsItemVisualRequestBuilder) Frames()(*RecordingsItemVisualFrame
 // Get get the HLS-style manifest pointer for a visual recording. Returns 200 {manifest_url, frame_count, status, engine} or 404 for
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
-func (m *RecordingsItemVisualRequestBuilder) Get(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.AuthContextable, requestConfiguration *RecordingsItemVisualRequestBuilderGetRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
-    requestInfo, err := m.ToGetRequestInformation(ctx, body, requestConfiguration);
+func (m *RecordingsItemVisualRequestBuilder) Get(ctx context.Context, requestConfiguration *RecordingsItemVisualRequestBuilderGetRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
+    requestInfo, err := m.ToGetRequestInformation(ctx, requestConfiguration);
     if err != nil {
         return nil, err
     }
@@ -71,17 +71,13 @@ func (m *RecordingsItemVisualRequestBuilder) Stop()(*RecordingsItemVisualStopReq
 }
 // ToGetRequestInformation get the HLS-style manifest pointer for a visual recording. Returns 200 {manifest_url, frame_count, status, engine} or 404 for
 // returns a *RequestInformation when successful
-func (m *RecordingsItemVisualRequestBuilder) ToGetRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.AuthContextable, requestConfiguration *RecordingsItemVisualRequestBuilderGetRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
+func (m *RecordingsItemVisualRequestBuilder) ToGetRequestInformation(ctx context.Context, requestConfiguration *RecordingsItemVisualRequestBuilderGetRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.GET, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)
     if requestConfiguration != nil {
         requestInfo.Headers.AddAll(requestConfiguration.Headers)
         requestInfo.AddRequestOptions(requestConfiguration.Options)
     }
     requestInfo.Headers.TryAdd("Accept", "application/json")
-    err := requestInfo.SetContentFromParsable(ctx, m.BaseRequestBuilder.RequestAdapter, "application/json", body)
-    if err != nil {
-        return nil, err
-    }
     return requestInfo, nil
 }
 // WithUrl returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.

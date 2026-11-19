@@ -34,7 +34,7 @@ func NewCdpFrameRequestBuilder(rawUrl string, requestAdapter i2ae4187f7daee26337
     urlParams["request-raw-url"] = rawUrl
     return NewCdpFrameRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Post engine-agnostic live-view frame capture (cross-engine). Returns a single base64-encoded JPEG frame of a live interactive session, using the same capture path across Chromium, Firefox, and WebKit. Gating: 1. Tenant authentication 2. Revocation check 3. 4. Session ownership (the session must belong to the authenticated organisation) Returns 200 {"format":"jpeg","data":"<base64>","engine","width","height"} on success; 403 cdp_not_enabled (tier) / cdp_revoked; 404 session_not_found; 502 frame_failed.
+// Post capture a JPEG frame of a live browser session. Returns a single base64-encoded JPEG frame of a live interactive session. Gating: 1. Tenant authentication 2. Revocation check 3. 4. Session ownership (the session must belong to the authenticated organisation) Returns 200 {"format":"jpeg","data":"<base64>","engine","width","height"} on success; 403 cdp_not_enabled (tier) / cdp_revoked; 404 session_not_found; 502 frame_failed.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *CdpFrameRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.CdpFrameRequestable, requestConfiguration *CdpFrameRequestBuilderPostRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -54,7 +54,7 @@ func (m *CdpFrameRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d9d
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToPostRequestInformation engine-agnostic live-view frame capture (cross-engine). Returns a single base64-encoded JPEG frame of a live interactive session, using the same capture path across Chromium, Firefox, and WebKit. Gating: 1. Tenant authentication 2. Revocation check 3. 4. Session ownership (the session must belong to the authenticated organisation) Returns 200 {"format":"jpeg","data":"<base64>","engine","width","height"} on success; 403 cdp_not_enabled (tier) / cdp_revoked; 404 session_not_found; 502 frame_failed.
+// ToPostRequestInformation capture a JPEG frame of a live browser session. Returns a single base64-encoded JPEG frame of a live interactive session. Gating: 1. Tenant authentication 2. Revocation check 3. 4. Session ownership (the session must belong to the authenticated organisation) Returns 200 {"format":"jpeg","data":"<base64>","engine","width","height"} on success; 403 cdp_not_enabled (tier) / cdp_revoked; 404 session_not_found; 502 frame_failed.
 // returns a *RequestInformation when successful
 func (m *CdpFrameRequestBuilder) ToPostRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.CdpFrameRequestable, requestConfiguration *CdpFrameRequestBuilderPostRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.POST, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

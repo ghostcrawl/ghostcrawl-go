@@ -14,6 +14,7 @@ const (
     CONFLICT_ERRORCODE
     BYO_PROXY_INVALID_ERRORCODE
     TIER_UNAVAILABLE_ERRORCODE
+    ROUTING_MODE_INCOHERENT_CLAIM_OS_ERRORCODE
     RATE_LIMITED_ERRORCODE
     QUOTA_BACKEND_UNAVAILABLE_ERRORCODE
     POOL_EXHAUSTED_ERRORCODE
@@ -32,7 +33,7 @@ const (
 )
 
 func (i ErrorCode) String() string {
-    return []string{"bad_request", "unauthorized", "forbidden", "payment_required", "not_found", "conflict", "byo_proxy_invalid", "tier_unavailable", "rate_limited", "quota_backend_unavailable", "pool_exhausted", "egress_integrity_failed", "render_hung", "engine_crashed", "render_timeout", "engine_timeout", "service_unavailable", "internal_error", "target_http_error", "navigation_failed", "blocked", "captcha_required", "empty_content"}[i]
+    return []string{"bad_request", "unauthorized", "forbidden", "payment_required", "not_found", "conflict", "byo_proxy_invalid", "tier_unavailable", "routing_mode_incoherent_claim_os", "rate_limited", "quota_backend_unavailable", "pool_exhausted", "egress_integrity_failed", "render_hung", "engine_crashed", "render_timeout", "engine_timeout", "service_unavailable", "internal_error", "target_http_error", "navigation_failed", "blocked", "captcha_required", "empty_content"}[i]
 }
 func ParseErrorCode(v string) (any, error) {
     result := BAD_REQUEST_ERRORCODE
@@ -53,6 +54,8 @@ func ParseErrorCode(v string) (any, error) {
             result = BYO_PROXY_INVALID_ERRORCODE
         case "tier_unavailable":
             result = TIER_UNAVAILABLE_ERRORCODE
+        case "routing_mode_incoherent_claim_os":
+            result = ROUTING_MODE_INCOHERENT_CLAIM_OS_ERRORCODE
         case "rate_limited":
             result = RATE_LIMITED_ERRORCODE
         case "quota_backend_unavailable":

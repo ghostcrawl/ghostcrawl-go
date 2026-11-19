@@ -7,35 +7,35 @@ import (
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91 "github.com/microsoft/kiota-abstractions-go/serialization"
 )
 
-type ProfileUpdateRequest_storage_state_idMember1 struct {
+type MouseBody_ops struct {
     // Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
     additionalData map[string]any
 }
-// NewProfileUpdateRequest_storage_state_idMember1 instantiates a new ProfileUpdateRequest_storage_state_idMember1 and sets the default values.
-func NewProfileUpdateRequest_storage_state_idMember1()(*ProfileUpdateRequest_storage_state_idMember1) {
-    m := &ProfileUpdateRequest_storage_state_idMember1{
+// NewMouseBody_ops instantiates a new MouseBody_ops and sets the default values.
+func NewMouseBody_ops()(*MouseBody_ops) {
+    m := &MouseBody_ops{
     }
     m.SetAdditionalData(make(map[string]any))
     return m
 }
-// CreateProfileUpdateRequest_storage_state_idMember1FromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// CreateMouseBody_opsFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
 // returns a Parsable when successful
-func CreateProfileUpdateRequest_storage_state_idMember1FromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
-    return NewProfileUpdateRequest_storage_state_idMember1(), nil
+func CreateMouseBody_opsFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    return NewMouseBody_ops(), nil
 }
 // GetAdditionalData gets the AdditionalData property value. Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
 // returns a map[string]any when successful
-func (m *ProfileUpdateRequest_storage_state_idMember1) GetAdditionalData()(map[string]any) {
+func (m *MouseBody_ops) GetAdditionalData()(map[string]any) {
     return m.additionalData
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
-func (m *ProfileUpdateRequest_storage_state_idMember1) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *MouseBody_ops) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     return res
 }
 // Serialize serializes information the current object
-func (m *ProfileUpdateRequest_storage_state_idMember1) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+func (m *MouseBody_ops) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
     {
         err := writer.WriteAdditionalData(m.GetAdditionalData())
         if err != nil {
@@ -45,10 +45,10 @@ func (m *ProfileUpdateRequest_storage_state_idMember1) Serialize(writer i878a80d
     return nil
 }
 // SetAdditionalData sets the AdditionalData property value. Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
-func (m *ProfileUpdateRequest_storage_state_idMember1) SetAdditionalData(value map[string]any)() {
+func (m *MouseBody_ops) SetAdditionalData(value map[string]any)() {
     m.additionalData = value
 }
-type ProfileUpdateRequest_storage_state_idMember1able interface {
+type MouseBody_opsable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
 }

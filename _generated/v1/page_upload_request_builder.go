@@ -34,7 +34,7 @@ func NewPageUploadRequestBuilder(rawUrl string, requestAdapter i2ae4187f7daee263
     urlParams["request-raw-url"] = rawUrl
     return NewPageUploadRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Post upload a file to a file input
+// Post set a file <input> on the page of a live session to caller-supplied bytes. The base64-decoded file is size-capped before it is applied to the input.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *PageUploadRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.UploadBodyable, requestConfiguration *PageUploadRequestBuilderPostRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -54,7 +54,7 @@ func (m *PageUploadRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToPostRequestInformation upload a file to a file input
+// ToPostRequestInformation set a file <input> on the page of a live session to caller-supplied bytes. The base64-decoded file is size-capped before it is applied to the input.
 // returns a *RequestInformation when successful
 func (m *PageUploadRequestBuilder) ToPostRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.UploadBodyable, requestConfiguration *PageUploadRequestBuilderPostRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.POST, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

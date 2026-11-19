@@ -13,6 +13,8 @@ type PdfRequest struct {
     additionalData map[string]any
     // Engine override. PDF is chrome-only; 'firefox' or 'webkit' returns 400 pdf_engine_unsupported immediately (before dispatch).
     engine *PdfRequest_engine
+    // Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+    geo_force *bool
     // Re-use a persisted identity.
     identity PdfRequest_PdfRequest_identityable
     // Two-letter country code to pin the exit country.
@@ -63,7 +65,7 @@ func CreatePdfRequest_PdfRequest_identityFromDiscriminatorValue(parseNode i878a8
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *PdfRequest_PdfRequest_identity) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -140,7 +142,7 @@ func CreatePdfRequest_PdfRequest_identity_countryFromDiscriminatorValue(parseNod
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *PdfRequest_PdfRequest_identity_country) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -217,7 +219,7 @@ func CreatePdfRequest_PdfRequest_languageFromDiscriminatorValue(parseNode i878a8
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *PdfRequest_PdfRequest_language) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -294,7 +296,7 @@ func CreatePdfRequest_PdfRequest_profileFromDiscriminatorValue(parseNode i878a80
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *PdfRequest_PdfRequest_profile) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -371,7 +373,7 @@ func CreatePdfRequest_PdfRequest_proxyFromDiscriminatorValue(parseNode i878a80d2
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *PdfRequest_PdfRequest_proxy) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -455,6 +457,8 @@ func NewPdfRequest()(*PdfRequest) {
     m.SetAdditionalData(make(map[string]any))
     engineValue := AUTO_PDFREQUEST_ENGINE
     m.SetEngine(&engineValue)
+    geo_forceValue := false
+    m.SetGeoForce(&geo_forceValue)
     return m
 }
 // CreatePdfRequestFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
@@ -473,7 +477,7 @@ func (m *PdfRequest) GetEngine()(*PdfRequest_engine) {
     return m.engine
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *PdfRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["engine"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -483,6 +487,16 @@ func (m *PdfRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d268
         }
         if val != nil {
             m.SetEngine(val.(*PdfRequest_engine))
+        }
+        return nil
+    }
+    res["geo_force"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetBoolValue()
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetGeoForce(val)
         }
         return nil
     }
@@ -558,6 +572,11 @@ func (m *PdfRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d268
     }
     return res
 }
+// GetGeoForce gets the geo_force property value. Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+// returns a *bool when successful
+func (m *PdfRequest) GetGeoForce()(*bool) {
+    return m.geo_force
+}
 // GetIdentity gets the identity property value. Re-use a persisted identity.
 // returns a PdfRequest_PdfRequest_identityable when successful
 func (m *PdfRequest) GetIdentity()(PdfRequest_PdfRequest_identityable) {
@@ -598,6 +617,12 @@ func (m *PdfRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c
     if m.GetEngine() != nil {
         cast := (*m.GetEngine()).String()
         err := writer.WriteStringValue("engine", &cast)
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteBoolValue("geo_force", m.GetGeoForce())
         if err != nil {
             return err
         }
@@ -660,6 +685,10 @@ func (m *PdfRequest) SetAdditionalData(value map[string]any)() {
 func (m *PdfRequest) SetEngine(value *PdfRequest_engine)() {
     m.engine = value
 }
+// SetGeoForce sets the geo_force property value. Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+func (m *PdfRequest) SetGeoForce(value *bool)() {
+    m.geo_force = value
+}
 // SetIdentity sets the identity property value. Re-use a persisted identity.
 func (m *PdfRequest) SetIdentity(value PdfRequest_PdfRequest_identityable)() {
     m.identity = value
@@ -692,6 +721,7 @@ type PdfRequestable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetEngine()(*PdfRequest_engine)
+    GetGeoForce()(*bool)
     GetIdentity()(PdfRequest_PdfRequest_identityable)
     GetIdentityCountry()(PdfRequest_PdfRequest_identity_countryable)
     GetIdentitySpec()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)
@@ -700,6 +730,7 @@ type PdfRequestable interface {
     GetProxy()(PdfRequest_PdfRequest_proxyable)
     GetUrl()(*string)
     SetEngine(value *PdfRequest_engine)()
+    SetGeoForce(value *bool)()
     SetIdentity(value PdfRequest_PdfRequest_identityable)()
     SetIdentityCountry(value PdfRequest_PdfRequest_identity_countryable)()
     SetIdentitySpec(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)()

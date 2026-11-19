@@ -13,11 +13,11 @@ type ScrapeRequest struct {
     additionalData map[string]any
     // "persist" (default): same identity for all URLs in a batch. "randomize": fresh identity per URL (each counts against quota).
     batch_identity_mode *ScrapeRequest_batch_identity_mode
-    // BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in human session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+    // BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in browser session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
     behavior_actions ScrapeRequest_ScrapeRequest_behavior_actionsable
     // Maximum tokens per markdown chunk. Clamped server-side to [256, 32768] regardless of caller input.
     chunk_tokens *int32
-    // Engine override. 'auto' (default): the identity's fingerprint decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
+    // Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
     engine *ScrapeRequest_engine
     // Response format. 'html' (default): the fully rendered DOM. 'markdown': returns a {markdown, chunks, citations, token_estimate} envelope with prompt-injection-neutralized, token-budgeted output. 'pdf': returns application/pdf bytes (Chrome identities only; Firefox and WebKit return 400 pdf_engine_unsupported).
     format *ScrapeRequest_format
@@ -33,7 +33,7 @@ type ScrapeRequest struct {
     include_citations *bool
     // Optional browser language tag (e.g. 'en-US','es-ES','de-DE'). Sets the identity's locale and language headers coherently, independent of the exit country. When omitted, the identity's default locale is used. Available on every tier.
     language ScrapeRequest_ScrapeRequest_languageable
-    // Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ same deterministic fingerprint) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
+    // Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ the same browser identity every time) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
     profile ScrapeRequest_ScrapeRequest_profileable
     // Bring-your-own proxy URL. Schemes: socks5, socks5h, http, https. Any credentials in the URL are redacted from logs. Example: socks5://user:pass@host:1080.
     proxy ScrapeRequest_ScrapeRequest_proxyable
@@ -1036,7 +1036,7 @@ func (m *ScrapeRequest) GetAdditionalData()(map[string]any) {
 func (m *ScrapeRequest) GetBatchIdentityMode()(*ScrapeRequest_batch_identity_mode) {
     return m.batch_identity_mode
 }
-// GetBehaviorActions gets the behavior_actions property value. BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in human session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+// GetBehaviorActions gets the behavior_actions property value. BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in browser session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
 // returns a ScrapeRequest_ScrapeRequest_behavior_actionsable when successful
 func (m *ScrapeRequest) GetBehaviorActions()(ScrapeRequest_ScrapeRequest_behavior_actionsable) {
     return m.behavior_actions
@@ -1046,7 +1046,7 @@ func (m *ScrapeRequest) GetBehaviorActions()(ScrapeRequest_ScrapeRequest_behavio
 func (m *ScrapeRequest) GetChunkTokens()(*int32) {
     return m.chunk_tokens
 }
-// GetEngine gets the engine property value. Engine override. 'auto' (default): the identity's fingerprint decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
+// GetEngine gets the engine property value. Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
 // returns a *ScrapeRequest_engine when successful
 func (m *ScrapeRequest) GetEngine()(*ScrapeRequest_engine) {
     return m.engine
@@ -1302,7 +1302,7 @@ func (m *ScrapeRequest) GetIncludeCitations()(*bool) {
 func (m *ScrapeRequest) GetLanguage()(ScrapeRequest_ScrapeRequest_languageable) {
     return m.language
 }
-// GetProfile gets the profile property value. Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ same deterministic fingerprint) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
+// GetProfile gets the profile property value. Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ the same browser identity every time) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
 // returns a ScrapeRequest_ScrapeRequest_profileable when successful
 func (m *ScrapeRequest) GetProfile()(ScrapeRequest_ScrapeRequest_profileable) {
     return m.profile
@@ -1500,7 +1500,7 @@ func (m *ScrapeRequest) SetAdditionalData(value map[string]any)() {
 func (m *ScrapeRequest) SetBatchIdentityMode(value *ScrapeRequest_batch_identity_mode)() {
     m.batch_identity_mode = value
 }
-// SetBehaviorActions sets the behavior_actions property value. BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in human session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+// SetBehaviorActions sets the behavior_actions property value. BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in browser session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
 func (m *ScrapeRequest) SetBehaviorActions(value ScrapeRequest_ScrapeRequest_behavior_actionsable)() {
     m.behavior_actions = value
 }
@@ -1508,7 +1508,7 @@ func (m *ScrapeRequest) SetBehaviorActions(value ScrapeRequest_ScrapeRequest_beh
 func (m *ScrapeRequest) SetChunkTokens(value *int32)() {
     m.chunk_tokens = value
 }
-// SetEngine sets the engine property value. Engine override. 'auto' (default): the identity's fingerprint decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
+// SetEngine sets the engine property value. Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
 func (m *ScrapeRequest) SetEngine(value *ScrapeRequest_engine)() {
     m.engine = value
 }
@@ -1540,7 +1540,7 @@ func (m *ScrapeRequest) SetIncludeCitations(value *bool)() {
 func (m *ScrapeRequest) SetLanguage(value ScrapeRequest_ScrapeRequest_languageable)() {
     m.language = value
 }
-// SetProfile sets the profile property value. Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ same deterministic fingerprint) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
+// SetProfile sets the profile property value. Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ the same browser identity every time) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
 func (m *ScrapeRequest) SetProfile(value ScrapeRequest_ScrapeRequest_profileable)() {
     m.profile = value
 }

@@ -34,7 +34,7 @@ func NewSchedulesItemRunsRequestBuilder(rawUrl string, requestAdapter i2ae4187f7
     urlParams["request-raw-url"] = rawUrl
     return NewSchedulesItemRunsRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Get synthetic run history from last_run_at. Returns a list of run summary objects derived from the schedule's stored last_run_at + last_result_hash. A schedule that has never fired returns an empty list. One that has fired returns a single summary with status='completed'. Status values: 'completed' (ran and produced a hash), 'pending' (never ran). This endpoint allows callers to poll for schedule execution without a separate run-history table, the writes last_run_at on every successful fire.
+// Get run history derived from last_run_at. Returns a list of run summary objects derived from the schedule's stored last_run_at + last_result_hash. A schedule that has never fired returns an empty list. One that has fired returns a single summary with status='completed'. Status values: 'completed' (ran and produced a hash), 'pending' (never ran). This endpoint allows callers to poll for schedule execution without a separate run-history table, the writes last_run_at on every successful fire.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *SchedulesItemRunsRequestBuilder) Get(ctx context.Context, requestConfiguration *SchedulesItemRunsRequestBuilderGetRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -54,7 +54,7 @@ func (m *SchedulesItemRunsRequestBuilder) Get(ctx context.Context, requestConfig
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToGetRequestInformation synthetic run history from last_run_at. Returns a list of run summary objects derived from the schedule's stored last_run_at + last_result_hash. A schedule that has never fired returns an empty list. One that has fired returns a single summary with status='completed'. Status values: 'completed' (ran and produced a hash), 'pending' (never ran). This endpoint allows callers to poll for schedule execution without a separate run-history table, the writes last_run_at on every successful fire.
+// ToGetRequestInformation run history derived from last_run_at. Returns a list of run summary objects derived from the schedule's stored last_run_at + last_result_hash. A schedule that has never fired returns an empty list. One that has fired returns a single summary with status='completed'. Status values: 'completed' (ran and produced a hash), 'pending' (never ran). This endpoint allows callers to poll for schedule execution without a separate run-history table, the writes last_run_at on every successful fire.
 // returns a *RequestInformation when successful
 func (m *SchedulesItemRunsRequestBuilder) ToGetRequestInformation(ctx context.Context, requestConfiguration *SchedulesItemRunsRequestBuilderGetRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.GET, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

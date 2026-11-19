@@ -17,7 +17,9 @@ type CookiesDeleteBody struct {
     // The path property
     path CookiesDeleteBody_CookiesDeleteBody_pathable
     // The profile_id property
-    profile_id *string
+    profile_id CookiesDeleteBody_CookiesDeleteBody_profile_idable
+    // The session_id property
+    session_id *string
 }
 // CookiesDeleteBody_CookiesDeleteBody_domain composed type wrapper for classes CookiesDeleteBody_domainMember1able, string
 type CookiesDeleteBody_CookiesDeleteBody_domain struct {
@@ -59,7 +61,7 @@ func (m *CookiesDeleteBody_CookiesDeleteBody_domain) GetCookiesDeleteBodyDomainM
     return m.cookiesDeleteBody_domainMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *CookiesDeleteBody_CookiesDeleteBody_domain) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -136,7 +138,7 @@ func (m *CookiesDeleteBody_CookiesDeleteBody_name) GetCookiesDeleteBodyNameMembe
     return m.cookiesDeleteBody_nameMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *CookiesDeleteBody_CookiesDeleteBody_name) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -213,7 +215,7 @@ func (m *CookiesDeleteBody_CookiesDeleteBody_path) GetCookiesDeleteBodyPathMembe
     return m.cookiesDeleteBody_pathMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *CookiesDeleteBody_CookiesDeleteBody_path) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -250,6 +252,83 @@ func (m *CookiesDeleteBody_CookiesDeleteBody_path) SetCookiesDeleteBodyPathMembe
 func (m *CookiesDeleteBody_CookiesDeleteBody_path) SetString(value *string)() {
     m.string = value
 }
+// CookiesDeleteBody_CookiesDeleteBody_profile_id composed type wrapper for classes CookiesDeleteBody_profile_idMember1able, string
+type CookiesDeleteBody_CookiesDeleteBody_profile_id struct {
+    // Composed type representation for type CookiesDeleteBody_profile_idMember1able
+    cookiesDeleteBody_profile_idMember1 CookiesDeleteBody_profile_idMember1able
+    // Composed type representation for type string
+    string *string
+}
+// NewCookiesDeleteBody_CookiesDeleteBody_profile_id instantiates a new CookiesDeleteBody_CookiesDeleteBody_profile_id and sets the default values.
+func NewCookiesDeleteBody_CookiesDeleteBody_profile_id()(*CookiesDeleteBody_CookiesDeleteBody_profile_id) {
+    m := &CookiesDeleteBody_CookiesDeleteBody_profile_id{
+    }
+    return m
+}
+// CreateCookiesDeleteBody_CookiesDeleteBody_profile_idFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateCookiesDeleteBody_CookiesDeleteBody_profile_idFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewCookiesDeleteBody_CookiesDeleteBody_profile_id()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateCookiesDeleteBody_profile_idMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(CookiesDeleteBody_profile_idMember1able); ok {
+                result.SetCookiesDeleteBodyProfileIdMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetCookiesDeleteBodyProfileIdMember1 gets the CookiesDeleteBody_profile_idMember1 property value. Composed type representation for type CookiesDeleteBody_profile_idMember1able
+// returns a CookiesDeleteBody_profile_idMember1able when successful
+func (m *CookiesDeleteBody_CookiesDeleteBody_profile_id) GetCookiesDeleteBodyProfileIdMember1()(CookiesDeleteBody_profile_idMember1able) {
+    return m.cookiesDeleteBody_profile_idMember1
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *CookiesDeleteBody_CookiesDeleteBody_profile_id) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *CookiesDeleteBody_CookiesDeleteBody_profile_id) GetIsComposedType()(bool) {
+    return true
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *CookiesDeleteBody_CookiesDeleteBody_profile_id) GetString()(*string) {
+    return m.string
+}
+// Serialize serializes information the current object
+func (m *CookiesDeleteBody_CookiesDeleteBody_profile_id) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetCookiesDeleteBodyProfileIdMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetCookiesDeleteBodyProfileIdMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetCookiesDeleteBodyProfileIdMember1 sets the CookiesDeleteBody_profile_idMember1 property value. Composed type representation for type CookiesDeleteBody_profile_idMember1able
+func (m *CookiesDeleteBody_CookiesDeleteBody_profile_id) SetCookiesDeleteBodyProfileIdMember1(value CookiesDeleteBody_profile_idMember1able)() {
+    m.cookiesDeleteBody_profile_idMember1 = value
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *CookiesDeleteBody_CookiesDeleteBody_profile_id) SetString(value *string)() {
+    m.string = value
+}
 type CookiesDeleteBody_CookiesDeleteBody_domainable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetCookiesDeleteBodyDomainMember1()(CookiesDeleteBody_domainMember1able)
@@ -269,6 +348,13 @@ type CookiesDeleteBody_CookiesDeleteBody_pathable interface {
     GetCookiesDeleteBodyPathMember1()(CookiesDeleteBody_pathMember1able)
     GetString()(*string)
     SetCookiesDeleteBodyPathMember1(value CookiesDeleteBody_pathMember1able)()
+    SetString(value *string)()
+}
+type CookiesDeleteBody_CookiesDeleteBody_profile_idable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetCookiesDeleteBodyProfileIdMember1()(CookiesDeleteBody_profile_idMember1able)
+    GetString()(*string)
+    SetCookiesDeleteBodyProfileIdMember1(value CookiesDeleteBody_profile_idMember1able)()
     SetString(value *string)()
 }
 // NewCookiesDeleteBody instantiates a new CookiesDeleteBody and sets the default values.
@@ -294,7 +380,7 @@ func (m *CookiesDeleteBody) GetDomain()(CookiesDeleteBody_CookiesDeleteBody_doma
     return m.domain
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *CookiesDeleteBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["domain"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -328,12 +414,22 @@ func (m *CookiesDeleteBody) GetFieldDeserializers()(map[string]func(i878a80d2330
         return nil
     }
     res["profile_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateCookiesDeleteBody_CookiesDeleteBody_profile_idFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetProfileId(val.(CookiesDeleteBody_CookiesDeleteBody_profile_idable))
+        }
+        return nil
+    }
+    res["session_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
         val, err := n.GetStringValue()
         if err != nil {
             return err
         }
         if val != nil {
-            m.SetProfileId(val)
+            m.SetSessionId(val)
         }
         return nil
     }
@@ -350,9 +446,14 @@ func (m *CookiesDeleteBody) GetPath()(CookiesDeleteBody_CookiesDeleteBody_pathab
     return m.path
 }
 // GetProfileId gets the profile_id property value. The profile_id property
-// returns a *string when successful
-func (m *CookiesDeleteBody) GetProfileId()(*string) {
+// returns a CookiesDeleteBody_CookiesDeleteBody_profile_idable when successful
+func (m *CookiesDeleteBody) GetProfileId()(CookiesDeleteBody_CookiesDeleteBody_profile_idable) {
     return m.profile_id
+}
+// GetSessionId gets the session_id property value. The session_id property
+// returns a *string when successful
+func (m *CookiesDeleteBody) GetSessionId()(*string) {
+    return m.session_id
 }
 // Serialize serializes information the current object
 func (m *CookiesDeleteBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
@@ -375,7 +476,13 @@ func (m *CookiesDeleteBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27
         }
     }
     {
-        err := writer.WriteStringValue("profile_id", m.GetProfileId())
+        err := writer.WriteObjectValue("profile_id", m.GetProfileId())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteStringValue("session_id", m.GetSessionId())
         if err != nil {
             return err
         }
@@ -405,8 +512,12 @@ func (m *CookiesDeleteBody) SetPath(value CookiesDeleteBody_CookiesDeleteBody_pa
     m.path = value
 }
 // SetProfileId sets the profile_id property value. The profile_id property
-func (m *CookiesDeleteBody) SetProfileId(value *string)() {
+func (m *CookiesDeleteBody) SetProfileId(value CookiesDeleteBody_CookiesDeleteBody_profile_idable)() {
     m.profile_id = value
+}
+// SetSessionId sets the session_id property value. The session_id property
+func (m *CookiesDeleteBody) SetSessionId(value *string)() {
+    m.session_id = value
 }
 type CookiesDeleteBodyable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
@@ -414,9 +525,11 @@ type CookiesDeleteBodyable interface {
     GetDomain()(CookiesDeleteBody_CookiesDeleteBody_domainable)
     GetName()(CookiesDeleteBody_CookiesDeleteBody_nameable)
     GetPath()(CookiesDeleteBody_CookiesDeleteBody_pathable)
-    GetProfileId()(*string)
+    GetProfileId()(CookiesDeleteBody_CookiesDeleteBody_profile_idable)
+    GetSessionId()(*string)
     SetDomain(value CookiesDeleteBody_CookiesDeleteBody_domainable)()
     SetName(value CookiesDeleteBody_CookiesDeleteBody_nameable)()
     SetPath(value CookiesDeleteBody_CookiesDeleteBody_pathable)()
-    SetProfileId(value *string)()
+    SetProfileId(value CookiesDeleteBody_CookiesDeleteBody_profile_idable)()
+    SetSessionId(value *string)()
 }

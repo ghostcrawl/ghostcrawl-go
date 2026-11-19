@@ -14,10 +14,14 @@ type ScrollBody struct {
     direction *ScrollBody_direction
     // The distance_px property
     distance_px ScrollBody_ScrollBody_distance_pxable
+    // The dy property
+    dy ScrollBody_ScrollBody_dyable
     // The profile_id property
-    profile_id *string
+    profile_id ScrollBody_ScrollBody_profile_idable
     // The selector property
     selector ScrollBody_ScrollBody_selectorable
+    // The session_id property
+    session_id ScrollBody_ScrollBody_session_idable
 }
 // ScrollBody_ScrollBody_distance_px composed type wrapper for classes int32, ScrollBody_distance_pxMember1able
 type ScrollBody_ScrollBody_distance_px struct {
@@ -54,7 +58,7 @@ func CreateScrollBody_ScrollBody_distance_pxFromDiscriminatorValue(parseNode i87
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrollBody_ScrollBody_distance_px) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -96,6 +100,160 @@ func (m *ScrollBody_ScrollBody_distance_px) SetInteger(value *int32)() {
 func (m *ScrollBody_ScrollBody_distance_px) SetScrollBodyDistancePxMember1(value ScrollBody_distance_pxMember1able)() {
     m.scrollBody_distance_pxMember1 = value
 }
+// ScrollBody_ScrollBody_dy composed type wrapper for classes int32, ScrollBody_dyMember1able
+type ScrollBody_ScrollBody_dy struct {
+    // Composed type representation for type int32
+    integer *int32
+    // Composed type representation for type ScrollBody_dyMember1able
+    scrollBody_dyMember1 ScrollBody_dyMember1able
+}
+// NewScrollBody_ScrollBody_dy instantiates a new ScrollBody_ScrollBody_dy and sets the default values.
+func NewScrollBody_ScrollBody_dy()(*ScrollBody_ScrollBody_dy) {
+    m := &ScrollBody_ScrollBody_dy{
+    }
+    return m
+}
+// CreateScrollBody_ScrollBody_dyFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateScrollBody_ScrollBody_dyFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewScrollBody_ScrollBody_dy()
+    if parseNode != nil {
+        if val, err := parseNode.GetInt32Value(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetInteger(val)
+        } else if val, err := parseNode.GetObjectValue(CreateScrollBody_dyMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(ScrollBody_dyMember1able); ok {
+                result.SetScrollBodyDyMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *ScrollBody_ScrollBody_dy) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetInteger gets the integer property value. Composed type representation for type int32
+// returns a *int32 when successful
+func (m *ScrollBody_ScrollBody_dy) GetInteger()(*int32) {
+    return m.integer
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *ScrollBody_ScrollBody_dy) GetIsComposedType()(bool) {
+    return true
+}
+// GetScrollBodyDyMember1 gets the ScrollBody_dyMember1 property value. Composed type representation for type ScrollBody_dyMember1able
+// returns a ScrollBody_dyMember1able when successful
+func (m *ScrollBody_ScrollBody_dy) GetScrollBodyDyMember1()(ScrollBody_dyMember1able) {
+    return m.scrollBody_dyMember1
+}
+// Serialize serializes information the current object
+func (m *ScrollBody_ScrollBody_dy) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetInteger() != nil {
+        err := writer.WriteInt32Value("", m.GetInteger())
+        if err != nil {
+            return err
+        }
+    } else if m.GetScrollBodyDyMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetScrollBodyDyMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetInteger sets the integer property value. Composed type representation for type int32
+func (m *ScrollBody_ScrollBody_dy) SetInteger(value *int32)() {
+    m.integer = value
+}
+// SetScrollBodyDyMember1 sets the ScrollBody_dyMember1 property value. Composed type representation for type ScrollBody_dyMember1able
+func (m *ScrollBody_ScrollBody_dy) SetScrollBodyDyMember1(value ScrollBody_dyMember1able)() {
+    m.scrollBody_dyMember1 = value
+}
+// ScrollBody_ScrollBody_profile_id composed type wrapper for classes ScrollBody_profile_idMember1able, string
+type ScrollBody_ScrollBody_profile_id struct {
+    // Composed type representation for type ScrollBody_profile_idMember1able
+    scrollBody_profile_idMember1 ScrollBody_profile_idMember1able
+    // Composed type representation for type string
+    string *string
+}
+// NewScrollBody_ScrollBody_profile_id instantiates a new ScrollBody_ScrollBody_profile_id and sets the default values.
+func NewScrollBody_ScrollBody_profile_id()(*ScrollBody_ScrollBody_profile_id) {
+    m := &ScrollBody_ScrollBody_profile_id{
+    }
+    return m
+}
+// CreateScrollBody_ScrollBody_profile_idFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateScrollBody_ScrollBody_profile_idFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewScrollBody_ScrollBody_profile_id()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateScrollBody_profile_idMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(ScrollBody_profile_idMember1able); ok {
+                result.SetScrollBodyProfileIdMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *ScrollBody_ScrollBody_profile_id) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *ScrollBody_ScrollBody_profile_id) GetIsComposedType()(bool) {
+    return true
+}
+// GetScrollBodyProfileIdMember1 gets the ScrollBody_profile_idMember1 property value. Composed type representation for type ScrollBody_profile_idMember1able
+// returns a ScrollBody_profile_idMember1able when successful
+func (m *ScrollBody_ScrollBody_profile_id) GetScrollBodyProfileIdMember1()(ScrollBody_profile_idMember1able) {
+    return m.scrollBody_profile_idMember1
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *ScrollBody_ScrollBody_profile_id) GetString()(*string) {
+    return m.string
+}
+// Serialize serializes information the current object
+func (m *ScrollBody_ScrollBody_profile_id) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetScrollBodyProfileIdMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetScrollBodyProfileIdMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetScrollBodyProfileIdMember1 sets the ScrollBody_profile_idMember1 property value. Composed type representation for type ScrollBody_profile_idMember1able
+func (m *ScrollBody_ScrollBody_profile_id) SetScrollBodyProfileIdMember1(value ScrollBody_profile_idMember1able)() {
+    m.scrollBody_profile_idMember1 = value
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *ScrollBody_ScrollBody_profile_id) SetString(value *string)() {
+    m.string = value
+}
 // ScrollBody_ScrollBody_selector composed type wrapper for classes ScrollBody_selectorMember1able, string
 type ScrollBody_ScrollBody_selector struct {
     // Composed type representation for type ScrollBody_selectorMember1able
@@ -131,7 +289,7 @@ func CreateScrollBody_ScrollBody_selectorFromDiscriminatorValue(parseNode i878a8
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrollBody_ScrollBody_selector) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -173,12 +331,103 @@ func (m *ScrollBody_ScrollBody_selector) SetScrollBodySelectorMember1(value Scro
 func (m *ScrollBody_ScrollBody_selector) SetString(value *string)() {
     m.string = value
 }
+// ScrollBody_ScrollBody_session_id composed type wrapper for classes ScrollBody_session_idMember1able, string
+type ScrollBody_ScrollBody_session_id struct {
+    // Composed type representation for type ScrollBody_session_idMember1able
+    scrollBody_session_idMember1 ScrollBody_session_idMember1able
+    // Composed type representation for type string
+    string *string
+}
+// NewScrollBody_ScrollBody_session_id instantiates a new ScrollBody_ScrollBody_session_id and sets the default values.
+func NewScrollBody_ScrollBody_session_id()(*ScrollBody_ScrollBody_session_id) {
+    m := &ScrollBody_ScrollBody_session_id{
+    }
+    return m
+}
+// CreateScrollBody_ScrollBody_session_idFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateScrollBody_ScrollBody_session_idFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewScrollBody_ScrollBody_session_id()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateScrollBody_session_idMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(ScrollBody_session_idMember1able); ok {
+                result.SetScrollBodySessionIdMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *ScrollBody_ScrollBody_session_id) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *ScrollBody_ScrollBody_session_id) GetIsComposedType()(bool) {
+    return true
+}
+// GetScrollBodySessionIdMember1 gets the ScrollBody_session_idMember1 property value. Composed type representation for type ScrollBody_session_idMember1able
+// returns a ScrollBody_session_idMember1able when successful
+func (m *ScrollBody_ScrollBody_session_id) GetScrollBodySessionIdMember1()(ScrollBody_session_idMember1able) {
+    return m.scrollBody_session_idMember1
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *ScrollBody_ScrollBody_session_id) GetString()(*string) {
+    return m.string
+}
+// Serialize serializes information the current object
+func (m *ScrollBody_ScrollBody_session_id) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetScrollBodySessionIdMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetScrollBodySessionIdMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetScrollBodySessionIdMember1 sets the ScrollBody_session_idMember1 property value. Composed type representation for type ScrollBody_session_idMember1able
+func (m *ScrollBody_ScrollBody_session_id) SetScrollBodySessionIdMember1(value ScrollBody_session_idMember1able)() {
+    m.scrollBody_session_idMember1 = value
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *ScrollBody_ScrollBody_session_id) SetString(value *string)() {
+    m.string = value
+}
 type ScrollBody_ScrollBody_distance_pxable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetInteger()(*int32)
     GetScrollBodyDistancePxMember1()(ScrollBody_distance_pxMember1able)
     SetInteger(value *int32)()
     SetScrollBodyDistancePxMember1(value ScrollBody_distance_pxMember1able)()
+}
+type ScrollBody_ScrollBody_dyable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetInteger()(*int32)
+    GetScrollBodyDyMember1()(ScrollBody_dyMember1able)
+    SetInteger(value *int32)()
+    SetScrollBodyDyMember1(value ScrollBody_dyMember1able)()
+}
+type ScrollBody_ScrollBody_profile_idable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetScrollBodyProfileIdMember1()(ScrollBody_profile_idMember1able)
+    GetString()(*string)
+    SetScrollBodyProfileIdMember1(value ScrollBody_profile_idMember1able)()
+    SetString(value *string)()
 }
 type ScrollBody_ScrollBody_selectorable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
@@ -187,11 +436,20 @@ type ScrollBody_ScrollBody_selectorable interface {
     SetScrollBodySelectorMember1(value ScrollBody_selectorMember1able)()
     SetString(value *string)()
 }
+type ScrollBody_ScrollBody_session_idable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetScrollBodySessionIdMember1()(ScrollBody_session_idMember1able)
+    GetString()(*string)
+    SetScrollBodySessionIdMember1(value ScrollBody_session_idMember1able)()
+    SetString(value *string)()
+}
 // NewScrollBody instantiates a new ScrollBody and sets the default values.
 func NewScrollBody()(*ScrollBody) {
     m := &ScrollBody{
     }
     m.SetAdditionalData(make(map[string]any))
+    directionValue := DOWN_SCROLLBODY_DIRECTION
+    m.SetDirection(&directionValue)
     return m
 }
 // CreateScrollBodyFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
@@ -214,8 +472,13 @@ func (m *ScrollBody) GetDirection()(*ScrollBody_direction) {
 func (m *ScrollBody) GetDistancePx()(ScrollBody_ScrollBody_distance_pxable) {
     return m.distance_px
 }
+// GetDy gets the dy property value. The dy property
+// returns a ScrollBody_ScrollBody_dyable when successful
+func (m *ScrollBody) GetDy()(ScrollBody_ScrollBody_dyable) {
+    return m.dy
+}
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrollBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["direction"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -238,13 +501,23 @@ func (m *ScrollBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d268
         }
         return nil
     }
-    res["profile_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
-        val, err := n.GetStringValue()
+    res["dy"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateScrollBody_ScrollBody_dyFromDiscriminatorValue)
         if err != nil {
             return err
         }
         if val != nil {
-            m.SetProfileId(val)
+            m.SetDy(val.(ScrollBody_ScrollBody_dyable))
+        }
+        return nil
+    }
+    res["profile_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateScrollBody_ScrollBody_profile_idFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetProfileId(val.(ScrollBody_ScrollBody_profile_idable))
         }
         return nil
     }
@@ -258,17 +531,32 @@ func (m *ScrollBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d268
         }
         return nil
     }
+    res["session_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateScrollBody_ScrollBody_session_idFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetSessionId(val.(ScrollBody_ScrollBody_session_idable))
+        }
+        return nil
+    }
     return res
 }
 // GetProfileId gets the profile_id property value. The profile_id property
-// returns a *string when successful
-func (m *ScrollBody) GetProfileId()(*string) {
+// returns a ScrollBody_ScrollBody_profile_idable when successful
+func (m *ScrollBody) GetProfileId()(ScrollBody_ScrollBody_profile_idable) {
     return m.profile_id
 }
 // GetSelector gets the selector property value. The selector property
 // returns a ScrollBody_ScrollBody_selectorable when successful
 func (m *ScrollBody) GetSelector()(ScrollBody_ScrollBody_selectorable) {
     return m.selector
+}
+// GetSessionId gets the session_id property value. The session_id property
+// returns a ScrollBody_ScrollBody_session_idable when successful
+func (m *ScrollBody) GetSessionId()(ScrollBody_ScrollBody_session_idable) {
+    return m.session_id
 }
 // Serialize serializes information the current object
 func (m *ScrollBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
@@ -286,13 +574,25 @@ func (m *ScrollBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c
         }
     }
     {
-        err := writer.WriteStringValue("profile_id", m.GetProfileId())
+        err := writer.WriteObjectValue("dy", m.GetDy())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteObjectValue("profile_id", m.GetProfileId())
         if err != nil {
             return err
         }
     }
     {
         err := writer.WriteObjectValue("selector", m.GetSelector())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteObjectValue("session_id", m.GetSessionId())
         if err != nil {
             return err
         }
@@ -317,23 +617,35 @@ func (m *ScrollBody) SetDirection(value *ScrollBody_direction)() {
 func (m *ScrollBody) SetDistancePx(value ScrollBody_ScrollBody_distance_pxable)() {
     m.distance_px = value
 }
+// SetDy sets the dy property value. The dy property
+func (m *ScrollBody) SetDy(value ScrollBody_ScrollBody_dyable)() {
+    m.dy = value
+}
 // SetProfileId sets the profile_id property value. The profile_id property
-func (m *ScrollBody) SetProfileId(value *string)() {
+func (m *ScrollBody) SetProfileId(value ScrollBody_ScrollBody_profile_idable)() {
     m.profile_id = value
 }
 // SetSelector sets the selector property value. The selector property
 func (m *ScrollBody) SetSelector(value ScrollBody_ScrollBody_selectorable)() {
     m.selector = value
 }
+// SetSessionId sets the session_id property value. The session_id property
+func (m *ScrollBody) SetSessionId(value ScrollBody_ScrollBody_session_idable)() {
+    m.session_id = value
+}
 type ScrollBodyable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetDirection()(*ScrollBody_direction)
     GetDistancePx()(ScrollBody_ScrollBody_distance_pxable)
-    GetProfileId()(*string)
+    GetDy()(ScrollBody_ScrollBody_dyable)
+    GetProfileId()(ScrollBody_ScrollBody_profile_idable)
     GetSelector()(ScrollBody_ScrollBody_selectorable)
+    GetSessionId()(ScrollBody_ScrollBody_session_idable)
     SetDirection(value *ScrollBody_direction)()
     SetDistancePx(value ScrollBody_ScrollBody_distance_pxable)()
-    SetProfileId(value *string)()
+    SetDy(value ScrollBody_ScrollBody_dyable)()
+    SetProfileId(value ScrollBody_ScrollBody_profile_idable)()
     SetSelector(value ScrollBody_ScrollBody_selectorable)()
+    SetSessionId(value ScrollBody_ScrollBody_session_idable)()
 }

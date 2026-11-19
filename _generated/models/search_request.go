@@ -13,7 +13,7 @@ type SearchRequest struct {
     additionalData map[string]any
     // Optional 2-letter ISO country code for geo-filter. Tavily v1 ignores this silently.
     country SearchRequest_SearchRequest_countryable
-    // Search engine to use: 'brave', 'tavily', 'google', 'bing', or 'yandex'. May also be passed via X-GhostCrawl-Search-Engine header.
+    // Search engine to use: 'brave', 'tavily', 'google', 'bing', or 'yandex'. May also be passed via X-Ghostcrawl-Search-Engine header.
     engine SearchRequest_SearchRequest_engineable
     // Vertical-specific extras (google only). jobs: location; scholar: year_low/year_high; play: mode/app_id; reviews: place_id. Ignored by brave/tavily.
     extra_params i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
@@ -61,7 +61,7 @@ func CreateSearchRequest_SearchRequest_countryFromDiscriminatorValue(parseNode i
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *SearchRequest_SearchRequest_country) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -138,7 +138,7 @@ func CreateSearchRequest_SearchRequest_engineFromDiscriminatorValue(parseNode i8
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *SearchRequest_SearchRequest_engine) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -215,7 +215,7 @@ func CreateSearchRequest_SearchRequest_freshnessFromDiscriminatorValue(parseNode
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *SearchRequest_SearchRequest_freshness) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -292,7 +292,7 @@ func CreateSearchRequest_SearchRequest_verticalFromDiscriminatorValue(parseNode 
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *SearchRequest_SearchRequest_vertical) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -386,7 +386,7 @@ func (m *SearchRequest) GetAdditionalData()(map[string]any) {
 func (m *SearchRequest) GetCountry()(SearchRequest_SearchRequest_countryable) {
     return m.country
 }
-// GetEngine gets the engine property value. Search engine to use: 'brave', 'tavily', 'google', 'bing', or 'yandex'. May also be passed via X-GhostCrawl-Search-Engine header.
+// GetEngine gets the engine property value. Search engine to use: 'brave', 'tavily', 'google', 'bing', or 'yandex'. May also be passed via X-Ghostcrawl-Search-Engine header.
 // returns a SearchRequest_SearchRequest_engineable when successful
 func (m *SearchRequest) GetEngine()(SearchRequest_SearchRequest_engineable) {
     return m.engine
@@ -397,7 +397,7 @@ func (m *SearchRequest) GetExtraParams()(i878a80d2330e89d26896388a3f487eef27b0a0
     return m.extra_params
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *SearchRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["country"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -552,7 +552,7 @@ func (m *SearchRequest) SetAdditionalData(value map[string]any)() {
 func (m *SearchRequest) SetCountry(value SearchRequest_SearchRequest_countryable)() {
     m.country = value
 }
-// SetEngine sets the engine property value. Search engine to use: 'brave', 'tavily', 'google', 'bing', or 'yandex'. May also be passed via X-GhostCrawl-Search-Engine header.
+// SetEngine sets the engine property value. Search engine to use: 'brave', 'tavily', 'google', 'bing', or 'yandex'. May also be passed via X-Ghostcrawl-Search-Engine header.
 func (m *SearchRequest) SetEngine(value SearchRequest_SearchRequest_engineable)() {
     m.engine = value
 }

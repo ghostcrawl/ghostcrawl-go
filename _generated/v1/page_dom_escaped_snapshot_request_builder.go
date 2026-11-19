@@ -34,7 +34,7 @@ func NewPageDom_snapshotRequestBuilder(rawUrl string, requestAdapter i2ae4187f7d
     urlParams["request-raw-url"] = rawUrl
     return NewPageDom_snapshotRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Post return ``page.content`` for the live session, capped at 5 MB. callers retry with finer scope or fall back to /v1/page/eval for selector-rooted extraction.
+// Post return the current HTML of the live session's page, capped at 5 MB. Over the cap the response is ``truncated=True`` with ``dom=None``; retry with a narrower scope or use /v1/page/eval to extract a fragment.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *PageDom_snapshotRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.DomSnapshotBodyable, requestConfiguration *PageDom_snapshotRequestBuilderPostRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -54,7 +54,7 @@ func (m *PageDom_snapshotRequestBuilder) Post(ctx context.Context, body ib5cfef4
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToPostRequestInformation return ``page.content`` for the live session, capped at 5 MB. callers retry with finer scope or fall back to /v1/page/eval for selector-rooted extraction.
+// ToPostRequestInformation return the current HTML of the live session's page, capped at 5 MB. Over the cap the response is ``truncated=True`` with ``dom=None``; retry with a narrower scope or use /v1/page/eval to extract a fragment.
 // returns a *RequestInformation when successful
 func (m *PageDom_snapshotRequestBuilder) ToPostRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.DomSnapshotBodyable, requestConfiguration *PageDom_snapshotRequestBuilderPostRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.POST, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

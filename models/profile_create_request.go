@@ -11,7 +11,7 @@ import (
 type ProfileCreateRequest struct {
     // Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
     additionalData map[string]any
-    // Public IdentityRequest spec (operating system, browser, device, viewport, locale, and timezone). The profile mints a STABLE deterministic identity_id from it, so every scrape with profile=<name> rehydrates the SAME fingerprint. When omitted, a default desktop-chrome identity is minted.
+    // Public IdentityRequest spec (operating system, browser, device, viewport, locale, and timezone). The profile mints a STABLE deterministic identity_id from it, so every scrape with profile=<name> rehydrates the SAME browser identity. When omitted, a default desktop-chrome identity is minted.
     identity_spec i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
     // Profile name. Unique per org (409 on conflict).
     name *string
@@ -155,7 +155,7 @@ func (m *ProfileCreateRequest) GetFieldDeserializers()(map[string]func(i878a80d2
     }
     return res
 }
-// GetIdentitySpec gets the identity_spec property value. Public IdentityRequest spec (operating system, browser, device, viewport, locale, and timezone). The profile mints a STABLE deterministic identity_id from it, so every scrape with profile=<name> rehydrates the SAME fingerprint. When omitted, a default desktop-chrome identity is minted.
+// GetIdentitySpec gets the identity_spec property value. Public IdentityRequest spec (operating system, browser, device, viewport, locale, and timezone). The profile mints a STABLE deterministic identity_id from it, so every scrape with profile=<name> rehydrates the SAME browser identity. When omitted, a default desktop-chrome identity is minted.
 // returns a UntypedNodeable when successful
 func (m *ProfileCreateRequest) GetIdentitySpec()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable) {
     return m.identity_spec
@@ -202,7 +202,7 @@ func (m *ProfileCreateRequest) Serialize(writer i878a80d2330e89d26896388a3f487ee
 func (m *ProfileCreateRequest) SetAdditionalData(value map[string]any)() {
     m.additionalData = value
 }
-// SetIdentitySpec sets the identity_spec property value. Public IdentityRequest spec (operating system, browser, device, viewport, locale, and timezone). The profile mints a STABLE deterministic identity_id from it, so every scrape with profile=<name> rehydrates the SAME fingerprint. When omitted, a default desktop-chrome identity is minted.
+// SetIdentitySpec sets the identity_spec property value. Public IdentityRequest spec (operating system, browser, device, viewport, locale, and timezone). The profile mints a STABLE deterministic identity_id from it, so every scrape with profile=<name> rehydrates the SAME browser identity. When omitted, a default desktop-chrome identity is minted.
 func (m *ProfileCreateRequest) SetIdentitySpec(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)() {
     m.identity_spec = value
 }

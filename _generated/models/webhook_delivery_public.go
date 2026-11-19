@@ -40,9 +40,9 @@ type WebhookDeliveryPublic struct {
     // The webhook_id property
     webhook_id *i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22.UUID
 }
-// WebhookDeliveryPublic_WebhookDeliveryPublic_delivered_at composed type wrapper for classes i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e. Time, WebhookDeliveryPublic_delivered_atMember1able
+// WebhookDeliveryPublic_WebhookDeliveryPublic_delivered_at composed type wrapper for classes i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time, WebhookDeliveryPublic_delivered_atMember1able
 type WebhookDeliveryPublic_WebhookDeliveryPublic_delivered_at struct {
-    // Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e. Time
+    // Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time
     dateTimeOffset *i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time
     // Composed type representation for type WebhookDeliveryPublic_delivered_atMember1able
     webhookDeliveryPublic_delivered_atMember1 WebhookDeliveryPublic_delivered_atMember1able
@@ -74,13 +74,13 @@ func CreateWebhookDeliveryPublic_WebhookDeliveryPublic_delivered_atFromDiscrimin
     }
     return result, nil
 }
-// GetDateTimeOffset gets the DateTimeOffset property value. Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e. Time
+// GetDateTimeOffset gets the DateTimeOffset property value. Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time
 // returns a *Time when successful
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_delivered_at) GetDateTimeOffset()(*i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time) {
     return m.dateTimeOffset
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_delivered_at) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -109,7 +109,7 @@ func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_delivered_at) Serialize(wri
     }
     return nil
 }
-// SetDateTimeOffset sets the DateTimeOffset property value. Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e. Time
+// SetDateTimeOffset sets the DateTimeOffset property value. Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_delivered_at) SetDateTimeOffset(value *i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time)() {
     m.dateTimeOffset = value
 }
@@ -152,7 +152,7 @@ func CreateWebhookDeliveryPublic_WebhookDeliveryPublic_error_classFromDiscrimina
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_error_class) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -194,9 +194,9 @@ func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_error_class) SetString(valu
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_error_class) SetWebhookDeliveryPublicErrorClassMember1(value WebhookDeliveryPublic_error_classMember1able)() {
     m.webhookDeliveryPublic_error_classMember1 = value
 }
-// WebhookDeliveryPublic_WebhookDeliveryPublic_replay_of composed type wrapper for classes i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22. UUID, WebhookDeliveryPublic_replay_ofMember1able
+// WebhookDeliveryPublic_WebhookDeliveryPublic_replay_of composed type wrapper for classes i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22.UUID, WebhookDeliveryPublic_replay_ofMember1able
 type WebhookDeliveryPublic_WebhookDeliveryPublic_replay_of struct {
-    // Composed type representation for type i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22. UUID
+    // Composed type representation for type i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22.UUID
     guid *i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22.UUID
     // Composed type representation for type WebhookDeliveryPublic_replay_ofMember1able
     webhookDeliveryPublic_replay_ofMember1 WebhookDeliveryPublic_replay_ofMember1able
@@ -229,11 +229,11 @@ func CreateWebhookDeliveryPublic_WebhookDeliveryPublic_replay_ofFromDiscriminato
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_replay_of) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
-// GetGuid gets the Guid property value. Composed type representation for type i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22. UUID
+// GetGuid gets the Guid property value. Composed type representation for type i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22.UUID
 // returns a *UUID when successful
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_replay_of) GetGuid()(*i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22.UUID) {
     return m.guid
@@ -263,7 +263,7 @@ func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_replay_of) Serialize(writer
     }
     return nil
 }
-// SetGuid sets the Guid property value. Composed type representation for type i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22. UUID
+// SetGuid sets the Guid property value. Composed type representation for type i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22.UUID
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_replay_of) SetGuid(value *i561e97a8befe7661a44c8f54600992b4207a3a0cf6770e5559949bc276de2e22.UUID)() {
     m.guid = value
 }
@@ -306,7 +306,7 @@ func CreateWebhookDeliveryPublic_WebhookDeliveryPublic_response_body_previewFrom
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_response_body_preview) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -383,7 +383,7 @@ func CreateWebhookDeliveryPublic_WebhookDeliveryPublic_response_statusFromDiscri
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *WebhookDeliveryPublic_WebhookDeliveryPublic_response_status) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -508,7 +508,7 @@ func (m *WebhookDeliveryPublic) GetEventType()(*string) {
     return m.event_type
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *WebhookDeliveryPublic) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["attempt"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {

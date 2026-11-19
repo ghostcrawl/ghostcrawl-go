@@ -14,7 +14,7 @@ import (
 type CrawlRunsWithRun_ItemRequestBuilder struct {
     i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.BaseRequestBuilder
 }
-// CrawlRunsWithRun_ItemRequestBuilderGetQueryParameters status, plus OPT-IN long-poll. Default (``wait`` absent/false): instant status snapshot, behavior unchanged. ``?wait=true&timeout_s=N``: BLOCKS event-driven (same cross-worker `` signal as start-and-wait) until the run reaches a terminal state (completed|cancelled|failed|failed_resumable) or ``timeout_s`` elapses, THEN returns the run record (results included when completed). A timeout returns the CURRENT non-terminal run as HTTP 200, a long-poll, NOT an error. ``timeout_s`` defaults to 300 and is capped at a server-configured maximum (default 600).
+// CrawlRunsWithRun_ItemRequestBuilderGetQueryParameters status, plus OPT-IN long-poll. Default (``wait`` absent/false): instant status snapshot, behavior unchanged. ``?wait=true&timeout_s=N``: BLOCKS (event-driven, the same completion signal start-and-wait uses) until the run reaches a terminal state (completed|cancelled|failed|failed_resumable) or ``timeout_s`` elapses, THEN returns the run record (results included when completed). A timeout returns the CURRENT non-terminal run as HTTP 200, a long-poll, NOT an error. ``timeout_s`` defaults to 300 and is capped at a server-configured maximum (default 600).
 type CrawlRunsWithRun_ItemRequestBuilderGetQueryParameters struct {
     Timeout_s *int32 "uriparametername:\"timeout_s\""
     Wait *bool "uriparametername:\"wait\""
@@ -46,7 +46,7 @@ func NewCrawlRunsWithRun_ItemRequestBuilder(rawUrl string, requestAdapter i2ae41
     urlParams["request-raw-url"] = rawUrl
     return NewCrawlRunsWithRun_ItemRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Get status, plus OPT-IN long-poll. Default (``wait`` absent/false): instant status snapshot, behavior unchanged. ``?wait=true&timeout_s=N``: BLOCKS event-driven (same cross-worker `` signal as start-and-wait) until the run reaches a terminal state (completed|cancelled|failed|failed_resumable) or ``timeout_s`` elapses, THEN returns the run record (results included when completed). A timeout returns the CURRENT non-terminal run as HTTP 200, a long-poll, NOT an error. ``timeout_s`` defaults to 300 and is capped at a server-configured maximum (default 600).
+// Get status, plus OPT-IN long-poll. Default (``wait`` absent/false): instant status snapshot, behavior unchanged. ``?wait=true&timeout_s=N``: BLOCKS (event-driven, the same completion signal start-and-wait uses) until the run reaches a terminal state (completed|cancelled|failed|failed_resumable) or ``timeout_s`` elapses, THEN returns the run record (results included when completed). A timeout returns the CURRENT non-terminal run as HTTP 200, a long-poll, NOT an error. ``timeout_s`` defaults to 300 and is capped at a server-configured maximum (default 600).
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 400 status code
 // returns a ProblemDetails error when the service returns a 401 status code
@@ -85,7 +85,7 @@ func (m *CrawlRunsWithRun_ItemRequestBuilder) Get(ctx context.Context, requestCo
 func (m *CrawlRunsWithRun_ItemRequestBuilder) Resume()(*CrawlRunsItemResumeRequestBuilder) {
     return NewCrawlRunsItemResumeRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
 }
-// ToGetRequestInformation status, plus OPT-IN long-poll. Default (``wait`` absent/false): instant status snapshot, behavior unchanged. ``?wait=true&timeout_s=N``: BLOCKS event-driven (same cross-worker `` signal as start-and-wait) until the run reaches a terminal state (completed|cancelled|failed|failed_resumable) or ``timeout_s`` elapses, THEN returns the run record (results included when completed). A timeout returns the CURRENT non-terminal run as HTTP 200, a long-poll, NOT an error. ``timeout_s`` defaults to 300 and is capped at a server-configured maximum (default 600).
+// ToGetRequestInformation status, plus OPT-IN long-poll. Default (``wait`` absent/false): instant status snapshot, behavior unchanged. ``?wait=true&timeout_s=N``: BLOCKS (event-driven, the same completion signal start-and-wait uses) until the run reaches a terminal state (completed|cancelled|failed|failed_resumable) or ``timeout_s`` elapses, THEN returns the run record (results included when completed). A timeout returns the CURRENT non-terminal run as HTTP 200, a long-poll, NOT an error. ``timeout_s`` defaults to 300 and is capped at a server-configured maximum (default 600).
 // returns a *RequestInformation when successful
 func (m *CrawlRunsWithRun_ItemRequestBuilder) ToGetRequestInformation(ctx context.Context, requestConfiguration *CrawlRunsWithRun_ItemRequestBuilderGetRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.GET, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

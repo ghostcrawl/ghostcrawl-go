@@ -11,7 +11,7 @@ import (
 type ExtractRequest struct {
     // Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
     additionalData map[string]any
-    // BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in human session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+    // BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in browser session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
     behavior_actions ExtractRequest_ExtractRequest_behavior_actionsable
     // Engine override: auto (default) | chrome | firefox | webkit.
     engine *ExtractRequest_engine
@@ -571,7 +571,7 @@ func CreateExtractRequestFromDiscriminatorValue(parseNode i878a80d2330e89d268963
 func (m *ExtractRequest) GetAdditionalData()(map[string]any) {
     return m.additionalData
 }
-// GetBehaviorActions gets the behavior_actions property value. BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in human session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+// GetBehaviorActions gets the behavior_actions property value. BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in browser session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
 // returns a ExtractRequest_ExtractRequest_behavior_actionsable when successful
 func (m *ExtractRequest) GetBehaviorActions()(ExtractRequest_ExtractRequest_behavior_actionsable) {
     return m.behavior_actions
@@ -781,7 +781,7 @@ func (m *ExtractRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a
 func (m *ExtractRequest) SetAdditionalData(value map[string]any)() {
     m.additionalData = value
 }
-// SetBehaviorActions sets the behavior_actions property value. BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in human session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+// SetBehaviorActions sets the behavior_actions property value. BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in browser session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
 func (m *ExtractRequest) SetBehaviorActions(value ExtractRequest_ExtractRequest_behavior_actionsable)() {
     m.behavior_actions = value
 }

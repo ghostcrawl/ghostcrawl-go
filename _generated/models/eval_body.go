@@ -11,9 +11,179 @@ type EvalBody struct {
     // Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
     additionalData map[string]any
     // The profile_id property
-    profile_id *string
+    profile_id EvalBody_EvalBody_profile_idable
     // The script property
     script *string
+    // The session_id property
+    session_id EvalBody_EvalBody_session_idable
+}
+// EvalBody_EvalBody_profile_id composed type wrapper for classes EvalBody_profile_idMember1able, string
+type EvalBody_EvalBody_profile_id struct {
+    // Composed type representation for type EvalBody_profile_idMember1able
+    evalBody_profile_idMember1 EvalBody_profile_idMember1able
+    // Composed type representation for type string
+    string *string
+}
+// NewEvalBody_EvalBody_profile_id instantiates a new EvalBody_EvalBody_profile_id and sets the default values.
+func NewEvalBody_EvalBody_profile_id()(*EvalBody_EvalBody_profile_id) {
+    m := &EvalBody_EvalBody_profile_id{
+    }
+    return m
+}
+// CreateEvalBody_EvalBody_profile_idFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateEvalBody_EvalBody_profile_idFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewEvalBody_EvalBody_profile_id()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateEvalBody_profile_idMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(EvalBody_profile_idMember1able); ok {
+                result.SetEvalBodyProfileIdMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetEvalBodyProfileIdMember1 gets the EvalBody_profile_idMember1 property value. Composed type representation for type EvalBody_profile_idMember1able
+// returns a EvalBody_profile_idMember1able when successful
+func (m *EvalBody_EvalBody_profile_id) GetEvalBodyProfileIdMember1()(EvalBody_profile_idMember1able) {
+    return m.evalBody_profile_idMember1
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *EvalBody_EvalBody_profile_id) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *EvalBody_EvalBody_profile_id) GetIsComposedType()(bool) {
+    return true
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *EvalBody_EvalBody_profile_id) GetString()(*string) {
+    return m.string
+}
+// Serialize serializes information the current object
+func (m *EvalBody_EvalBody_profile_id) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetEvalBodyProfileIdMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetEvalBodyProfileIdMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetEvalBodyProfileIdMember1 sets the EvalBody_profile_idMember1 property value. Composed type representation for type EvalBody_profile_idMember1able
+func (m *EvalBody_EvalBody_profile_id) SetEvalBodyProfileIdMember1(value EvalBody_profile_idMember1able)() {
+    m.evalBody_profile_idMember1 = value
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *EvalBody_EvalBody_profile_id) SetString(value *string)() {
+    m.string = value
+}
+// EvalBody_EvalBody_session_id composed type wrapper for classes EvalBody_session_idMember1able, string
+type EvalBody_EvalBody_session_id struct {
+    // Composed type representation for type EvalBody_session_idMember1able
+    evalBody_session_idMember1 EvalBody_session_idMember1able
+    // Composed type representation for type string
+    string *string
+}
+// NewEvalBody_EvalBody_session_id instantiates a new EvalBody_EvalBody_session_id and sets the default values.
+func NewEvalBody_EvalBody_session_id()(*EvalBody_EvalBody_session_id) {
+    m := &EvalBody_EvalBody_session_id{
+    }
+    return m
+}
+// CreateEvalBody_EvalBody_session_idFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateEvalBody_EvalBody_session_idFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewEvalBody_EvalBody_session_id()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateEvalBody_session_idMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(EvalBody_session_idMember1able); ok {
+                result.SetEvalBodySessionIdMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetEvalBodySessionIdMember1 gets the EvalBody_session_idMember1 property value. Composed type representation for type EvalBody_session_idMember1able
+// returns a EvalBody_session_idMember1able when successful
+func (m *EvalBody_EvalBody_session_id) GetEvalBodySessionIdMember1()(EvalBody_session_idMember1able) {
+    return m.evalBody_session_idMember1
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *EvalBody_EvalBody_session_id) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *EvalBody_EvalBody_session_id) GetIsComposedType()(bool) {
+    return true
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *EvalBody_EvalBody_session_id) GetString()(*string) {
+    return m.string
+}
+// Serialize serializes information the current object
+func (m *EvalBody_EvalBody_session_id) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetEvalBodySessionIdMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetEvalBodySessionIdMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetEvalBodySessionIdMember1 sets the EvalBody_session_idMember1 property value. Composed type representation for type EvalBody_session_idMember1able
+func (m *EvalBody_EvalBody_session_id) SetEvalBodySessionIdMember1(value EvalBody_session_idMember1able)() {
+    m.evalBody_session_idMember1 = value
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *EvalBody_EvalBody_session_id) SetString(value *string)() {
+    m.string = value
+}
+type EvalBody_EvalBody_profile_idable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetEvalBodyProfileIdMember1()(EvalBody_profile_idMember1able)
+    GetString()(*string)
+    SetEvalBodyProfileIdMember1(value EvalBody_profile_idMember1able)()
+    SetString(value *string)()
+}
+type EvalBody_EvalBody_session_idable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetEvalBodySessionIdMember1()(EvalBody_session_idMember1able)
+    GetString()(*string)
+    SetEvalBodySessionIdMember1(value EvalBody_session_idMember1able)()
+    SetString(value *string)()
 }
 // NewEvalBody instantiates a new EvalBody and sets the default values.
 func NewEvalBody()(*EvalBody) {
@@ -33,16 +203,16 @@ func (m *EvalBody) GetAdditionalData()(map[string]any) {
     return m.additionalData
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *EvalBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["profile_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
-        val, err := n.GetStringValue()
+        val, err := n.GetObjectValue(CreateEvalBody_EvalBody_profile_idFromDiscriminatorValue)
         if err != nil {
             return err
         }
         if val != nil {
-            m.SetProfileId(val)
+            m.SetProfileId(val.(EvalBody_EvalBody_profile_idable))
         }
         return nil
     }
@@ -56,11 +226,21 @@ func (m *EvalBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896
         }
         return nil
     }
+    res["session_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateEvalBody_EvalBody_session_idFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetSessionId(val.(EvalBody_EvalBody_session_idable))
+        }
+        return nil
+    }
     return res
 }
 // GetProfileId gets the profile_id property value. The profile_id property
-// returns a *string when successful
-func (m *EvalBody) GetProfileId()(*string) {
+// returns a EvalBody_EvalBody_profile_idable when successful
+func (m *EvalBody) GetProfileId()(EvalBody_EvalBody_profile_idable) {
     return m.profile_id
 }
 // GetScript gets the script property value. The script property
@@ -68,16 +248,27 @@ func (m *EvalBody) GetProfileId()(*string) {
 func (m *EvalBody) GetScript()(*string) {
     return m.script
 }
+// GetSessionId gets the session_id property value. The session_id property
+// returns a EvalBody_EvalBody_session_idable when successful
+func (m *EvalBody) GetSessionId()(EvalBody_EvalBody_session_idable) {
+    return m.session_id
+}
 // Serialize serializes information the current object
 func (m *EvalBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
     {
-        err := writer.WriteStringValue("profile_id", m.GetProfileId())
+        err := writer.WriteObjectValue("profile_id", m.GetProfileId())
         if err != nil {
             return err
         }
     }
     {
         err := writer.WriteStringValue("script", m.GetScript())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteObjectValue("session_id", m.GetSessionId())
         if err != nil {
             return err
         }
@@ -95,18 +286,24 @@ func (m *EvalBody) SetAdditionalData(value map[string]any)() {
     m.additionalData = value
 }
 // SetProfileId sets the profile_id property value. The profile_id property
-func (m *EvalBody) SetProfileId(value *string)() {
+func (m *EvalBody) SetProfileId(value EvalBody_EvalBody_profile_idable)() {
     m.profile_id = value
 }
 // SetScript sets the script property value. The script property
 func (m *EvalBody) SetScript(value *string)() {
     m.script = value
 }
+// SetSessionId sets the session_id property value. The session_id property
+func (m *EvalBody) SetSessionId(value EvalBody_EvalBody_session_idable)() {
+    m.session_id = value
+}
 type EvalBodyable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
-    GetProfileId()(*string)
+    GetProfileId()(EvalBody_EvalBody_profile_idable)
     GetScript()(*string)
-    SetProfileId(value *string)()
+    GetSessionId()(EvalBody_EvalBody_session_idable)
+    SetProfileId(value EvalBody_EvalBody_profile_idable)()
     SetScript(value *string)()
+    SetSessionId(value EvalBody_EvalBody_session_idable)()
 }

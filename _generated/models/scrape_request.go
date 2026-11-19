@@ -13,16 +13,20 @@ type ScrapeRequest struct {
     additionalData map[string]any
     // "persist" (default): same identity for all URLs in a batch. "randomize": fresh identity per URL (each counts against quota).
     batch_identity_mode *ScrapeRequest_batch_identity_mode
-    // BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in human session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+    // BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in browser session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
     behavior_actions ScrapeRequest_ScrapeRequest_behavior_actionsable
     // Maximum tokens per markdown chunk. Clamped server-side to [256, 32768] regardless of caller input.
     chunk_tokens *int32
-    // Engine override. 'auto' (default): the identity's fingerprint decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
+    // Device class for the population identity draw. 'random' (default) = unchanged. The random_* classes restrict which real-population devices may be drawn (weights inside the class unchanged); with engine 'auto' the engine follows the drawn device (iOS -> webkit always, android -> chrome). An engine the class cannot render on -> 422 device_engine_mismatch. Not combinable with identity / profile; identity_spec's operating system must lie inside the class. For a fixed device use profile=<name>. Cloud only: where no population draw runs (self-host / direct egress) a non-random class -> 422 device_unsupported.
+    device *ScrapeRequest_device
+    // Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
     engine *ScrapeRequest_engine
     // Response format. 'html' (default): the fully rendered DOM. 'markdown': returns a {markdown, chunks, citations, token_estimate} envelope with prompt-injection-neutralized, token-budgeted output. 'pdf': returns application/pdf bytes (Chrome identities only; Firefox and WebKit return 400 pdf_engine_unsupported).
     format *ScrapeRequest_format
     // When screenshot=true, capture the FULL document height instead of just the visible viewport. Ignored when screenshot_selector is set.
     full_page *bool
+    // Override geo-coherence: use `identity_country`'s geo (timezone + geolocation) REGARDLESS of the exit IP's country. Requires a pinned `identity_country` (and the geo_select tier). Off by default, the default is IP-coherent geo (the browser identity follows the exit). Forcing may create an IP<->timezone mismatch that some sites cross-check; opt-in at your own risk.
+    geo_force *bool
     // Previously-persisted identity_id from POST /v1/identity (persist=true).
     identity ScrapeRequest_ScrapeRequest_identityable
     // Optional two-letter country code (e.g. 'US','DE'). When set, the exit is geo-filtered to that country and the identity's timezone is derived from it. When omitted, the timezone follows the rotating exit country. Language is independent, see the `language` field.
@@ -33,7 +37,7 @@ type ScrapeRequest struct {
     include_citations *bool
     // Optional browser language tag (e.g. 'en-US','es-ES','de-DE'). Sets the identity's locale and language headers coherently, independent of the exit country. When omitted, the identity's default locale is used. Available on every tier.
     language ScrapeRequest_ScrapeRequest_languageable
-    // Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ same deterministic fingerprint) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
+    // Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ the same browser identity every time) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
     profile ScrapeRequest_ScrapeRequest_profileable
     // Bring-your-own proxy URL. Schemes: socks5, socks5h, http, https. Any credentials in the URL are redacted from logs. Example: socks5://user:pass@host:1080.
     proxy ScrapeRequest_ScrapeRequest_proxyable
@@ -95,7 +99,7 @@ func CreateScrapeRequest_ScrapeRequest_behavior_actionsFromDiscriminatorValue(pa
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_behavior_actions) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -178,7 +182,7 @@ func CreateScrapeRequest_ScrapeRequest_identityFromDiscriminatorValue(parseNode 
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_identity) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -255,7 +259,7 @@ func CreateScrapeRequest_ScrapeRequest_identity_countryFromDiscriminatorValue(pa
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_identity_country) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -332,7 +336,7 @@ func CreateScrapeRequest_ScrapeRequest_languageFromDiscriminatorValue(parseNode 
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_language) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -409,7 +413,7 @@ func CreateScrapeRequest_ScrapeRequest_profileFromDiscriminatorValue(parseNode i
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_profile) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -486,7 +490,7 @@ func CreateScrapeRequest_ScrapeRequest_proxyFromDiscriminatorValue(parseNode i87
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_proxy) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -563,7 +567,7 @@ func CreateScrapeRequest_ScrapeRequest_screenshot_selectorFromDiscriminatorValue
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_screenshot_selector) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -640,7 +644,7 @@ func CreateScrapeRequest_ScrapeRequest_sessionFromDiscriminatorValue(parseNode i
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_session) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -717,7 +721,7 @@ func CreateScrapeRequest_ScrapeRequest_timeout_msFromDiscriminatorValue(parseNod
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_timeout_ms) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -794,7 +798,7 @@ func CreateScrapeRequest_ScrapeRequest_urlFromDiscriminatorValue(parseNode i878a
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_url) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -877,7 +881,7 @@ func CreateScrapeRequest_ScrapeRequest_urlsFromDiscriminatorValue(parseNode i878
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest_ScrapeRequest_urls) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -1005,12 +1009,16 @@ func NewScrapeRequest()(*ScrapeRequest) {
     m.SetBatchIdentityMode(&batch_identity_modeValue)
     chunk_tokensValue := int32(8192)
     m.SetChunkTokens(&chunk_tokensValue)
+    deviceValue := RANDOM_SCRAPEREQUEST_DEVICE
+    m.SetDevice(&deviceValue)
     engineValue := AUTO_SCRAPEREQUEST_ENGINE
     m.SetEngine(&engineValue)
     formatValue := HTML_SCRAPEREQUEST_FORMAT
     m.SetFormat(&formatValue)
     full_pageValue := false
     m.SetFullPage(&full_pageValue)
+    geo_forceValue := false
+    m.SetGeoForce(&geo_forceValue)
     include_citationsValue := true
     m.SetIncludeCitations(&include_citationsValue)
     routing_modeValue := AUTO_SCRAPEREQUEST_ROUTING_MODE
@@ -1036,7 +1044,7 @@ func (m *ScrapeRequest) GetAdditionalData()(map[string]any) {
 func (m *ScrapeRequest) GetBatchIdentityMode()(*ScrapeRequest_batch_identity_mode) {
     return m.batch_identity_mode
 }
-// GetBehaviorActions gets the behavior_actions property value. BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in human session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+// GetBehaviorActions gets the behavior_actions property value. BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in browser session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
 // returns a ScrapeRequest_ScrapeRequest_behavior_actionsable when successful
 func (m *ScrapeRequest) GetBehaviorActions()(ScrapeRequest_ScrapeRequest_behavior_actionsable) {
     return m.behavior_actions
@@ -1046,13 +1054,18 @@ func (m *ScrapeRequest) GetBehaviorActions()(ScrapeRequest_ScrapeRequest_behavio
 func (m *ScrapeRequest) GetChunkTokens()(*int32) {
     return m.chunk_tokens
 }
-// GetEngine gets the engine property value. Engine override. 'auto' (default): the identity's fingerprint decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
+// GetDevice gets the device property value. Device class for the population identity draw. 'random' (default) = unchanged. The random_* classes restrict which real-population devices may be drawn (weights inside the class unchanged); with engine 'auto' the engine follows the drawn device (iOS -> webkit always, android -> chrome). An engine the class cannot render on -> 422 device_engine_mismatch. Not combinable with identity / profile; identity_spec's operating system must lie inside the class. For a fixed device use profile=<name>. Cloud only: where no population draw runs (self-host / direct egress) a non-random class -> 422 device_unsupported.
+// returns a *ScrapeRequest_device when successful
+func (m *ScrapeRequest) GetDevice()(*ScrapeRequest_device) {
+    return m.device
+}
+// GetEngine gets the engine property value. Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
 // returns a *ScrapeRequest_engine when successful
 func (m *ScrapeRequest) GetEngine()(*ScrapeRequest_engine) {
     return m.engine
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScrapeRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["batch_identity_mode"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -1085,6 +1098,16 @@ func (m *ScrapeRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d
         }
         return nil
     }
+    res["device"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetEnumValue(ParseScrapeRequest_device)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetDevice(val.(*ScrapeRequest_device))
+        }
+        return nil
+    }
     res["engine"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
         val, err := n.GetEnumValue(ParseScrapeRequest_engine)
         if err != nil {
@@ -1112,6 +1135,16 @@ func (m *ScrapeRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d
         }
         if val != nil {
             m.SetFullPage(val)
+        }
+        return nil
+    }
+    res["geo_force"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetBoolValue()
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetGeoForce(val)
         }
         return nil
     }
@@ -1277,6 +1310,11 @@ func (m *ScrapeRequest) GetFormat()(*ScrapeRequest_format) {
 func (m *ScrapeRequest) GetFullPage()(*bool) {
     return m.full_page
 }
+// GetGeoForce gets the geo_force property value. Override geo-coherence: use `identity_country`'s geo (timezone + geolocation) REGARDLESS of the exit IP's country. Requires a pinned `identity_country` (and the geo_select tier). Off by default, the default is IP-coherent geo (the browser identity follows the exit). Forcing may create an IP<->timezone mismatch that some sites cross-check; opt-in at your own risk.
+// returns a *bool when successful
+func (m *ScrapeRequest) GetGeoForce()(*bool) {
+    return m.geo_force
+}
 // GetIdentity gets the identity property value. Previously-persisted identity_id from POST /v1/identity (persist=true).
 // returns a ScrapeRequest_ScrapeRequest_identityable when successful
 func (m *ScrapeRequest) GetIdentity()(ScrapeRequest_ScrapeRequest_identityable) {
@@ -1302,7 +1340,7 @@ func (m *ScrapeRequest) GetIncludeCitations()(*bool) {
 func (m *ScrapeRequest) GetLanguage()(ScrapeRequest_ScrapeRequest_languageable) {
     return m.language
 }
-// GetProfile gets the profile property value. Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ same deterministic fingerprint) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
+// GetProfile gets the profile property value. Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ the same browser identity every time) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
 // returns a ScrapeRequest_ScrapeRequest_profileable when successful
 func (m *ScrapeRequest) GetProfile()(ScrapeRequest_ScrapeRequest_profileable) {
     return m.profile
@@ -1373,6 +1411,13 @@ func (m *ScrapeRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0
             return err
         }
     }
+    if m.GetDevice() != nil {
+        cast := (*m.GetDevice()).String()
+        err := writer.WriteStringValue("device", &cast)
+        if err != nil {
+            return err
+        }
+    }
     if m.GetEngine() != nil {
         cast := (*m.GetEngine()).String()
         err := writer.WriteStringValue("engine", &cast)
@@ -1389,6 +1434,12 @@ func (m *ScrapeRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0
     }
     {
         err := writer.WriteBoolValue("full_page", m.GetFullPage())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteBoolValue("geo_force", m.GetGeoForce())
         if err != nil {
             return err
         }
@@ -1500,7 +1551,7 @@ func (m *ScrapeRequest) SetAdditionalData(value map[string]any)() {
 func (m *ScrapeRequest) SetBatchIdentityMode(value *ScrapeRequest_batch_identity_mode)() {
     m.batch_identity_mode = value
 }
-// SetBehaviorActions sets the behavior_actions property value. BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in human session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+// SetBehaviorActions sets the behavior_actions property value. BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in browser session. Each item is {"kind":"move","x":int,"y":int} | {"kind":"wheel","x":int,"y":int,"dy":int} | {"kind":"dwell","ms":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.
 func (m *ScrapeRequest) SetBehaviorActions(value ScrapeRequest_ScrapeRequest_behavior_actionsable)() {
     m.behavior_actions = value
 }
@@ -1508,7 +1559,11 @@ func (m *ScrapeRequest) SetBehaviorActions(value ScrapeRequest_ScrapeRequest_beh
 func (m *ScrapeRequest) SetChunkTokens(value *int32)() {
     m.chunk_tokens = value
 }
-// SetEngine sets the engine property value. Engine override. 'auto' (default): the identity's fingerprint decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
+// SetDevice sets the device property value. Device class for the population identity draw. 'random' (default) = unchanged. The random_* classes restrict which real-population devices may be drawn (weights inside the class unchanged); with engine 'auto' the engine follows the drawn device (iOS -> webkit always, android -> chrome). An engine the class cannot render on -> 422 device_engine_mismatch. Not combinable with identity / profile; identity_spec's operating system must lie inside the class. For a fixed device use profile=<name>. Cloud only: where no population draw runs (self-host / direct egress) a non-random class -> 422 device_unsupported.
+func (m *ScrapeRequest) SetDevice(value *ScrapeRequest_device)() {
+    m.device = value
+}
+// SetEngine sets the engine property value. Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
 func (m *ScrapeRequest) SetEngine(value *ScrapeRequest_engine)() {
     m.engine = value
 }
@@ -1519,6 +1574,10 @@ func (m *ScrapeRequest) SetFormat(value *ScrapeRequest_format)() {
 // SetFullPage sets the full_page property value. When screenshot=true, capture the FULL document height instead of just the visible viewport. Ignored when screenshot_selector is set.
 func (m *ScrapeRequest) SetFullPage(value *bool)() {
     m.full_page = value
+}
+// SetGeoForce sets the geo_force property value. Override geo-coherence: use `identity_country`'s geo (timezone + geolocation) REGARDLESS of the exit IP's country. Requires a pinned `identity_country` (and the geo_select tier). Off by default, the default is IP-coherent geo (the browser identity follows the exit). Forcing may create an IP<->timezone mismatch that some sites cross-check; opt-in at your own risk.
+func (m *ScrapeRequest) SetGeoForce(value *bool)() {
+    m.geo_force = value
 }
 // SetIdentity sets the identity property value. Previously-persisted identity_id from POST /v1/identity (persist=true).
 func (m *ScrapeRequest) SetIdentity(value ScrapeRequest_ScrapeRequest_identityable)() {
@@ -1540,7 +1599,7 @@ func (m *ScrapeRequest) SetIncludeCitations(value *bool)() {
 func (m *ScrapeRequest) SetLanguage(value ScrapeRequest_ScrapeRequest_languageable)() {
     m.language = value
 }
-// SetProfile sets the profile property value. Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ same deterministic fingerprint) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
+// SetProfile sets the profile property value. Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ the same browser identity every time) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.
 func (m *ScrapeRequest) SetProfile(value ScrapeRequest_ScrapeRequest_profileable)() {
     m.profile = value
 }
@@ -1586,9 +1645,11 @@ type ScrapeRequestable interface {
     GetBatchIdentityMode()(*ScrapeRequest_batch_identity_mode)
     GetBehaviorActions()(ScrapeRequest_ScrapeRequest_behavior_actionsable)
     GetChunkTokens()(*int32)
+    GetDevice()(*ScrapeRequest_device)
     GetEngine()(*ScrapeRequest_engine)
     GetFormat()(*ScrapeRequest_format)
     GetFullPage()(*bool)
+    GetGeoForce()(*bool)
     GetIdentity()(ScrapeRequest_ScrapeRequest_identityable)
     GetIdentityCountry()(ScrapeRequest_ScrapeRequest_identity_countryable)
     GetIdentitySpec()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)
@@ -1607,9 +1668,11 @@ type ScrapeRequestable interface {
     SetBatchIdentityMode(value *ScrapeRequest_batch_identity_mode)()
     SetBehaviorActions(value ScrapeRequest_ScrapeRequest_behavior_actionsable)()
     SetChunkTokens(value *int32)()
+    SetDevice(value *ScrapeRequest_device)()
     SetEngine(value *ScrapeRequest_engine)()
     SetFormat(value *ScrapeRequest_format)()
     SetFullPage(value *bool)()
+    SetGeoForce(value *bool)()
     SetIdentity(value ScrapeRequest_ScrapeRequest_identityable)()
     SetIdentityCountry(value ScrapeRequest_ScrapeRequest_identity_countryable)()
     SetIdentitySpec(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)()

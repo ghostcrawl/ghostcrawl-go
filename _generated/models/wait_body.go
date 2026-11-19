@@ -11,11 +11,90 @@ type WaitBody struct {
     // Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
     additionalData map[string]any
     // The profile_id property
-    profile_id *string
+    profile_id WaitBody_WaitBody_profile_idable
     // The selector property
     selector WaitBody_WaitBody_selectorable
+    // The session_id property
+    session_id *string
     // The timeout_ms property
     timeout_ms *int32
+}
+// WaitBody_WaitBody_profile_id composed type wrapper for classes string, WaitBody_profile_idMember1able
+type WaitBody_WaitBody_profile_id struct {
+    // Composed type representation for type string
+    string *string
+    // Composed type representation for type WaitBody_profile_idMember1able
+    waitBody_profile_idMember1 WaitBody_profile_idMember1able
+}
+// NewWaitBody_WaitBody_profile_id instantiates a new WaitBody_WaitBody_profile_id and sets the default values.
+func NewWaitBody_WaitBody_profile_id()(*WaitBody_WaitBody_profile_id) {
+    m := &WaitBody_WaitBody_profile_id{
+    }
+    return m
+}
+// CreateWaitBody_WaitBody_profile_idFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateWaitBody_WaitBody_profile_idFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewWaitBody_WaitBody_profile_id()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateWaitBody_profile_idMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(WaitBody_profile_idMember1able); ok {
+                result.SetWaitBodyProfileIdMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *WaitBody_WaitBody_profile_id) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *WaitBody_WaitBody_profile_id) GetIsComposedType()(bool) {
+    return true
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *WaitBody_WaitBody_profile_id) GetString()(*string) {
+    return m.string
+}
+// GetWaitBodyProfileIdMember1 gets the WaitBody_profile_idMember1 property value. Composed type representation for type WaitBody_profile_idMember1able
+// returns a WaitBody_profile_idMember1able when successful
+func (m *WaitBody_WaitBody_profile_id) GetWaitBodyProfileIdMember1()(WaitBody_profile_idMember1able) {
+    return m.waitBody_profile_idMember1
+}
+// Serialize serializes information the current object
+func (m *WaitBody_WaitBody_profile_id) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetWaitBodyProfileIdMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetWaitBodyProfileIdMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *WaitBody_WaitBody_profile_id) SetString(value *string)() {
+    m.string = value
+}
+// SetWaitBodyProfileIdMember1 sets the WaitBody_profile_idMember1 property value. Composed type representation for type WaitBody_profile_idMember1able
+func (m *WaitBody_WaitBody_profile_id) SetWaitBodyProfileIdMember1(value WaitBody_profile_idMember1able)() {
+    m.waitBody_profile_idMember1 = value
 }
 // WaitBody_WaitBody_selector composed type wrapper for classes string, WaitBody_selectorMember1able
 type WaitBody_WaitBody_selector struct {
@@ -52,7 +131,7 @@ func CreateWaitBody_WaitBody_selectorFromDiscriminatorValue(parseNode i878a80d23
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *WaitBody_WaitBody_selector) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -94,6 +173,13 @@ func (m *WaitBody_WaitBody_selector) SetString(value *string)() {
 func (m *WaitBody_WaitBody_selector) SetWaitBodySelectorMember1(value WaitBody_selectorMember1able)() {
     m.waitBody_selectorMember1 = value
 }
+type WaitBody_WaitBody_profile_idable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetString()(*string)
+    GetWaitBodyProfileIdMember1()(WaitBody_profile_idMember1able)
+    SetString(value *string)()
+    SetWaitBodyProfileIdMember1(value WaitBody_profile_idMember1able)()
+}
 type WaitBody_WaitBody_selectorable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetString()(*string)
@@ -121,16 +207,16 @@ func (m *WaitBody) GetAdditionalData()(map[string]any) {
     return m.additionalData
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *WaitBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["profile_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
-        val, err := n.GetStringValue()
+        val, err := n.GetObjectValue(CreateWaitBody_WaitBody_profile_idFromDiscriminatorValue)
         if err != nil {
             return err
         }
         if val != nil {
-            m.SetProfileId(val)
+            m.SetProfileId(val.(WaitBody_WaitBody_profile_idable))
         }
         return nil
     }
@@ -141,6 +227,16 @@ func (m *WaitBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896
         }
         if val != nil {
             m.SetSelector(val.(WaitBody_WaitBody_selectorable))
+        }
+        return nil
+    }
+    res["session_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetStringValue()
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetSessionId(val)
         }
         return nil
     }
@@ -157,14 +253,19 @@ func (m *WaitBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896
     return res
 }
 // GetProfileId gets the profile_id property value. The profile_id property
-// returns a *string when successful
-func (m *WaitBody) GetProfileId()(*string) {
+// returns a WaitBody_WaitBody_profile_idable when successful
+func (m *WaitBody) GetProfileId()(WaitBody_WaitBody_profile_idable) {
     return m.profile_id
 }
 // GetSelector gets the selector property value. The selector property
 // returns a WaitBody_WaitBody_selectorable when successful
 func (m *WaitBody) GetSelector()(WaitBody_WaitBody_selectorable) {
     return m.selector
+}
+// GetSessionId gets the session_id property value. The session_id property
+// returns a *string when successful
+func (m *WaitBody) GetSessionId()(*string) {
+    return m.session_id
 }
 // GetTimeoutMs gets the timeout_ms property value. The timeout_ms property
 // returns a *int32 when successful
@@ -174,13 +275,19 @@ func (m *WaitBody) GetTimeoutMs()(*int32) {
 // Serialize serializes information the current object
 func (m *WaitBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
     {
-        err := writer.WriteStringValue("profile_id", m.GetProfileId())
+        err := writer.WriteObjectValue("profile_id", m.GetProfileId())
         if err != nil {
             return err
         }
     }
     {
         err := writer.WriteObjectValue("selector", m.GetSelector())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteStringValue("session_id", m.GetSessionId())
         if err != nil {
             return err
         }
@@ -204,12 +311,16 @@ func (m *WaitBody) SetAdditionalData(value map[string]any)() {
     m.additionalData = value
 }
 // SetProfileId sets the profile_id property value. The profile_id property
-func (m *WaitBody) SetProfileId(value *string)() {
+func (m *WaitBody) SetProfileId(value WaitBody_WaitBody_profile_idable)() {
     m.profile_id = value
 }
 // SetSelector sets the selector property value. The selector property
 func (m *WaitBody) SetSelector(value WaitBody_WaitBody_selectorable)() {
     m.selector = value
+}
+// SetSessionId sets the session_id property value. The session_id property
+func (m *WaitBody) SetSessionId(value *string)() {
+    m.session_id = value
 }
 // SetTimeoutMs sets the timeout_ms property value. The timeout_ms property
 func (m *WaitBody) SetTimeoutMs(value *int32)() {
@@ -218,10 +329,12 @@ func (m *WaitBody) SetTimeoutMs(value *int32)() {
 type WaitBodyable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
-    GetProfileId()(*string)
+    GetProfileId()(WaitBody_WaitBody_profile_idable)
     GetSelector()(WaitBody_WaitBody_selectorable)
+    GetSessionId()(*string)
     GetTimeoutMs()(*int32)
-    SetProfileId(value *string)()
+    SetProfileId(value WaitBody_WaitBody_profile_idable)()
     SetSelector(value WaitBody_WaitBody_selectorable)()
+    SetSessionId(value *string)()
     SetTimeoutMs(value *int32)()
 }

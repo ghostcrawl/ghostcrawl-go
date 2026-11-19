@@ -2,7 +2,7 @@
 // Changes may cause incorrect behavior and will be lost if the code is regenerated.
 
 package models
-// Engine override. 'auto' (default): the identity's fingerprint decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
+// Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
 type ScrapeRequest_engine int
 
 const (

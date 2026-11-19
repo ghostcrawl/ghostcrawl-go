@@ -41,20 +41,21 @@ func main() {
 		log.Fatalf("scrape failed: %v", err)
 	}
 
-	// Canonical LLM-ready markdown scrape. The markdown envelope carries identity_id so
-	// this drive can be correlated to its egress-exit assignment (D-04).
-	content, _ := result["markdown"].(string)
+	// Canonical LLM-ready markdown scrape. Read typed fields off *ScrapeResult;
+	// content is the cross-format alias for the rendered output.
+	content := result.Markdown
 	if content == "" {
-		content, _ = result["content"].(string)
+		content = result.Content
 	}
 	if len(content) > 200 {
 		content = content[:200] + "..."
 	}
-	fmt.Println("Status:", result["status"])
-	// identity_id (Phase 140.4-16 response envelope field) — printed so a caller can
-	// correlate this exact drive to its server-side egress-exit assignment (D-04, phase 177).
-	// JSON numbers decode as float64; render a whole-number id as a plain integer.
-	identityID := result["identity_id"]
+	fmt.Println("Status:", result.Status)
+	// identity_id (undeclared response envelope field) — read via the back-compat
+	// Raw map so a caller can correlate this exact drive to its server-side
+	// egress-exit assignment. JSON numbers decode as float64; render a whole-number
+	// id as a plain integer.
+	identityID := result.Raw["identity_id"]
 	if f, ok := identityID.(float64); ok && f == float64(int64(f)) {
 		identityID = int64(f)
 	}

@@ -4,12 +4,22 @@
 package v1
 
 import (
+    "context"
     i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f "github.com/microsoft/kiota-abstractions-go"
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91 "github.com/microsoft/kiota-abstractions-go/serialization"
+    ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739 "github.com/GhostCrawl/ghostcrawl-go/v2/models"
 )
 
 // SessionsProfile_ItemRequestBuilder builds and executes requests for operations under \v1\sessions\{profile_-id}
 type SessionsProfile_ItemRequestBuilder struct {
     i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.BaseRequestBuilder
+}
+// SessionsProfile_ItemRequestBuilderGetRequestConfiguration configuration for the request such as headers, query parameters, and middleware options.
+type SessionsProfile_ItemRequestBuilderGetRequestConfiguration struct {
+    // Request headers
+    Headers *i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestHeaders
+    // Request options
+    Options []i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestOption
 }
 // NewSessionsProfile_ItemRequestBuilderInternal instantiates a new SessionsProfile_ItemRequestBuilder and sets the default values.
 func NewSessionsProfile_ItemRequestBuilderInternal(pathParameters map[string]string, requestAdapter i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestAdapter)(*SessionsProfile_ItemRequestBuilder) {
@@ -28,6 +38,26 @@ func NewSessionsProfile_ItemRequestBuilder(rawUrl string, requestAdapter i2ae418
 // returns a *SessionsItemExtendRequestBuilder when successful
 func (m *SessionsProfile_ItemRequestBuilder) Extend()(*SessionsItemExtendRequestBuilder) {
     return NewSessionsItemExtendRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
+// Get return the session lease record (org-owned) or 404. Reads; a missing lease OR a cross-org lease → 404). tenant_id is not echoed.
+// returns a UntypedNodeable when successful
+// returns a ProblemDetails error when the service returns a 422 status code
+func (m *SessionsProfile_ItemRequestBuilder) Get(ctx context.Context, requestConfiguration *SessionsProfile_ItemRequestBuilderGetRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
+    requestInfo, err := m.ToGetRequestInformation(ctx, requestConfiguration);
+    if err != nil {
+        return nil, err
+    }
+    errorMapping := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.ErrorMappings {
+        "422": ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.CreateProblemDetailsFromDiscriminatorValue,
+    }
+    res, err := m.BaseRequestBuilder.RequestAdapter.Send(ctx, requestInfo, i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.CreateUntypedNodeFromDiscriminatorValue, errorMapping)
+    if err != nil {
+        return nil, err
+    }
+    if res == nil {
+        return nil, nil
+    }
+    return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
 // Pin the pin property
 // returns a *SessionsItemPinRequestBuilder when successful
@@ -58,4 +88,25 @@ func (m *SessionsProfile_ItemRequestBuilder) Takeover_release()(*SessionsItemTak
 // returns a *SessionsItemTakeover_tokenRequestBuilder when successful
 func (m *SessionsProfile_ItemRequestBuilder) Takeover_token()(*SessionsItemTakeover_tokenRequestBuilder) {
     return NewSessionsItemTakeover_tokenRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
+// Terminate the terminate property
+// returns a *SessionsItemTerminateRequestBuilder when successful
+func (m *SessionsProfile_ItemRequestBuilder) Terminate()(*SessionsItemTerminateRequestBuilder) {
+    return NewSessionsItemTerminateRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
+}
+// ToGetRequestInformation return the session lease record (org-owned) or 404. Reads; a missing lease OR a cross-org lease → 404). tenant_id is not echoed.
+// returns a *RequestInformation when successful
+func (m *SessionsProfile_ItemRequestBuilder) ToGetRequestInformation(ctx context.Context, requestConfiguration *SessionsProfile_ItemRequestBuilderGetRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
+    requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.GET, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)
+    if requestConfiguration != nil {
+        requestInfo.Headers.AddAll(requestConfiguration.Headers)
+        requestInfo.AddRequestOptions(requestConfiguration.Options)
+    }
+    requestInfo.Headers.TryAdd("Accept", "application/json")
+    return requestInfo, nil
+}
+// WithUrl returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
+// returns a *SessionsProfile_ItemRequestBuilder when successful
+func (m *SessionsProfile_ItemRequestBuilder) WithUrl(rawUrl string)(*SessionsProfile_ItemRequestBuilder) {
+    return NewSessionsProfile_ItemRequestBuilder(rawUrl, m.BaseRequestBuilder.RequestAdapter);
 }

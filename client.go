@@ -62,6 +62,12 @@ type GhostCrawlError struct {
 	Retryable bool
 	// RequestID echoes the response request id (problem+json `instance`), when present.
 	RequestID string
+	// RetryAfter is the server-suggested wait before retrying, in seconds (from the
+	// problem+json `retry_after` / Retry-After header). Zero when not advertised.
+	RetryAfter int
+	// wrapped is the underlying cause (e.g. a net/url transport error) so
+	// errors.Is / errors.As can reach it. Nil for API-side errors.
+	wrapped error
 }
 
 func (e *GhostCrawlError) Error() string {
@@ -71,26 +77,62 @@ func (e *GhostCrawlError) Error() string {
 	return fmt.Sprintf("ghostcrawl: %s (status %d)", e.Message, e.StatusCode)
 }
 
+// Unwrap returns the underlying cause, when this error wraps one (transport
+// failures wrap the net/url error). Returns nil for API-side errors.
+func (e *GhostCrawlError) Unwrap() error { return e.wrapped }
+
 // AuthenticationError is returned on 401 — missing or invalid API key.
 type AuthenticationError struct{ *GhostCrawlError }
+
+// Unwrap returns the embedded base so errors.As(err, &*GhostCrawlError) matches
+// (and errors.Is reaches any cause the base itself wraps).
+func (e *AuthenticationError) Unwrap() error { return e.GhostCrawlError }
 
 // PaymentRequiredError is returned on 402 — usage or spend limit reached.
 type PaymentRequiredError struct{ *GhostCrawlError }
 
+// Unwrap returns the embedded base so errors.As(err, &*GhostCrawlError) matches.
+func (e *PaymentRequiredError) Unwrap() error { return e.GhostCrawlError }
+
 // InvalidRequestError is returned on 422 — bad request parameters.
 type InvalidRequestError struct{ *GhostCrawlError }
+
+// Unwrap returns the embedded base so errors.As(err, &*GhostCrawlError) matches.
+func (e *InvalidRequestError) Unwrap() error { return e.GhostCrawlError }
 
 // RateLimitError is returned on 429 — rate limit reached.
 type RateLimitError struct{ *GhostCrawlError }
 
+// Unwrap returns the embedded base so errors.As(err, &*GhostCrawlError) matches.
+func (e *RateLimitError) Unwrap() error { return e.GhostCrawlError }
+
 // APIError is returned on 5xx server errors.
 type APIError struct{ *GhostCrawlError }
+
+// Unwrap returns the embedded base so errors.As(err, &*GhostCrawlError) matches.
+func (e *APIError) Unwrap() error { return e.GhostCrawlError }
+
+// TransportError is returned when the request never reached the API — a
+// connection refusal, DNS failure, TLS error, or client-side timeout. It carries
+// no HTTP StatusCode and no canonical Code (both zero/empty); the underlying
+// net/url error is reachable via errors.Unwrap / errors.Is. Retryable is true —
+// a transport failure is transient by nature.
+type TransportError struct{ *GhostCrawlError }
+
+// Unwrap returns the embedded base so errors.As(err, &*GhostCrawlError) matches.
+// The cause is still reachable via errors.Is: the walk continues from the base,
+// whose own Unwrap returns the wrapped net/url error — so both
+// errors.As(err, &base) and errors.Is(err, cause) hold.
+func (e *TransportError) Unwrap() error { return e.GhostCrawlError }
 
 // ProblemError is returned for an OUR-side failure delivered as a non-2xx
 // application/problem+json response (channel "problem" in the catalog) that does
 // not map to one of the legacy status-keyed types above. The canonical Code,
 // Retryable flag, and RequestID are available on the embedded GhostCrawlError.
 type ProblemError struct{ *GhostCrawlError }
+
+// Unwrap returns the embedded base so errors.As(err, &*GhostCrawlError) matches.
+func (e *ProblemError) Unwrap() error { return e.GhostCrawlError }
 
 // ScrapeError is returned when a scrape/crawl call completes with HTTP 200 but
 // the result itself reports a TARGET failure (channel "result" in the catalog):
@@ -107,11 +149,12 @@ type ScrapeError struct {
 
 // problemBody is the subset of an application/problem+json body the SDK reads.
 type problemBody struct {
-	Code      string `json:"code"`
-	Detail    string `json:"detail"`
-	Title     string `json:"title"`
-	Instance  string `json:"instance"`
-	Retryable *bool  `json:"retryable"`
+	Code       string `json:"code"`
+	Detail     string `json:"detail"`
+	Title      string `json:"title"`
+	Instance   string `json:"instance"`
+	Retryable  *bool  `json:"retryable"`
+	RetryAfter *int   `json:"retry_after"`
 }
 
 // raiseForStatus builds a typed error for a non-2xx response. When body is a
@@ -130,21 +173,39 @@ func raiseForStatus(statusCode int, body string) error {
 	// the body for unmapped statuses, leaving only the status line).
 	code := codeForStatus(statusCode)
 	requestID := ""
+	retryAfter := 0
+	retryable := isRetryableCode(code)
 	if pb, ok := parseProblemJSON(body); ok {
 		if pb.Code != "" {
 			code = pb.Code
+			retryable = isRetryableCode(code)
 		}
 		requestID = pb.Instance
+		if pb.Retryable != nil {
+			retryable = *pb.Retryable
+		}
+		if pb.RetryAfter != nil {
+			retryAfter = *pb.RetryAfter
+		}
 	}
 	base := &GhostCrawlError{
 		StatusCode: statusCode,
 		Body:       body,
 		Code:       code,
-		Retryable:  isRetryableCode(code),
+		Retryable:  retryable,
 		RequestID:  requestID,
+		RetryAfter: retryAfter,
 	}
+	return typedErrorForBase(base)
+}
 
-	switch statusCode {
+// typedErrorForBase selects the exported typed-error wrapper for a fully
+// populated GhostCrawlError, setting a human-readable Message. Both the
+// status-line path (raiseForStatus) and the modeled-body path (wrapAPIError's
+// ProblemDetails branch) funnel through here so the canonical Code, RequestID,
+// and RetryAfter fields are preserved identically on every path.
+func typedErrorForBase(base *GhostCrawlError) error {
+	switch base.StatusCode {
 	case 401:
 		base.Message = "Authentication failed — check your API key."
 		return &AuthenticationError{base}
@@ -152,17 +213,17 @@ func raiseForStatus(statusCode int, body string) error {
 		base.Message = "Usage or spend limit reached."
 		return &PaymentRequiredError{base}
 	case 422:
-		base.Message = fmt.Sprintf("Invalid request: %s", body)
+		base.Message = fmt.Sprintf("Invalid request: %s", base.Body)
 		return &InvalidRequestError{base}
 	case 429:
 		base.Message = "Rate limit reached — retry after a short delay."
 		return &RateLimitError{base}
 	default:
-		if statusCode >= 500 {
-			base.Message = fmt.Sprintf("Server error: %d", statusCode)
+		if base.StatusCode >= 500 {
+			base.Message = fmt.Sprintf("Server error: %d", base.StatusCode)
 			return &APIError{base}
 		}
-		base.Message = fmt.Sprintf("Request failed: %d", statusCode)
+		base.Message = fmt.Sprintf("Request failed: %d", base.StatusCode)
 		return &ProblemError{base}
 	}
 }
@@ -186,6 +247,47 @@ func wrapAPIError(err error) error {
 	if err == nil {
 		return nil
 	}
+
+	// Preferred path: the generated core parsed the application/problem+json body
+	// into a typed *ProblemDetails (registered as the error model on every route).
+	// Carry its canonical fields straight through — ae.Error() below is only the
+	// generic Kiota status message, so the status-line fallback would otherwise
+	// discard the real Code / RequestID / RetryAfter the server sent.
+	if pd, ok := err.(problemDetailsErr); ok {
+		statusCode := pd.GetStatusCode()
+		if statusCode == 0 {
+			if s := pd.GetStatus(); s != nil {
+				statusCode = int(*s)
+			}
+		}
+		code := codeForStatus(statusCode)
+		if c := pd.GetCode(); c != nil {
+			code = c.String()
+		}
+		requestID := ""
+		if inst := pd.GetInstance(); inst != nil {
+			requestID = *inst
+		}
+		retryable := isRetryableCode(code)
+		if r := pd.GetRetryable(); r != nil {
+			retryable = *r
+		}
+		retryAfter := 0
+		if ra := pd.GetRetryAfter(); ra != nil {
+			retryAfter = int(*ra)
+		}
+		return typedErrorForBase(&GhostCrawlError{
+			StatusCode: statusCode,
+			Body:       pd.Error(),
+			Code:       code,
+			Retryable:  retryable,
+			RequestID:  requestID,
+			RetryAfter: retryAfter,
+		})
+	}
+
+	// The error reached the API but is not a modeled ProblemDetails (e.g. a
+	// status-only ApiError). Fall back to the status-line mapping.
 	type apiErr interface {
 		GetStatusCode() int
 		Error() string
@@ -193,7 +295,29 @@ func wrapAPIError(err error) error {
 	if ae, ok := err.(apiErr); ok {
 		return raiseForStatus(ae.GetStatusCode(), ae.Error())
 	}
-	return fmt.Errorf("ghostcrawl: %w", err)
+
+	// The request never reached the API — a connection/DNS/TLS failure or a
+	// client-side timeout. Surface it as the typed transport-error family so
+	// callers can branch (and unwrap to the underlying net/url error).
+	return &TransportError{&GhostCrawlError{
+		Message:   fmt.Sprintf("transport error: %v", err),
+		Retryable: true,
+		wrapped:   err,
+	}}
+}
+
+// problemDetailsErr is the subset of the generated *ProblemDetails surface the
+// facade reads: the HTTP status (from the embedded ApiError) plus the parsed
+// body fields. Declared locally so the facade depends on behaviour, not the
+// concrete generated type.
+type problemDetailsErr interface {
+	GetStatusCode() int
+	GetCode() *genmodels.ErrorCode
+	GetInstance() *string
+	GetRetryable() *bool
+	GetRetryAfter() *int32
+	GetStatus() *int32
+	Error() string
 }
 
 // scanResultError inspects a successful (HTTP 200) result map for a TARGET
@@ -221,7 +345,7 @@ func scanResultError(result map[string]interface{}) *ScrapeError {
 	}
 
 	// Pull the canonical code from result_error{code,...} first, then a
-	// top-level `code` (the worker stamps both).
+	// top-level `code` (the server stamps both).
 	var (
 		code         string
 		retryable    bool
@@ -286,7 +410,7 @@ func scanResultError(result map[string]interface{}) *ScrapeError {
 // ("markdown"/"html"/"text") onto a stable "content" key so callers can read
 // result["content"] regardless of the requested format. It looks first at the
 // top level (the flat markdown-build envelope) and then inside the first row of
-// a `results` envelope (the html/default fleet path renders content per-URL, not
+// a `results` envelope (the html/default path renders content per-URL, not
 // at the top level). The original format-specific key is preserved (backward
 // compatible). No-op when result is nil or already carries a "content" key.
 func normalizeScrapeContent(result map[string]interface{}) {
@@ -347,7 +471,7 @@ func asInt(v interface{}) int {
 func messageForResultCode(code string) string {
 	switch code {
 	case CodeBlocked:
-		return "Blocked by the target's anti-bot protection — retry with a different identity or proxy."
+		return "The target site blocked the request — retry with a different identity or proxy."
 	case CodeCaptchaRequired:
 		return "The target presented a CAPTCHA."
 	case CodeTargetHTTPError:
@@ -371,6 +495,12 @@ type staticTokenProvider struct {
 }
 
 func newStaticTokenProvider(token string) *staticTokenProvider {
+	// NewAllowedHostsValidator is marked deprecated upstream but remains the only
+	// constructor for the value the auth provider expects on the pinned kiota
+	// version — there is no non-deprecated replacement yet. Scope the SA1019
+	// suppression to this one unavoidable call rather than disabling the check
+	// module-wide, so genuine deprecations elsewhere still surface.
+	//lint:ignore SA1019 no non-deprecated replacement on the pinned kiota-abstractions-go
 	v := absauth.NewAllowedHostsValidator([]string{})
 	return &staticTokenProvider{token: token, validator: &v}
 }
@@ -530,6 +660,10 @@ func newKiotaCore(token, baseURL string) (*GhostCrawlClient, error) {
 	// The default kiota middleware pipeline enables gzip compression of request bodies,
 	// but FastAPI does not decompress request bodies by default → 400.
 	// We keep all other default middlewares (retry, redirect, user-agent, headers-inspection).
+	// NewCompressionOptions is deprecated in favour of NewCompressionOptionsReference,
+	// but GetDefaultMiddlewaresWithOptions still takes the value form on the pinned
+	// kiota-http-go; scope the SA1019 suppression to this call only.
+	//lint:ignore SA1019 GetDefaultMiddlewaresWithOptions takes the value form on the pinned kiota-http-go
 	compressionOff := khttp.NewCompressionOptions(false)
 	middlewares, err := khttp.GetDefaultMiddlewaresWithOptions(&compressionOff)
 	if err != nil {
@@ -572,6 +706,16 @@ type SearchRequest struct {
 	// <ProviderKey> header the backend requires. Without it /v1/search replies
 	// 401 search_backend_key_missing.
 	ProviderKey string
+	// Wait makes Search block to a terminal result. On a warm rotation the
+	// result is returned immediately; on a cold rotation (HTTP 202 with a poll_url)
+	// the SDK owns a bounded client-side poll of /v1/search/jobs/{id}, honouring the
+	// server's Retry-After and deadline and respecting ctx cancellation — so the
+	// caller writes no poll loop, the same DX crawl's wait gives.
+	Wait bool
+	// WaitTimeout bounds the overall client-side wait budget when Wait is set. Zero
+	// uses the server's advertised poll_max_seconds, falling back to 300s. The ctx
+	// deadline still applies and interrupts an in-flight wait.
+	WaitTimeout time.Duration
 	Extra       map[string]interface{}
 }
 
@@ -639,6 +783,7 @@ type ContentRequest struct {
 type CrawlRunsClient struct {
 	v1      *genv1.V1RequestBuilder
 	baseURL string
+	req     *apiRequester
 }
 
 // StartCrawlRunRequest holds parameters for starting a crawl run.
@@ -736,10 +881,22 @@ func (c *CrawlRunsClient) Cancel(ctx context.Context, runID string) (map[string]
 	return untypedToMap(result), nil
 }
 
+// Resume resumes a paused or interrupted crawl run.
+// Delegates to POST /v1/crawl-runs/{run_id}/resume via the shared Kiota adapter.
+func (c *CrawlRunsClient) Resume(ctx context.Context, runID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/crawl-runs/"+url.PathEscape(runID)+"/resume", nil)
+}
+
 // defaultWaitWindow is the per-request server-side blocking window used by
 // WaitForCompletion when the caller sets none. It matches the server default
 // for `timeout_s` on GET /v1/crawl-runs/{run_id}?wait=true.
 const defaultWaitWindow = 300 * time.Second
+
+// defaultCrawlWaitTimeout bounds the TOTAL WaitForCompletion wait when the caller
+// passes a ctx with no deadline, so a server stuck returning non-terminal runs
+// can never re-arm the poll loop forever. An explicit ctx deadline overrides it.
+// A var (not const) purely so tests can lower it — production code never mutates it.
+var defaultCrawlWaitTimeout = 30 * time.Minute
 
 // isTerminalStatus reports whether a crawl-run status is final (no further
 // progress possible). "canceled" is accepted alongside "cancelled" for the
@@ -811,6 +968,16 @@ func (c *CrawlRunsClient) WaitForCompletion(ctx context.Context, runID string, o
 		o(&cfg)
 	}
 
+	// Guard against an unbounded spin: with a deadline-less ctx (e.g.
+	// context.Background()) and a server that keeps returning non-terminal 200s,
+	// the re-arm loop would never stop. Derive a sane overall deadline when the
+	// caller supplied none; an explicit ctx deadline always takes precedence.
+	if _, ok := ctx.Deadline(); !ok {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, defaultCrawlWaitTimeout)
+		defer cancel()
+	}
+
 	for {
 		if err := ctx.Err(); err != nil {
 			return nil, err
@@ -858,12 +1025,18 @@ func (c *CrawlRunsClient) getWaiting(ctx context.Context, runID string, timeoutS
 }
 
 // SessionsClient manages browser sessions — /v1/sessions.
-type SessionsClient struct{ v1 *genv1.V1RequestBuilder }
+type SessionsClient struct {
+	v1  *genv1.V1RequestBuilder
+	req *apiRequester
+}
 
 // CreateSessionRequest holds parameters for creating a session.
 type CreateSessionRequest struct {
 	ProfileName string
-	Extra       map[string]interface{}
+	// Engine selects the browser engine for an engine-based ad-hoc session when
+	// ProfileName is empty ("chrome"/"firefox"/"webkit"/"auto"; default "auto").
+	Engine string
+	Extra  map[string]interface{}
 }
 
 // List lists all active sessions.
@@ -878,11 +1051,29 @@ func (c *SessionsClient) List(ctx context.Context) (map[string]interface{}, erro
 
 // Create creates a new browser session.
 // Delegates to POST /v1/sessions/create via the generated builder.
+//
+// Two creation modes (pass exactly one — passing both is a server-side
+// validation error):
+//   - profile-based: set req.ProfileName to rehydrate a saved identity profile
+//     (the org must already own a profile of that name, else the API 404s).
+//   - engine-based (ad-hoc): leave req.ProfileName empty and the API opens a
+//     fresh session on req.Engine ("chrome"/"firefox"/"webkit"/"auto"; default
+//     "auto") with no saved profile required — the zero-setup path that works on
+//     a brand-new key with no profiles.
 func (c *SessionsClient) Create(ctx context.Context, req CreateSessionRequest) (map[string]interface{}, error) {
 	body := genmodels.NewSessionCreateRequest()
 	// Clear typed default (engine=chrome) — avoid duplicate key with additionalData.
 	body.SetEngine(nil)
-	data := map[string]any{"profile": req.ProfileName}
+	data := map[string]any{}
+	if req.ProfileName != "" {
+		data["profile"] = req.ProfileName
+	} else {
+		engine := req.Engine
+		if engine == "" {
+			engine = "auto"
+		}
+		data["engine"] = engine
+	}
 	for k, v := range req.Extra {
 		data[k] = v
 	}
@@ -915,6 +1106,49 @@ func (c *SessionsClient) Release(ctx context.Context, sessionID string) (map[str
 		return nil, wrapAPIError(err)
 	}
 	return untypedToMap(result), nil
+}
+
+// Pin pins a session so the pool keeps it warm (excludes it from idle reaping)
+// — POST /v1/sessions/{session_id}/pin. Delegates via the shared Kiota adapter.
+func (c *SessionsClient) Pin(ctx context.Context, sessionID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(sessionID)+"/pin", nil)
+}
+
+// Terminate force-terminates a session immediately (harder than Release, which
+// returns it to the pool) — POST /v1/sessions/{session_id}/terminate.
+func (c *SessionsClient) Terminate(ctx context.Context, sessionID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(sessionID)+"/terminate", nil)
+}
+
+// Takeover begins an interactive human takeover of a live session — POST
+// /v1/sessions/{session_id}/takeover. Pair with TakeoverToken to obtain the
+// short-lived viewer credential and TakeoverRelease to hand control back.
+func (c *SessionsClient) Takeover(ctx context.Context, sessionID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(sessionID)+"/takeover", nil)
+}
+
+// TakeoverRelease ends a human takeover and returns control to automation —
+// POST /v1/sessions/{session_id}/takeover_release.
+func (c *SessionsClient) TakeoverRelease(ctx context.Context, sessionID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(sessionID)+"/takeover_release", nil)
+}
+
+// TakeoverToken mints a short-lived token authorizing the interactive takeover
+// viewer for a session — POST /v1/sessions/{session_id}/takeover_token.
+func (c *SessionsClient) TakeoverToken(ctx context.Context, sessionID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(sessionID)+"/takeover_token", nil)
+}
+
+// RecordingStart starts recording a session — POST
+// /v1/sessions/{profile_id}/recording/start. The id is the live session/profile id.
+func (c *SessionsClient) RecordingStart(ctx context.Context, profileID string, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(profileID)+"/recording/start", body)
+}
+
+// RecordingStop stops recording a session — POST
+// /v1/sessions/{profile_id}/recording/stop.
+func (c *SessionsClient) RecordingStop(ctx context.Context, profileID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(profileID)+"/recording/stop", nil)
 }
 
 // ProfilesClient manages identity profiles — /v1/profiles.
@@ -1045,6 +1279,29 @@ func (c *WebhooksClient) Delete(ctx context.Context, webhookID string) (map[stri
 // Returns RotateSecretResponseable as a map via parsableToMap.
 func (c *WebhooksClient) RotateSecret(ctx context.Context, webhookID string) (map[string]interface{}, error) {
 	result, err := c.v1.Webhooks().ByWebhook_id(webhookID).RotateSecret().Post(ctx, nil)
+	if err != nil {
+		return nil, wrapAPIError(err)
+	}
+	return parsableToMap(result), nil
+}
+
+// ListDeliveries lists recent delivery attempts for a webhook.
+// Delegates to GET /v1/webhooks/{id}/deliveries via the generated builder.
+// The delivery history (which events were sent, which failed and why) — the
+// input to RetryDelivery. Returns WebhookDeliveryListResponseable as a map.
+func (c *WebhooksClient) ListDeliveries(ctx context.Context, webhookID string) (map[string]interface{}, error) {
+	result, err := c.v1.Webhooks().ByWebhook_id(webhookID).Deliveries().Get(ctx, nil)
+	if err != nil {
+		return nil, wrapAPIError(err)
+	}
+	return parsableToMap(result), nil
+}
+
+// RetryDelivery re-attempts a single failed delivery.
+// Delegates to POST /v1/webhooks/{id}/deliveries/{deliveryID}/retry via the
+// generated builder. Returns RetryDeliveryResponseable as a map.
+func (c *WebhooksClient) RetryDelivery(ctx context.Context, webhookID, deliveryID string) (map[string]interface{}, error) {
+	result, err := c.v1.Webhooks().ByWebhook_id(webhookID).Deliveries().ByDelivery_id(deliveryID).Retry().Post(ctx, nil)
 	if err != nil {
 		return nil, wrapAPIError(err)
 	}
@@ -1272,6 +1529,133 @@ func (c *RecordingsClient) Delete(ctx context.Context, recordingID string) (map[
 	return map[string]interface{}{}, nil
 }
 
+// Visual returns the live visual-recording surface for a session
+// (start/stop/frames/watch) — recordings.visual.
+func (c *RecordingsClient) Visual(sessionID string) *VisualRecordingClient {
+	return &VisualRecordingClient{v1: c.v1, sessionID: sessionID}
+}
+
+// Watch is a convenience: start a live visual recording for sessionID and stream
+// each new frame reference to fn until fn returns false, no more frames arrive
+// and the stream is stopped, or ctx is cancelled. See VisualRecordingClient.Watch.
+func (c *RecordingsClient) Watch(ctx context.Context, sessionID string, fn func(frameRef string) bool) error {
+	return c.Visual(sessionID).Watch(ctx, fn)
+}
+
+// VisualRecordingClient is the live visual-recording lifecycle for one session —
+// recordings.visual. Delegates to the generated
+// recordings.ByRecording_Id(sessionID).Visual() builders (Start/Stop/Frames +
+// the manifest Get). This is the live-observability surface — watch your browser
+// working in near real time. The generated builders model an empty tenant body;
+// it is ignored server-side (the tenant comes from the Bearer token), so an empty
+// AuthContext is sent.
+type VisualRecordingClient struct {
+	v1        *genv1.V1RequestBuilder
+	sessionID string
+}
+
+// Start starts a visual recording for the live session — POST .../visual/start.
+func (c *VisualRecordingClient) Start(ctx context.Context) (map[string]interface{}, error) {
+	result, err := c.v1.Recordings().ByRecording_Id(c.sessionID).Visual().Start().Post(ctx, genmodels.NewAuthContext(), nil)
+	if err != nil {
+		return nil, wrapAPIError(err)
+	}
+	return untypedToMap(result), nil
+}
+
+// Stop stops and finalises the visual recording — POST .../visual/stop.
+func (c *VisualRecordingClient) Stop(ctx context.Context) (map[string]interface{}, error) {
+	result, err := c.v1.Recordings().ByRecording_Id(c.sessionID).Visual().Stop().Post(ctx, genmodels.NewAuthContext(), nil)
+	if err != nil {
+		return nil, wrapAPIError(err)
+	}
+	return untypedToMap(result), nil
+}
+
+// Manifest returns the recording manifest pointer — GET .../visual.
+func (c *VisualRecordingClient) Manifest(ctx context.Context) (map[string]interface{}, error) {
+	result, err := c.v1.Recordings().ByRecording_Id(c.sessionID).Visual().Get(ctx, genmodels.NewAuthContext(), nil)
+	if err != nil {
+		return nil, wrapAPIError(err)
+	}
+	return untypedToMap(result), nil
+}
+
+// Frames lists a page of frame references — GET .../visual/frames. Returns
+// {frames: []string, next_cursor: int, session_id: string}; next_cursor == -1
+// means no more pages.
+func (c *VisualRecordingClient) Frames(ctx context.Context, cursor, limit int32) (map[string]interface{}, error) {
+	qp := &genv1.RecordingsItemVisualFramesRequestBuilderGetQueryParameters{
+		Cursor: &cursor,
+		Limit:  &limit,
+	}
+	config := &genv1.RecordingsItemVisualFramesRequestBuilderGetRequestConfiguration{
+		QueryParameters: qp,
+	}
+	result, err := c.v1.Recordings().ByRecording_Id(c.sessionID).Visual().Frames().Get(ctx, genmodels.NewAuthContext(), config)
+	if err != nil {
+		return nil, wrapAPIError(err)
+	}
+	return untypedToMap(result), nil
+}
+
+// Watch starts a live visual recording and streams each new frame reference to
+// fn until fn returns false, ctx is cancelled, or the stream ends. It stops the
+// recording on return. It is the blocking-native analog of the Python/Node
+// watch() async iterators (Go has no async generators).
+func (c *VisualRecordingClient) Watch(ctx context.Context, fn func(frameRef string) bool) error {
+	if _, err := c.Start(ctx); err != nil {
+		return err
+	}
+	defer func() { _, _ = c.Stop(context.Background()) }()
+
+	var cursor int32
+	for {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		page, err := c.Frames(ctx, cursor, 100)
+		if err != nil {
+			return err
+		}
+		if refs, ok := page["frames"].([]interface{}); ok {
+			for _, r := range refs {
+				if s, ok := r.(string); ok {
+					if !fn(s) {
+						return nil
+					}
+				}
+			}
+		}
+		next, _ := toInt32(page["next_cursor"])
+		if next >= 0 {
+			cursor = next
+		} else {
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(time.Second):
+			}
+		}
+	}
+}
+
+// toInt32 best-effort converts a decoded-JSON number (float64) to int32.
+func toInt32(v interface{}) (int32, bool) {
+	switch n := v.(type) {
+	case float64:
+		return int32(n), true
+	case int:
+		return int32(n), true
+	case int32:
+		return n, true
+	case int64:
+		return int32(n), true
+	default:
+		return -1, false
+	}
+}
+
 // KVClient provides access to the key-value store — /v1/kv.
 type KVClient struct{ v1 *genv1.V1RequestBuilder }
 
@@ -1321,6 +1705,248 @@ func toAnyMap(m map[string]interface{}) map[string]any {
 }
 
 // ---------------------------------------------------------------------------
+// apiRequester — shared RequestAdapter delegation path
+// ---------------------------------------------------------------------------
+
+// apiRequester wraps the canonical Kiota RequestAdapter so any facade surface —
+// the root client and every sub-client — can reach a route through the SAME
+// spec-generated auth + middleware pipeline used by the modeled builders, even
+// when a route has no dedicated generated request-builder (e.g. /v1/cdp/input,
+// /v1/me). This is the sanctioned delegation path from the FACADE-PATTERN
+// (RequestAdapter/RequestInformation), NOT a hand-rolled HTTP client: the Bearer
+// token, base URL, retry/redirect/user-agent middleware, and error mapping all
+// come from the generated core. It carries no state beyond the adapter + base URL.
+type apiRequester struct {
+	adapter abstractions.RequestAdapter
+	baseURL string
+}
+
+// do issues an authenticated JSON request to path (already URL-escaped by the
+// caller) via the shared Kiota adapter and returns the decoded JSON body as a
+// map. A nil body sends no request payload (GET/DELETE). Non-2xx responses are
+// surfaced as the same typed errors the modeled methods raise (via wrapAPIError).
+func (r *apiRequester) do(ctx context.Context, method abstractions.HttpMethod, path string, body map[string]interface{}) (map[string]interface{}, error) {
+	ri := abstractions.NewRequestInformation()
+	ri.Method = method
+	// A URL template with no expressions is treated as a literal URL by Kiota.
+	ri.UrlTemplate = r.baseURL + path
+	ri.Headers.TryAdd("Accept", "application/json")
+	if body != nil {
+		payload, err := json.Marshal(body)
+		if err != nil {
+			return nil, fmt.Errorf("ghostcrawl: failed to encode request body: %w", err)
+		}
+		ri.SetStreamContentAndContentType(payload, "application/json")
+	}
+	raw, err := r.adapter.SendPrimitive(ctx, ri, "[]byte", nil)
+	if err != nil {
+		return nil, wrapAPIError(err)
+	}
+	if raw == nil {
+		return map[string]interface{}{}, nil
+	}
+	data, ok := raw.([]byte)
+	if !ok {
+		return map[string]interface{}{}, nil
+	}
+	trimmed := strings.TrimSpace(string(data))
+	if trimmed == "" {
+		return map[string]interface{}{}, nil
+	}
+	var result map[string]interface{}
+	if err := json.Unmarshal([]byte(trimmed), &result); err != nil {
+		// Non-object JSON (e.g. an array) — wrap under a "data" key so callers get
+		// a stable map rather than an error.
+		var anyVal interface{}
+		if err2 := json.Unmarshal([]byte(trimmed), &anyVal); err2 == nil {
+			return map[string]interface{}{"data": anyVal}, nil
+		}
+		return nil, fmt.Errorf("ghostcrawl: failed to decode response: %w", err)
+	}
+	return result, nil
+}
+
+// ---------------------------------------------------------------------------
+// CDPClient — low-level Chrome DevTools Protocol primitives (/v1/cdp)
+// ---------------------------------------------------------------------------
+
+// CDPClient exposes the low-level CDP surface for a live session — the escape
+// hatch when the high-level scrape/crawl lanes are not enough (cdp/* are
+// first-class customer primitives). Each call carries the target session_id in
+// the request body. Delegates through the shared Kiota adapter.
+type CDPClient struct{ req *apiRequester }
+
+// Frame drives a CDP frame command — POST /v1/cdp/frame.
+func (c *CDPClient) Frame(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/cdp/frame", body)
+}
+
+// Input dispatches a synthesized input event — POST /v1/cdp/input.
+func (c *CDPClient) Input(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/cdp/input", body)
+}
+
+// URL navigates the session to a URL via CDP — POST /v1/cdp/url.
+func (c *CDPClient) URL(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/cdp/url", body)
+}
+
+// ---------------------------------------------------------------------------
+// PageClient — page-level primitives on a live session (/v1/page)
+// ---------------------------------------------------------------------------
+
+// PageClient exposes the page-level primitives (cookies, DOM snapshot, eval,
+// scroll, upload/download, HAR, wait) for a live session (page/* are
+// first-class customer primitives). Each call carries the target session_id in
+// the request body. Delegates through the shared Kiota adapter.
+type PageClient struct{ req *apiRequester }
+
+// GetCookies reads the session's cookies — GET /v1/page/cookies.
+func (c *PageClient) GetCookies(ctx context.Context) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.GET, "/v1/page/cookies", nil)
+}
+
+// SetCookies sets cookies on the session — POST /v1/page/cookies.
+func (c *PageClient) SetCookies(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/cookies", body)
+}
+
+// DeleteCookies clears cookies on the session — DELETE /v1/page/cookies.
+func (c *PageClient) DeleteCookies(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.DELETE, "/v1/page/cookies", body)
+}
+
+// DomSnapshot captures a DOM snapshot — POST /v1/page/dom_snapshot.
+func (c *PageClient) DomSnapshot(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/dom_snapshot", body)
+}
+
+// Download triggers a page download — POST /v1/page/download.
+func (c *PageClient) Download(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/download", body)
+}
+
+// Eval evaluates JavaScript in the page context — POST /v1/page/eval.
+func (c *PageClient) Eval(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/eval", body)
+}
+
+// Har returns the captured HAR for the session — POST /v1/page/har.
+func (c *PageClient) Har(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/har", body)
+}
+
+// Scroll scrolls the page — POST /v1/page/scroll.
+func (c *PageClient) Scroll(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/scroll", body)
+}
+
+// Upload uploads a file to a file input — POST /v1/page/upload.
+func (c *PageClient) Upload(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/upload", body)
+}
+
+// Wait waits for a page condition (selector/network/timeout) — POST /v1/page/wait.
+func (c *PageClient) Wait(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/wait", body)
+}
+
+// Mouse replays a mouse op-stream on the live page — POST /v1/page/mouse.
+// ops is an ordered list of {"kind":"move|down|up|wheel|dwell", ...} driven natively
+// on the live page — engine-agnostic (every engine gets the same trusted trajectory
+// + settled click).
+func (c *PageClient) Mouse(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/mouse", body)
+}
+
+// Arrival arrives at dest_url through a native link click from source_url —
+// POST /v1/page/arrival. The live page's document.referrer, Referer and Sec-Fetch-*
+// are produced natively by the click (engine-agnostic).
+func (c *PageClient) Arrival(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/arrival", body)
+}
+
+// TabVisit opens a background tab, reads it, and closes it — POST /v1/page/tab-visit.
+// Chromium-native (Target.createTarget → attach → read → close); other engines are
+// unsupported server-side.
+func (c *PageClient) TabVisit(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/tab-visit", body)
+}
+
+// ClosePopups dismisses overlay popups on the live page — POST /v1/page/close-popups.
+func (c *PageClient) ClosePopups(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/close-popups", body)
+}
+
+// Touch replays a touch op-stream on the live page — POST /v1/page/touch.
+// ops is an ordered list of native tap/gesture ops (engine-agnostic).
+func (c *PageClient) Touch(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/page/touch", body)
+}
+
+// ---------------------------------------------------------------------------
+// StorageStatesClient — persisted browser storage states (/v1/storage-states)
+// ---------------------------------------------------------------------------
+
+// StorageStatesClient manages persisted browser storage states (cookies +
+// localStorage snapshots) that can be attached to / detached from sessions —
+// /v1/storage-states. Delegates through the shared Kiota adapter.
+type StorageStatesClient struct{ req *apiRequester }
+
+// List lists all storage states — GET /v1/storage-states.
+func (c *StorageStatesClient) List(ctx context.Context) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.GET, "/v1/storage-states", nil)
+}
+
+// Create creates a new storage state — POST /v1/storage-states.
+func (c *StorageStatesClient) Create(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/storage-states", body)
+}
+
+// Get gets a storage state by id or name — GET /v1/storage-states/{id_or_name}.
+func (c *StorageStatesClient) Get(ctx context.Context, idOrName string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.GET, "/v1/storage-states/"+url.PathEscape(idOrName), nil)
+}
+
+// Delete deletes a storage state — DELETE /v1/storage-states/{id_or_name}.
+func (c *StorageStatesClient) Delete(ctx context.Context, idOrName string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.DELETE, "/v1/storage-states/"+url.PathEscape(idOrName), nil)
+}
+
+// Attach attaches a storage state to a session — POST /v1/storage-states/{id_or_name}/attach.
+func (c *StorageStatesClient) Attach(ctx context.Context, idOrName string, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/storage-states/"+url.PathEscape(idOrName)+"/attach", body)
+}
+
+// Detach detaches the active storage state from a session — POST /v1/storage-states/detach.
+func (c *StorageStatesClient) Detach(ctx context.Context, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/storage-states/detach", body)
+}
+
+// ---------------------------------------------------------------------------
+// DownloadsClient — files captured during sessions (/v1/downloads)
+// ---------------------------------------------------------------------------
+
+// DownloadsClient manages files captured during sessions/crawls — /v1/downloads.
+// Delegates through the shared Kiota adapter.
+type DownloadsClient struct{ req *apiRequester }
+
+// List lists all captured downloads — GET /v1/downloads.
+func (c *DownloadsClient) List(ctx context.Context) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.GET, "/v1/downloads", nil)
+}
+
+// Get gets a download's metadata by id — GET /v1/downloads/{download_id}.
+func (c *DownloadsClient) Get(ctx context.Context, downloadID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.GET, "/v1/downloads/"+url.PathEscape(downloadID), nil)
+}
+
+// Delete deletes a captured download — DELETE /v1/downloads/{download_id}.
+func (c *DownloadsClient) Delete(ctx context.Context, downloadID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.DELETE, "/v1/downloads/"+url.PathEscape(downloadID), nil)
+}
+
+// ---------------------------------------------------------------------------
 // Main facade — Client
 // ---------------------------------------------------------------------------
 
@@ -1334,18 +1960,24 @@ func toAnyMap(m map[string]interface{}) map[string]any {
 //	client, err := ghostcrawl.New("gck_live_YOUR_KEY")
 //	result, err := client.Scrape(ctx, ghostcrawl.ScrapeRequest{URL: "https://example.com"})
 type Client struct {
-	core       *GhostCrawlClient
-	v1         *genv1.V1RequestBuilder
-	adapter    abstractions.RequestAdapter
-	baseURL    string
-	crawlRuns  *CrawlRunsClient
-	sessions   *SessionsClient
-	profiles   *ProfilesClient
-	webhooks   *WebhooksClient
-	schedules  *SchedulesClient
-	datasets   *DatasetsClient
-	recordings *RecordingsClient
-	kv         *KVClient
+	core          *GhostCrawlClient
+	v1            *genv1.V1RequestBuilder
+	adapter       abstractions.RequestAdapter
+	req           *apiRequester
+	baseURL       string
+	token         string
+	crawlRuns     *CrawlRunsClient
+	sessions      *SessionsClient
+	profiles      *ProfilesClient
+	webhooks      *WebhooksClient
+	schedules     *SchedulesClient
+	datasets      *DatasetsClient
+	recordings    *RecordingsClient
+	kv            *KVClient
+	cdp           *CDPClient
+	page          *PageClient
+	storageStates *StorageStatesClient
+	downloads     *DownloadsClient
 }
 
 // New creates a new GhostCrawl API client.
@@ -1378,19 +2010,27 @@ func New(token string, baseURL ...string) (*Client, error) {
 	}
 
 	v1 := core.V1()
+	adapter := core.BaseRequestBuilder.RequestAdapter
+	req := &apiRequester{adapter: adapter, baseURL: resolvedBase}
 	return &Client{
-		core:       core,
-		v1:         v1,
-		adapter:    core.BaseRequestBuilder.RequestAdapter,
-		baseURL:    resolvedBase,
-		crawlRuns:  &CrawlRunsClient{v1: v1, baseURL: resolvedBase},
-		sessions:   &SessionsClient{v1: v1},
-		profiles:   &ProfilesClient{v1: v1},
-		webhooks:   &WebhooksClient{v1: v1},
-		schedules:  &SchedulesClient{v1: v1},
-		datasets:   &DatasetsClient{v1: v1},
-		recordings: &RecordingsClient{v1: v1},
-		kv:         &KVClient{v1: v1},
+		core:          core,
+		v1:            v1,
+		adapter:       adapter,
+		req:           req,
+		baseURL:       resolvedBase,
+		token:         resolvedToken,
+		crawlRuns:     &CrawlRunsClient{v1: v1, baseURL: resolvedBase, req: req},
+		sessions:      &SessionsClient{v1: v1, req: req},
+		profiles:      &ProfilesClient{v1: v1},
+		webhooks:      &WebhooksClient{v1: v1},
+		schedules:     &SchedulesClient{v1: v1},
+		datasets:      &DatasetsClient{v1: v1},
+		recordings:    &RecordingsClient{v1: v1},
+		kv:            &KVClient{v1: v1},
+		cdp:           &CDPClient{req: req},
+		page:          &PageClient{req: req},
+		storageStates: &StorageStatesClient{req: req},
+		downloads:     &DownloadsClient{req: req},
 	}, nil
 }
 
@@ -1420,13 +2060,31 @@ func (c *Client) Recordings() *RecordingsClient { return c.recordings }
 // KV returns the key-value store sub-client.
 func (c *Client) KV() *KVClient { return c.kv }
 
+// CDP returns the low-level Chrome DevTools Protocol sub-client (/v1/cdp).
+func (c *Client) CDP() *CDPClient { return c.cdp }
+
+// Page returns the page-level primitives sub-client (/v1/page).
+func (c *Client) Page() *PageClient { return c.page }
+
+// StorageStates returns the persisted browser storage-state sub-client
+// (/v1/storage-states).
+func (c *Client) StorageStates() *StorageStatesClient { return c.storageStates }
+
+// Downloads returns the captured-downloads sub-client (/v1/downloads).
+func (c *Client) Downloads() *DownloadsClient { return c.downloads }
+
 // ---------------------------------------------------------------------------
 // Top-level facade methods — delegate to generated builders
 // ---------------------------------------------------------------------------
 
 // Scrape scrapes a single URL and returns the rendered content.
 // Delegates to POST /v1/scrape via the generated ScrapeRequestBuilder.
-func (c *Client) Scrape(ctx context.Context, req ScrapeRequest) (map[string]interface{}, error) {
+//
+// It returns a typed *ScrapeResult: read discoverable fields
+// (result.Content, result.StatusCode, …) or the complete decoded response via
+// result.Raw["..."] for any undeclared/back-compat field. The raw generated model
+// is never exposed.
+func (c *Client) Scrape(ctx context.Context, req ScrapeRequest) (*ScrapeResult, error) {
 	if req.Format == "" {
 		req.Format = "markdown"
 	}
@@ -1478,14 +2136,20 @@ func (c *Client) Scrape(ctx context.Context, req ScrapeRequest) (map[string]inte
 	// (and the README quickstart) can read result["content"] regardless of format.
 	normalizeScrapeContent(out)
 	if se := scanResultError(out); se != nil {
-		return out, se
+		return newScrapeResult(out), se
 	}
-	return out, nil
+	return newScrapeResult(out), nil
 }
 
 // Search searches the web and returns results.
 // Delegates to POST /v1/search via the generated SearchRequestBuilder.
-func (c *Client) Search(ctx context.Context, req SearchRequest) (map[string]interface{}, error) {
+//
+// It returns a typed *SearchResult: read result.Results / result.Status /
+// result.Query, or the complete decoded response via result.Raw["..."]. When
+// req.Wait is set and the rotation is cold (HTTP 202 with a poll_url), the SDK owns
+// a bounded client-side poll of /v1/search/jobs/{id} to a terminal result,
+// honouring Retry-After / the deadline and respecting ctx cancellation.
+func (c *Client) Search(ctx context.Context, req SearchRequest) (*SearchResult, error) {
 	if req.Engine == "" {
 		req.Engine = "google"
 	}
@@ -1514,7 +2178,40 @@ func (c *Client) Search(ctx context.Context, req SearchRequest) (map[string]inte
 	if err != nil {
 		return nil, wrapAPIError(err)
 	}
-	return untypedToMap(result), nil
+	out := untypedToMap(result)
+	// on a cold rotation the POST returns a non-terminal job with a poll_url;
+	// when the caller asked to wait, the SDK owns the bounded client-side poll to a
+	// terminal result. The warm path (terminal / no poll_url) returns immediately.
+	if req.Wait && !searchIsTerminal(out) {
+		if pu, _ := out["poll_url"].(string); pu != "" {
+			headers := map[string]string{"Accept": "application/json"}
+			if c.token != "" {
+				headers["Authorization"] = "Bearer " + c.token
+			}
+			if req.ProviderKey != "" {
+				headers["X-Provider-Authorization"] = "Bearer " + req.ProviderKey
+			}
+			final, perr := pollSearchJob(ctx, c.baseURL, out, searchPollOptions{
+				headers: headers,
+				timeout: req.WaitTimeout,
+			})
+			if perr != nil {
+				return nil, perr
+			}
+			out = final
+		}
+	}
+	// Stable shape: a timed-out poll returns the raw running handle (no "query").
+	// Only the SDK knows the caller's query/engine — inject them when the payload
+	// omits them so every Search return (warm 200, wait:false handle, timed-out
+	// poll) carries query/engine + a non-nil Results.
+	if q, _ := out["query"].(string); q == "" {
+		out["query"] = req.Query
+	}
+	if _, ok := out["engine"]; !ok {
+		out["engine"] = req.Engine
+	}
+	return newSearchResult(out), nil
 }
 
 // Extract extracts structured data from a URL using a JSON Schema.
@@ -1545,7 +2242,12 @@ func (c *Client) Extract(ctx context.Context, req ExtractRequest) (map[string]in
 
 // Crawl starts a deep crawl from a seed URL.
 // Delegates to POST /v1/crawl/deep via the generated CrawlDeepRequestBuilder.
-func (c *Client) Crawl(ctx context.Context, req CrawlRequest) (map[string]interface{}, error) {
+//
+// It returns a typed *CrawlRun: read result.RunID / result.Status /
+// result.Results, or the complete decoded response via result.Raw["..."]. To wait
+// for a run to reach a terminal state, hand result.RunID to
+// client.CrawlRuns().WaitForCompletion.
+func (c *Client) Crawl(ctx context.Context, req CrawlRequest) (*CrawlRun, error) {
 	if req.MaxDepth == 0 {
 		req.MaxDepth = 2
 	}
@@ -1581,9 +2283,9 @@ func (c *Client) Crawl(ctx context.Context, req CrawlRequest) (map[string]interf
 	}
 	out := untypedToMap(result)
 	if se := scanResultError(out); se != nil {
-		return out, se
+		return newCrawlRun(out), se
 	}
-	return out, nil
+	return newCrawlRun(out), nil
 }
 
 // Map maps all URLs reachable from a seed URL.
@@ -1776,6 +2478,43 @@ func (c *Client) Content(ctx context.Context, req ContentRequest) (map[string]in
 	return result, nil
 }
 
+// Me returns the caller's account profile — GET /v1/me.
+//
+// The identity behind your API key: user, primary team, and tier. Routed through
+// the shared Kiota request adapter (same Bearer token + base URL + middleware as
+// the modeled calls) via the generic authenticated request path. The route is
+// real and in-schema but pruned from the published spec, so it has no generated
+// builder.
+func (c *Client) Me(ctx context.Context) (map[string]interface{}, error) {
+	return c.request(ctx, abstractions.GET, "/v1/me", nil)
+}
+
+// Usage returns the caller's usage + quota report — GET /v1/me/usage.
+//
+// The quota-visibility surface: cost/usage for the current billing window plus
+// the prepaid wallet balance, scoped to the caller's team. period is one of
+// "day" (server default when empty), "week", or "month".
+func (c *Client) Usage(ctx context.Context, period string) (map[string]interface{}, error) {
+	path := "/v1/me/usage"
+	if period != "" {
+		path += "?period=" + url.QueryEscape(period)
+	}
+	return c.request(ctx, abstractions.GET, path, nil)
+}
+
+// SessionPersona returns the customer-safe persona for a running session —
+// GET /v1/me/identities/{session_id}/persona.
+//
+// Who a given session *is*, shaped for display: a whitelist of device_class /
+// os_class / browser_class / locale only — never a raw user-agent or any
+// internal detail. Session-scoped, so each session reports its own persona,
+// distinct from the account-level entitlements on Me(). An unknown session
+// yields a not-found error (same anti-enumeration shape as the rest of /v1/me).
+func (c *Client) SessionPersona(ctx context.Context, sessionID string) (map[string]interface{}, error) {
+	path := "/v1/me/identities/" + url.PathEscape(sessionID) + "/persona"
+	return c.request(ctx, abstractions.GET, path, nil)
+}
+
 // Agent runs an autonomous agent task. Delegates to POST /v1/agent. Parity with
 // the Python SDK's agent() and the Node SDK's agent(). Note: the agent endpoint
 // may be unavailable (404) on a given deployment; callers should handle that
@@ -1788,48 +2527,68 @@ func (c *Client) Agent(ctx context.Context, options map[string]interface{}) (map
 }
 
 // request is the generic authenticated request escape hatch for endpoints that
-// have no generated typed builder (currently /v1/agent).
-// It applies the same Bearer token, base URL, and middleware pipeline as the
-// modeled calls via the shared Kiota request adapter, and returns the parsed JSON
-// body as a map. Non-2xx responses are surfaced as the same typed errors the
-// modeled methods raise (via wrapAPIError).
+// have no generated typed builder (e.g. /v1/agent, /v1/me). It delegates to the
+// shared apiRequester, applying the same Bearer token, base URL, and middleware
+// pipeline as the modeled calls via the canonical Kiota request adapter. Non-2xx
+// responses are surfaced as the same typed errors the modeled methods raise.
 func (c *Client) request(ctx context.Context, method abstractions.HttpMethod, path string, body map[string]interface{}) (map[string]interface{}, error) {
-	ri := abstractions.NewRequestInformation()
-	ri.Method = method
-	// A URL template with no expressions is treated as a literal URL by Kiota.
-	ri.UrlTemplate = c.baseURL + path
-	ri.Headers.TryAdd("Accept", "application/json")
-	if body != nil {
-		payload, err := json.Marshal(body)
-		if err != nil {
-			return nil, fmt.Errorf("ghostcrawl: failed to encode request body: %w", err)
-		}
-		ri.SetStreamContentAndContentType(payload, "application/json")
+	return c.req.do(ctx, method, path, body)
+}
+
+// ScrapeBatchRequest holds parameters for ScrapeBatch().
+type ScrapeBatchRequest struct {
+	// URLs is the set of target URLs to scrape in one call (required).
+	URLs []string
+	// Format is the rendered output format applied to every URL ("markdown"
+	// default, "html", "text"). Empty defaults to "markdown".
+	Format string
+	// Engine is the browser engine ("auto" default, "chrome", "firefox", "webkit").
+	Engine string
+	Extra  map[string]interface{}
+}
+
+// ScrapeBatch scrapes many URLs in a single call and returns the collection of
+// per-URL results. Delegates to POST /v1/scrape/batch via the shared Kiota
+// adapter. The returned map carries the results collection (e.g. result["results"]).
+func (c *Client) ScrapeBatch(ctx context.Context, req ScrapeBatchRequest) (map[string]interface{}, error) {
+	format := req.Format
+	if format == "" {
+		format = "markdown"
 	}
-	raw, err := c.adapter.SendPrimitive(ctx, ri, "[]byte", nil)
+	engine := req.Engine
+	if engine == "" {
+		engine = "auto"
+	}
+	body := map[string]interface{}{
+		"urls":   req.URLs,
+		"format": format,
+		"engine": engine,
+	}
+	for k, v := range req.Extra {
+		body[k] = v
+	}
+	out, err := c.req.do(ctx, abstractions.POST, "/v1/scrape/batch", body)
 	if err != nil {
-		return nil, wrapAPIError(err)
+		return nil, err
 	}
-	if raw == nil {
-		return map[string]interface{}{}, nil
+	if se := scanResultError(out); se != nil {
+		return out, se
 	}
-	data, ok := raw.([]byte)
-	if !ok {
-		return map[string]interface{}{}, nil
-	}
-	trimmed := strings.TrimSpace(string(data))
-	if trimmed == "" {
-		return map[string]interface{}{}, nil
-	}
-	var result map[string]interface{}
-	if err := json.Unmarshal([]byte(trimmed), &result); err != nil {
-		// Non-object JSON (e.g. an array) — wrap under a "data" key so callers get
-		// a stable map rather than an error.
-		var any interface{}
-		if err2 := json.Unmarshal([]byte(trimmed), &any); err2 == nil {
-			return map[string]interface{}{"data": any}, nil
-		}
-		return nil, fmt.Errorf("ghostcrawl: failed to decode response: %w", err)
-	}
-	return result, nil
+	return out, nil
+}
+
+// SearchJob polls a queued async search job to its current state.
+// Delegates to GET /v1/search/jobs/{job_id} via the shared Kiota adapter. This is
+// the manual-poll companion to Search(SearchRequest{Wait: true}), which owns the
+// poll for you.
+func (c *Client) SearchJob(ctx context.Context, jobID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.GET, "/v1/search/jobs/"+url.PathEscape(jobID), nil)
+}
+
+// CrawlStatus returns the current status of a deep crawl run.
+// Delegates to GET /v1/crawl/deep/{run_id} via the shared Kiota adapter. This is
+// the lightweight status poll for a run started with Crawl(); to block until the
+// run is terminal, use CrawlRuns().WaitForCompletion instead.
+func (c *Client) CrawlStatus(ctx context.Context, runID string) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.GET, "/v1/crawl/deep/"+url.PathEscape(runID), nil)
 }

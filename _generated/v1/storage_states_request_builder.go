@@ -85,7 +85,7 @@ func (m *StorageStatesRequestBuilder) Get(ctx context.Context, requestConfigurat
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// Post snapshot browser storage state from a live session. Captures the current cookies, localStorage, and session storage from the named active profile and saves it encrypted under the given name. Returns storage state metadata on success (credentials are never returned). Storage blobs over 5 MB return storage_state_too_large (400).
+// Post snapshot browser storage state from a live session. Captures the current cookies, localStorage, and session storage from the named active profile and saves it encrypted under the given name. Returns storage state metadata on success (credentials are never returned). Storage blobs over 5 MB return storage_state_too_large (400). Pass ``session_id`` to capture from a live cloud session; on a self-hosted deployment ``profile_id`` alone captures from the local active page.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *StorageStatesRequestBuilder) Post(ctx context.Context, body StorageStatesPostRequestBodyable, requestConfiguration *StorageStatesRequestBuilderPostRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -119,7 +119,7 @@ func (m *StorageStatesRequestBuilder) ToGetRequestInformation(ctx context.Contex
     requestInfo.Headers.TryAdd("Accept", "application/json")
     return requestInfo, nil
 }
-// ToPostRequestInformation snapshot browser storage state from a live session. Captures the current cookies, localStorage, and session storage from the named active profile and saves it encrypted under the given name. Returns storage state metadata on success (credentials are never returned). Storage blobs over 5 MB return storage_state_too_large (400).
+// ToPostRequestInformation snapshot browser storage state from a live session. Captures the current cookies, localStorage, and session storage from the named active profile and saves it encrypted under the given name. Returns storage state metadata on success (credentials are never returned). Storage blobs over 5 MB return storage_state_too_large (400). Pass ``session_id`` to capture from a live cloud session; on a self-hosted deployment ``profile_id`` alone captures from the local active page.
 // returns a *RequestInformation when successful
 func (m *StorageStatesRequestBuilder) ToPostRequestInformation(ctx context.Context, body StorageStatesPostRequestBodyable, requestConfiguration *StorageStatesRequestBuilderPostRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.POST, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

@@ -7,21 +7,25 @@ import (
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91 "github.com/microsoft/kiota-abstractions-go/serialization"
 )
 
-// ExtractRequest pOST /v1/extract request body, schema-driven extraction (deterministic) + bring-your-own-model extraction. Two extraction modes: - Deterministic (default, model_provider absent): CSS/regex/keyword extraction. Requires 'schema'. Returns {"url","data","token_estimate"}. - Bring-your-own-model (model_provider present): GhostCrawl fetches and prepares clean Markdown; your connected model performs the semantic extraction (you are not billed for model inference here, only the request quota). Returns {"urls","data","token_estimate"}. Security notes: - The 'schema' field is validated before any fetch (fail-fast input guard). - URLs are validated against private, loopback, and metadata targets before any fetch. - Error responses never echo the schema body, fetched content, or model credentials. - model_provider.api_key is request-scoped only: never persisted, logged, or returned in any response body or error message.
+// ExtractRequest pOST /v1/extract request body, schema-driven extraction (deterministic) + bring-your-own-model extraction. Two extraction modes: - Deterministic (default, model_provider absent): native structured-data extraction, reads the schema.org JSON-LD / microdata / Open Graph a page already embeds and fills the schema (no model, no third party); returns whole priced product grids. Requires 'schema'. Returns {"url","data","token_estimate"}. - Bring-your-own-model (model_provider present): GhostCrawl fetches and prepares clean Markdown; your connected model performs the semantic extraction (you are not billed for model inference here, only the request quota). Returns {"urls","data","token_estimate"}. Security notes: - The 'schema' field is validated before any fetch (fail-fast input guard). - URLs are validated against private, loopback, and metadata targets before any fetch. - Error responses never echo the schema body, fetched content, or model credentials. - model_provider.api_key is request-scoped only: never persisted, logged, or returned in any response body or error message.
 type ExtractRequest struct {
     // Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
     additionalData map[string]any
-    // BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in human session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+    // BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in browser session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
     behavior_actions ExtractRequest_ExtractRequest_behavior_actionsable
     // Engine override: auto (default) | chrome | firefox | webkit.
     engine *ExtractRequest_engine
+    // Override geo-coherence: use `identity_country`'s geo (timezone + geolocation) REGARDLESS of the exit IP's country. Requires a pinned `identity_country` (and the geo_select tier). Off by default, the default is IP-coherent geo (the browser identity follows the exit). Forcing may create an IP<->timezone mismatch that some sites cross-check; opt-in at your own risk.
+    geo_force *bool
     // Optional two-letter country code to pin (geo-filters the exit and derives timezone; tier-gated). Omitted = timezone follows the exit.
     identity_country ExtractRequest_ExtractRequest_identity_countryable
+    // Inline identity specification (Creates an ephemeral identity). Same shape as /v1/scrape: {operating system, browser, viewport|device_model}. Absent → default identity.
+    identity_spec i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
     // Optional browser language tag (e.g. 'en-US','es-ES'). Sets the identity's locale and language headers coherently, independent of the exit country. Available on every tier.
     language ExtractRequest_ExtractRequest_languageable
-    // BYO model credentials dict: {type, api_key, model, base_url?}. When present → BYO-LLM extraction path (GhostCrawl bills the request, not the inference tokens, inference runs on the user's connected model). When absent → deterministic CSS/regex/keyword extraction (default).
+    // BYO model credentials dict: {type, api_key, model, base_url?}. When present → BYO-LLM extraction path (GhostCrawl bills the request, not the inference tokens, inference runs on the user's connected model). When absent → deterministic native structured-data extraction (default): schema.org JSON-LD / microdata / Open Graph parsed into the schema, no model.
     model_provider i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
-    // Free-form extraction instruction for BYO-LLM mode. Allowed without a schema (schema-less prose extraction). Ignored in deterministic mode (model_provider absent).
+    // Free-form extraction instruction. Requires a connected model: pass it WITH model_provider to run semantic extraction on your own AI/LLM. Sent WITHOUT model_provider it returns 422 model_provider_required (connect your AI/LLM). Allowed without a schema (schema-less prose extraction). GhostCrawl prepares the content; your model does the extraction.
     prompt ExtractRequest_ExtractRequest_promptable
     // JSON Schema describing the desired extraction output. Required for deterministic extraction (model_provider absent). Optional for BYO-LLM extraction (model_provider present), when provided, the LLM is instructed to respond in JSON-mode conforming to this schema.
     schema i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
@@ -81,7 +85,7 @@ func (m *ExtractRequest_ExtractRequest_behavior_actions) GetExtractRequestBehavi
     return m.extractRequest_behavior_actionsMember2
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ExtractRequest_ExtractRequest_behavior_actions) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -159,7 +163,7 @@ func (m *ExtractRequest_ExtractRequest_identity_country) GetExtractRequestIdenti
     return m.extractRequest_identity_countryMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ExtractRequest_ExtractRequest_identity_country) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -236,7 +240,7 @@ func (m *ExtractRequest_ExtractRequest_language) GetExtractRequestLanguageMember
     return m.extractRequest_languageMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ExtractRequest_ExtractRequest_language) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -313,7 +317,7 @@ func (m *ExtractRequest_ExtractRequest_prompt) GetExtractRequestPromptMember1()(
     return m.extractRequest_promptMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ExtractRequest_ExtractRequest_prompt) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -390,7 +394,7 @@ func (m *ExtractRequest_ExtractRequest_url) GetExtractRequestUrlMember1()(Extrac
     return m.extractRequest_urlMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ExtractRequest_ExtractRequest_url) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -473,7 +477,7 @@ func (m *ExtractRequest_ExtractRequest_urls) GetExtractRequestUrlsMember1()(Extr
     return m.extractRequest_urlsMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ExtractRequest_ExtractRequest_urls) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -559,6 +563,8 @@ func NewExtractRequest()(*ExtractRequest) {
     m.SetAdditionalData(make(map[string]any))
     engineValue := AUTO_EXTRACTREQUEST_ENGINE
     m.SetEngine(&engineValue)
+    geo_forceValue := false
+    m.SetGeoForce(&geo_forceValue)
     return m
 }
 // CreateExtractRequestFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
@@ -571,7 +577,7 @@ func CreateExtractRequestFromDiscriminatorValue(parseNode i878a80d2330e89d268963
 func (m *ExtractRequest) GetAdditionalData()(map[string]any) {
     return m.additionalData
 }
-// GetBehaviorActions gets the behavior_actions property value. BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in human session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+// GetBehaviorActions gets the behavior_actions property value. BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in browser session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
 // returns a ExtractRequest_ExtractRequest_behavior_actionsable when successful
 func (m *ExtractRequest) GetBehaviorActions()(ExtractRequest_ExtractRequest_behavior_actionsable) {
     return m.behavior_actions
@@ -582,7 +588,7 @@ func (m *ExtractRequest) GetEngine()(*ExtractRequest_engine) {
     return m.engine
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ExtractRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["behavior_actions"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -605,6 +611,16 @@ func (m *ExtractRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89
         }
         return nil
     }
+    res["geo_force"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetBoolValue()
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetGeoForce(val)
+        }
+        return nil
+    }
     res["identity_country"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
         val, err := n.GetObjectValue(CreateExtractRequest_ExtractRequest_identity_countryFromDiscriminatorValue)
         if err != nil {
@@ -612,6 +628,16 @@ func (m *ExtractRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89
         }
         if val != nil {
             m.SetIdentityCountry(val.(ExtractRequest_ExtractRequest_identity_countryable))
+        }
+        return nil
+    }
+    res["identity_spec"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.CreateUntypedNodeFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetIdentitySpec(val.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable))
         }
         return nil
     }
@@ -677,22 +703,32 @@ func (m *ExtractRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89
     }
     return res
 }
+// GetGeoForce gets the geo_force property value. Override geo-coherence: use `identity_country`'s geo (timezone + geolocation) REGARDLESS of the exit IP's country. Requires a pinned `identity_country` (and the geo_select tier). Off by default, the default is IP-coherent geo (the browser identity follows the exit). Forcing may create an IP<->timezone mismatch that some sites cross-check; opt-in at your own risk.
+// returns a *bool when successful
+func (m *ExtractRequest) GetGeoForce()(*bool) {
+    return m.geo_force
+}
 // GetIdentityCountry gets the identity_country property value. Optional two-letter country code to pin (geo-filters the exit and derives timezone; tier-gated). Omitted = timezone follows the exit.
 // returns a ExtractRequest_ExtractRequest_identity_countryable when successful
 func (m *ExtractRequest) GetIdentityCountry()(ExtractRequest_ExtractRequest_identity_countryable) {
     return m.identity_country
+}
+// GetIdentitySpec gets the identity_spec property value. Inline identity specification (Creates an ephemeral identity). Same shape as /v1/scrape: {operating system, browser, viewport|device_model}. Absent → default identity.
+// returns a UntypedNodeable when successful
+func (m *ExtractRequest) GetIdentitySpec()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable) {
+    return m.identity_spec
 }
 // GetLanguage gets the language property value. Optional browser language tag (e.g. 'en-US','es-ES'). Sets the identity's locale and language headers coherently, independent of the exit country. Available on every tier.
 // returns a ExtractRequest_ExtractRequest_languageable when successful
 func (m *ExtractRequest) GetLanguage()(ExtractRequest_ExtractRequest_languageable) {
     return m.language
 }
-// GetModelProvider gets the model_provider property value. BYO model credentials dict: {type, api_key, model, base_url?}. When present → BYO-LLM extraction path (GhostCrawl bills the request, not the inference tokens, inference runs on the user's connected model). When absent → deterministic CSS/regex/keyword extraction (default).
+// GetModelProvider gets the model_provider property value. BYO model credentials dict: {type, api_key, model, base_url?}. When present → BYO-LLM extraction path (GhostCrawl bills the request, not the inference tokens, inference runs on the user's connected model). When absent → deterministic native structured-data extraction (default): schema.org JSON-LD / microdata / Open Graph parsed into the schema, no model.
 // returns a UntypedNodeable when successful
 func (m *ExtractRequest) GetModelProvider()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable) {
     return m.model_provider
 }
-// GetPrompt gets the prompt property value. Free-form extraction instruction for BYO-LLM mode. Allowed without a schema (schema-less prose extraction). Ignored in deterministic mode (model_provider absent).
+// GetPrompt gets the prompt property value. Free-form extraction instruction. Requires a connected model: pass it WITH model_provider to run semantic extraction on your own AI/LLM. Sent WITHOUT model_provider it returns 422 model_provider_required (connect your AI/LLM). Allowed without a schema (schema-less prose extraction). GhostCrawl prepares the content; your model does the extraction.
 // returns a ExtractRequest_ExtractRequest_promptable when successful
 func (m *ExtractRequest) GetPrompt()(ExtractRequest_ExtractRequest_promptable) {
     return m.prompt
@@ -728,7 +764,19 @@ func (m *ExtractRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a
         }
     }
     {
+        err := writer.WriteBoolValue("geo_force", m.GetGeoForce())
+        if err != nil {
+            return err
+        }
+    }
+    {
         err := writer.WriteObjectValue("identity_country", m.GetIdentityCountry())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteObjectValue("identity_spec", m.GetIdentitySpec())
         if err != nil {
             return err
         }
@@ -781,7 +829,7 @@ func (m *ExtractRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a
 func (m *ExtractRequest) SetAdditionalData(value map[string]any)() {
     m.additionalData = value
 }
-// SetBehaviorActions sets the behavior_actions property value. BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in human session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
+// SetBehaviorActions sets the behavior_actions property value. BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in browser session. Sanitized + bounded server-side (max 256 actions). Available on every tier.
 func (m *ExtractRequest) SetBehaviorActions(value ExtractRequest_ExtractRequest_behavior_actionsable)() {
     m.behavior_actions = value
 }
@@ -789,19 +837,27 @@ func (m *ExtractRequest) SetBehaviorActions(value ExtractRequest_ExtractRequest_
 func (m *ExtractRequest) SetEngine(value *ExtractRequest_engine)() {
     m.engine = value
 }
+// SetGeoForce sets the geo_force property value. Override geo-coherence: use `identity_country`'s geo (timezone + geolocation) REGARDLESS of the exit IP's country. Requires a pinned `identity_country` (and the geo_select tier). Off by default, the default is IP-coherent geo (the browser identity follows the exit). Forcing may create an IP<->timezone mismatch that some sites cross-check; opt-in at your own risk.
+func (m *ExtractRequest) SetGeoForce(value *bool)() {
+    m.geo_force = value
+}
 // SetIdentityCountry sets the identity_country property value. Optional two-letter country code to pin (geo-filters the exit and derives timezone; tier-gated). Omitted = timezone follows the exit.
 func (m *ExtractRequest) SetIdentityCountry(value ExtractRequest_ExtractRequest_identity_countryable)() {
     m.identity_country = value
+}
+// SetIdentitySpec sets the identity_spec property value. Inline identity specification (Creates an ephemeral identity). Same shape as /v1/scrape: {operating system, browser, viewport|device_model}. Absent → default identity.
+func (m *ExtractRequest) SetIdentitySpec(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)() {
+    m.identity_spec = value
 }
 // SetLanguage sets the language property value. Optional browser language tag (e.g. 'en-US','es-ES'). Sets the identity's locale and language headers coherently, independent of the exit country. Available on every tier.
 func (m *ExtractRequest) SetLanguage(value ExtractRequest_ExtractRequest_languageable)() {
     m.language = value
 }
-// SetModelProvider sets the model_provider property value. BYO model credentials dict: {type, api_key, model, base_url?}. When present → BYO-LLM extraction path (GhostCrawl bills the request, not the inference tokens, inference runs on the user's connected model). When absent → deterministic CSS/regex/keyword extraction (default).
+// SetModelProvider sets the model_provider property value. BYO model credentials dict: {type, api_key, model, base_url?}. When present → BYO-LLM extraction path (GhostCrawl bills the request, not the inference tokens, inference runs on the user's connected model). When absent → deterministic native structured-data extraction (default): schema.org JSON-LD / microdata / Open Graph parsed into the schema, no model.
 func (m *ExtractRequest) SetModelProvider(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)() {
     m.model_provider = value
 }
-// SetPrompt sets the prompt property value. Free-form extraction instruction for BYO-LLM mode. Allowed without a schema (schema-less prose extraction). Ignored in deterministic mode (model_provider absent).
+// SetPrompt sets the prompt property value. Free-form extraction instruction. Requires a connected model: pass it WITH model_provider to run semantic extraction on your own AI/LLM. Sent WITHOUT model_provider it returns 422 model_provider_required (connect your AI/LLM). Allowed without a schema (schema-less prose extraction). GhostCrawl prepares the content; your model does the extraction.
 func (m *ExtractRequest) SetPrompt(value ExtractRequest_ExtractRequest_promptable)() {
     m.prompt = value
 }
@@ -822,7 +878,9 @@ type ExtractRequestable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetBehaviorActions()(ExtractRequest_ExtractRequest_behavior_actionsable)
     GetEngine()(*ExtractRequest_engine)
+    GetGeoForce()(*bool)
     GetIdentityCountry()(ExtractRequest_ExtractRequest_identity_countryable)
+    GetIdentitySpec()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)
     GetLanguage()(ExtractRequest_ExtractRequest_languageable)
     GetModelProvider()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)
     GetPrompt()(ExtractRequest_ExtractRequest_promptable)
@@ -831,7 +889,9 @@ type ExtractRequestable interface {
     GetUrls()(ExtractRequest_ExtractRequest_urlsable)
     SetBehaviorActions(value ExtractRequest_ExtractRequest_behavior_actionsable)()
     SetEngine(value *ExtractRequest_engine)()
+    SetGeoForce(value *bool)()
     SetIdentityCountry(value ExtractRequest_ExtractRequest_identity_countryable)()
+    SetIdentitySpec(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)()
     SetLanguage(value ExtractRequest_ExtractRequest_languageable)()
     SetModelProvider(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)()
     SetPrompt(value ExtractRequest_ExtractRequest_promptable)()

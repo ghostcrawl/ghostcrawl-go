@@ -34,7 +34,7 @@ func NewSessionsItemTakeoverRequestBuilder(rawUrl string, requestAdapter i2ae418
     urlParams["request-raw-url"] = rawUrl
     return NewSessionsItemTakeoverRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Post pOST /v1/sessions/{id}/takeover with {"action": "mint"} delegates to the HMAC-token mint logic (same as /takeover_token). {"action": "release"} delegates to the control flag release logic (same as /takeover_release). with an action discriminator, while the underlying REST surface exposes two dedicated sub-paths. Both entry points share identical auth, tier,
+// Post start or release an interactive takeover of a live browser session. Send ``{"action": "mint"}`` to begin a takeover: you receive a short-lived token you can use to open the interactive session and drive it yourself. Send ``{"action": "release"}`` to hand control back and return the session to view-only. Requires a paid plan and ownership of the session.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *SessionsItemTakeoverRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.TakeoverActionBodyable, requestConfiguration *SessionsItemTakeoverRequestBuilderPostRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -54,7 +54,7 @@ func (m *SessionsItemTakeoverRequestBuilder) Post(ctx context.Context, body ib5c
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToPostRequestInformation pOST /v1/sessions/{id}/takeover with {"action": "mint"} delegates to the HMAC-token mint logic (same as /takeover_token). {"action": "release"} delegates to the control flag release logic (same as /takeover_release). with an action discriminator, while the underlying REST surface exposes two dedicated sub-paths. Both entry points share identical auth, tier,
+// ToPostRequestInformation start or release an interactive takeover of a live browser session. Send ``{"action": "mint"}`` to begin a takeover: you receive a short-lived token you can use to open the interactive session and drive it yourself. Send ``{"action": "release"}`` to hand control back and return the session to view-only. Requires a paid plan and ownership of the session.
 // returns a *RequestInformation when successful
 func (m *SessionsItemTakeoverRequestBuilder) ToPostRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.TakeoverActionBodyable, requestConfiguration *SessionsItemTakeoverRequestBuilderPostRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.POST, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

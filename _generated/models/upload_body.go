@@ -17,9 +17,95 @@ type UploadBody struct {
     // The mime property
     mime *string
     // The profile_id property
-    profile_id *string
+    profile_id UploadBody_UploadBody_profile_idable
     // The selector property
     selector *string
+    // The session_id property
+    session_id *string
+}
+// UploadBody_UploadBody_profile_id composed type wrapper for classes string, UploadBody_profile_idMember1able
+type UploadBody_UploadBody_profile_id struct {
+    // Composed type representation for type string
+    string *string
+    // Composed type representation for type UploadBody_profile_idMember1able
+    uploadBody_profile_idMember1 UploadBody_profile_idMember1able
+}
+// NewUploadBody_UploadBody_profile_id instantiates a new UploadBody_UploadBody_profile_id and sets the default values.
+func NewUploadBody_UploadBody_profile_id()(*UploadBody_UploadBody_profile_id) {
+    m := &UploadBody_UploadBody_profile_id{
+    }
+    return m
+}
+// CreateUploadBody_UploadBody_profile_idFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateUploadBody_UploadBody_profile_idFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewUploadBody_UploadBody_profile_id()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateUploadBody_profile_idMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(UploadBody_profile_idMember1able); ok {
+                result.SetUploadBodyProfileIdMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *UploadBody_UploadBody_profile_id) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *UploadBody_UploadBody_profile_id) GetIsComposedType()(bool) {
+    return true
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *UploadBody_UploadBody_profile_id) GetString()(*string) {
+    return m.string
+}
+// GetUploadBodyProfileIdMember1 gets the UploadBody_profile_idMember1 property value. Composed type representation for type UploadBody_profile_idMember1able
+// returns a UploadBody_profile_idMember1able when successful
+func (m *UploadBody_UploadBody_profile_id) GetUploadBodyProfileIdMember1()(UploadBody_profile_idMember1able) {
+    return m.uploadBody_profile_idMember1
+}
+// Serialize serializes information the current object
+func (m *UploadBody_UploadBody_profile_id) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetUploadBodyProfileIdMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetUploadBodyProfileIdMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *UploadBody_UploadBody_profile_id) SetString(value *string)() {
+    m.string = value
+}
+// SetUploadBodyProfileIdMember1 sets the UploadBody_profile_idMember1 property value. Composed type representation for type UploadBody_profile_idMember1able
+func (m *UploadBody_UploadBody_profile_id) SetUploadBodyProfileIdMember1(value UploadBody_profile_idMember1able)() {
+    m.uploadBody_profile_idMember1 = value
+}
+type UploadBody_UploadBody_profile_idable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetString()(*string)
+    GetUploadBodyProfileIdMember1()(UploadBody_profile_idMember1able)
+    SetString(value *string)()
+    SetUploadBodyProfileIdMember1(value UploadBody_profile_idMember1able)()
 }
 // NewUploadBody instantiates a new UploadBody and sets the default values.
 func NewUploadBody()(*UploadBody) {
@@ -44,7 +130,7 @@ func (m *UploadBody) GetContentBase64()(*string) {
     return m.content_base64
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *UploadBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["content_base64"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -78,12 +164,12 @@ func (m *UploadBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d268
         return nil
     }
     res["profile_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
-        val, err := n.GetStringValue()
+        val, err := n.GetObjectValue(CreateUploadBody_UploadBody_profile_idFromDiscriminatorValue)
         if err != nil {
             return err
         }
         if val != nil {
-            m.SetProfileId(val)
+            m.SetProfileId(val.(UploadBody_UploadBody_profile_idable))
         }
         return nil
     }
@@ -94,6 +180,16 @@ func (m *UploadBody) GetFieldDeserializers()(map[string]func(i878a80d2330e89d268
         }
         if val != nil {
             m.SetSelector(val)
+        }
+        return nil
+    }
+    res["session_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetStringValue()
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetSessionId(val)
         }
         return nil
     }
@@ -110,14 +206,19 @@ func (m *UploadBody) GetMime()(*string) {
     return m.mime
 }
 // GetProfileId gets the profile_id property value. The profile_id property
-// returns a *string when successful
-func (m *UploadBody) GetProfileId()(*string) {
+// returns a UploadBody_UploadBody_profile_idable when successful
+func (m *UploadBody) GetProfileId()(UploadBody_UploadBody_profile_idable) {
     return m.profile_id
 }
 // GetSelector gets the selector property value. The selector property
 // returns a *string when successful
 func (m *UploadBody) GetSelector()(*string) {
     return m.selector
+}
+// GetSessionId gets the session_id property value. The session_id property
+// returns a *string when successful
+func (m *UploadBody) GetSessionId()(*string) {
+    return m.session_id
 }
 // Serialize serializes information the current object
 func (m *UploadBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
@@ -140,13 +241,19 @@ func (m *UploadBody) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c
         }
     }
     {
-        err := writer.WriteStringValue("profile_id", m.GetProfileId())
+        err := writer.WriteObjectValue("profile_id", m.GetProfileId())
         if err != nil {
             return err
         }
     }
     {
         err := writer.WriteStringValue("selector", m.GetSelector())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteStringValue("session_id", m.GetSessionId())
         if err != nil {
             return err
         }
@@ -176,12 +283,16 @@ func (m *UploadBody) SetMime(value *string)() {
     m.mime = value
 }
 // SetProfileId sets the profile_id property value. The profile_id property
-func (m *UploadBody) SetProfileId(value *string)() {
+func (m *UploadBody) SetProfileId(value UploadBody_UploadBody_profile_idable)() {
     m.profile_id = value
 }
 // SetSelector sets the selector property value. The selector property
 func (m *UploadBody) SetSelector(value *string)() {
     m.selector = value
+}
+// SetSessionId sets the session_id property value. The session_id property
+func (m *UploadBody) SetSessionId(value *string)() {
+    m.session_id = value
 }
 type UploadBodyable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
@@ -189,11 +300,13 @@ type UploadBodyable interface {
     GetContentBase64()(*string)
     GetFilename()(*string)
     GetMime()(*string)
-    GetProfileId()(*string)
+    GetProfileId()(UploadBody_UploadBody_profile_idable)
     GetSelector()(*string)
+    GetSessionId()(*string)
     SetContentBase64(value *string)()
     SetFilename(value *string)()
     SetMime(value *string)()
-    SetProfileId(value *string)()
+    SetProfileId(value UploadBody_UploadBody_profile_idable)()
     SetSelector(value *string)()
+    SetSessionId(value *string)()
 }

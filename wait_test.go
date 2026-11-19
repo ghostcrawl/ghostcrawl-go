@@ -103,6 +103,50 @@ func TestWaitForCompletion_LongPollAcrossWindows(t *testing.T) {
 	}
 }
 
+// WaitForCompletion must not spin forever when the caller passes a deadline-less
+// ctx (context.Background()) and the server keeps returning non-terminal 200s:
+// it derives a default overall deadline and returns context.DeadlineExceeded.
+func TestWaitForCompletion_BoundedDefaultDeadline(t *testing.T) {
+	// Lower the default overall bound so the test is fast; restore after.
+	orig := defaultCrawlWaitTimeout
+	defaultCrawlWaitTimeout = 300 * time.Millisecond
+	defer func() { defaultCrawlWaitTimeout = orig }()
+
+	var calls int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&calls, 1)
+		w.Header().Set("Content-Type", "application/json")
+		// Always non-terminal → without the default deadline this re-arms forever.
+		_, _ = w.Write([]byte(`{"run_id":"run_1","status":"running"}`))
+	}))
+	defer srv.Close()
+
+	client, err := New("gck_live_test", srv.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		// context.Background() has no deadline — the SDK must supply the bound.
+		_, e := client.CrawlRuns().WaitForCompletion(
+			context.Background(), "run_1", WithWaitWindow(50*time.Millisecond))
+		done <- e
+	}()
+
+	select {
+	case e := <-done:
+		if !errors.Is(e, context.DeadlineExceeded) {
+			t.Fatalf("err = %v, want context.DeadlineExceeded", e)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("WaitForCompletion did not honour the default deadline — spun past the bound")
+	}
+	if atomic.LoadInt32(&calls) == 0 {
+		t.Error("expected at least one poll before the deadline")
+	}
+}
+
 // A terminal failed/cancelled run is a successful observation (nil error); the
 // caller inspects status.
 func TestWaitForCompletion_TerminalFailedIsNotError(t *testing.T) {

@@ -15,6 +15,8 @@ type ScreenshotRequest struct {
     engine *ScreenshotRequest_engine
     // Capture the FULL document height instead of just the viewport.
     full_page *bool
+    // Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+    geo_force *bool
     // Re-use a persisted identity.
     identity ScreenshotRequest_ScreenshotRequest_identityable
     // Two-letter country code to pin the exit country.
@@ -67,7 +69,7 @@ func CreateScreenshotRequest_ScreenshotRequest_identityFromDiscriminatorValue(pa
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScreenshotRequest_ScreenshotRequest_identity) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -144,7 +146,7 @@ func CreateScreenshotRequest_ScreenshotRequest_identity_countryFromDiscriminator
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScreenshotRequest_ScreenshotRequest_identity_country) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -221,7 +223,7 @@ func CreateScreenshotRequest_ScreenshotRequest_languageFromDiscriminatorValue(pa
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScreenshotRequest_ScreenshotRequest_language) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -298,7 +300,7 @@ func CreateScreenshotRequest_ScreenshotRequest_profileFromDiscriminatorValue(par
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScreenshotRequest_ScreenshotRequest_profile) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -375,7 +377,7 @@ func CreateScreenshotRequest_ScreenshotRequest_proxyFromDiscriminatorValue(parse
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScreenshotRequest_ScreenshotRequest_proxy) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -452,7 +454,7 @@ func CreateScreenshotRequest_ScreenshotRequest_screenshot_selectorFromDiscrimina
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScreenshotRequest_ScreenshotRequest_screenshot_selector) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -545,6 +547,8 @@ func NewScreenshotRequest()(*ScreenshotRequest) {
     m.SetEngine(&engineValue)
     full_pageValue := false
     m.SetFullPage(&full_pageValue)
+    geo_forceValue := false
+    m.SetGeoForce(&geo_forceValue)
     return m
 }
 // CreateScreenshotRequestFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
@@ -563,7 +567,7 @@ func (m *ScreenshotRequest) GetEngine()(*ScreenshotRequest_engine) {
     return m.engine
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ScreenshotRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["engine"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -583,6 +587,16 @@ func (m *ScreenshotRequest) GetFieldDeserializers()(map[string]func(i878a80d2330
         }
         if val != nil {
             m.SetFullPage(val)
+        }
+        return nil
+    }
+    res["geo_force"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetBoolValue()
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetGeoForce(val)
         }
         return nil
     }
@@ -673,6 +687,11 @@ func (m *ScreenshotRequest) GetFieldDeserializers()(map[string]func(i878a80d2330
 func (m *ScreenshotRequest) GetFullPage()(*bool) {
     return m.full_page
 }
+// GetGeoForce gets the geo_force property value. Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+// returns a *bool when successful
+func (m *ScreenshotRequest) GetGeoForce()(*bool) {
+    return m.geo_force
+}
 // GetIdentity gets the identity property value. Re-use a persisted identity.
 // returns a ScreenshotRequest_ScreenshotRequest_identityable when successful
 func (m *ScreenshotRequest) GetIdentity()(ScreenshotRequest_ScreenshotRequest_identityable) {
@@ -724,6 +743,12 @@ func (m *ScreenshotRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27
     }
     {
         err := writer.WriteBoolValue("full_page", m.GetFullPage())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteBoolValue("geo_force", m.GetGeoForce())
         if err != nil {
             return err
         }
@@ -796,6 +821,10 @@ func (m *ScreenshotRequest) SetEngine(value *ScreenshotRequest_engine)() {
 func (m *ScreenshotRequest) SetFullPage(value *bool)() {
     m.full_page = value
 }
+// SetGeoForce sets the geo_force property value. Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+func (m *ScreenshotRequest) SetGeoForce(value *bool)() {
+    m.geo_force = value
+}
 // SetIdentity sets the identity property value. Re-use a persisted identity.
 func (m *ScreenshotRequest) SetIdentity(value ScreenshotRequest_ScreenshotRequest_identityable)() {
     m.identity = value
@@ -833,6 +862,7 @@ type ScreenshotRequestable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetEngine()(*ScreenshotRequest_engine)
     GetFullPage()(*bool)
+    GetGeoForce()(*bool)
     GetIdentity()(ScreenshotRequest_ScreenshotRequest_identityable)
     GetIdentityCountry()(ScreenshotRequest_ScreenshotRequest_identity_countryable)
     GetIdentitySpec()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)
@@ -843,6 +873,7 @@ type ScreenshotRequestable interface {
     GetUrl()(*string)
     SetEngine(value *ScreenshotRequest_engine)()
     SetFullPage(value *bool)()
+    SetGeoForce(value *bool)()
     SetIdentity(value ScreenshotRequest_ScreenshotRequest_identityable)()
     SetIdentityCountry(value ScreenshotRequest_ScreenshotRequest_identity_countryable)()
     SetIdentitySpec(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)()

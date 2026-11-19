@@ -15,6 +15,8 @@ type ContentRequest struct {
     engine *ContentRequest_engine
     // Content format: rendered post-JS 'html' (default) or 'markdown'.
     format *ContentRequest_format
+    // Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+    geo_force *bool
     // Re-use a persisted identity.
     identity ContentRequest_ContentRequest_identityable
     // Two-letter country code to pin the exit country.
@@ -70,7 +72,7 @@ func (m *ContentRequest_ContentRequest_identity) GetContentRequestIdentityMember
     return m.contentRequest_identityMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ContentRequest_ContentRequest_identity) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -147,7 +149,7 @@ func (m *ContentRequest_ContentRequest_identity_country) GetContentRequestIdenti
     return m.contentRequest_identity_countryMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ContentRequest_ContentRequest_identity_country) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -224,7 +226,7 @@ func (m *ContentRequest_ContentRequest_language) GetContentRequestLanguageMember
     return m.contentRequest_languageMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ContentRequest_ContentRequest_language) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -301,7 +303,7 @@ func (m *ContentRequest_ContentRequest_profile) GetContentRequestProfileMember1(
     return m.contentRequest_profileMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ContentRequest_ContentRequest_profile) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -378,7 +380,7 @@ func (m *ContentRequest_ContentRequest_proxy) GetContentRequestProxyMember1()(Co
     return m.contentRequest_proxyMember1
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ContentRequest_ContentRequest_proxy) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -459,6 +461,8 @@ func NewContentRequest()(*ContentRequest) {
     m.SetEngine(&engineValue)
     formatValue := HTML_CONTENTREQUEST_FORMAT
     m.SetFormat(&formatValue)
+    geo_forceValue := false
+    m.SetGeoForce(&geo_forceValue)
     return m
 }
 // CreateContentRequestFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
@@ -477,7 +481,7 @@ func (m *ContentRequest) GetEngine()(*ContentRequest_engine) {
     return m.engine
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *ContentRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["engine"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
@@ -497,6 +501,16 @@ func (m *ContentRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89
         }
         if val != nil {
             m.SetFormat(val.(*ContentRequest_format))
+        }
+        return nil
+    }
+    res["geo_force"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetBoolValue()
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetGeoForce(val)
         }
         return nil
     }
@@ -577,6 +591,11 @@ func (m *ContentRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89
 func (m *ContentRequest) GetFormat()(*ContentRequest_format) {
     return m.format
 }
+// GetGeoForce gets the geo_force property value. Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+// returns a *bool when successful
+func (m *ContentRequest) GetGeoForce()(*bool) {
+    return m.geo_force
+}
 // GetIdentity gets the identity property value. Re-use a persisted identity.
 // returns a ContentRequest_ContentRequest_identityable when successful
 func (m *ContentRequest) GetIdentity()(ContentRequest_ContentRequest_identityable) {
@@ -624,6 +643,12 @@ func (m *ContentRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a
     if m.GetFormat() != nil {
         cast := (*m.GetFormat()).String()
         err := writer.WriteStringValue("format", &cast)
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteBoolValue("geo_force", m.GetGeoForce())
         if err != nil {
             return err
         }
@@ -690,6 +715,10 @@ func (m *ContentRequest) SetEngine(value *ContentRequest_engine)() {
 func (m *ContentRequest) SetFormat(value *ContentRequest_format)() {
     m.format = value
 }
+// SetGeoForce sets the geo_force property value. Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).
+func (m *ContentRequest) SetGeoForce(value *bool)() {
+    m.geo_force = value
+}
 // SetIdentity sets the identity property value. Re-use a persisted identity.
 func (m *ContentRequest) SetIdentity(value ContentRequest_ContentRequest_identityable)() {
     m.identity = value
@@ -723,6 +752,7 @@ type ContentRequestable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetEngine()(*ContentRequest_engine)
     GetFormat()(*ContentRequest_format)
+    GetGeoForce()(*bool)
     GetIdentity()(ContentRequest_ContentRequest_identityable)
     GetIdentityCountry()(ContentRequest_ContentRequest_identity_countryable)
     GetIdentitySpec()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)
@@ -732,6 +762,7 @@ type ContentRequestable interface {
     GetUrl()(*string)
     SetEngine(value *ContentRequest_engine)()
     SetFormat(value *ContentRequest_format)()
+    SetGeoForce(value *bool)()
     SetIdentity(value ContentRequest_ContentRequest_identityable)()
     SetIdentityCountry(value ContentRequest_ContentRequest_identity_countryable)()
     SetIdentitySpec(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)()

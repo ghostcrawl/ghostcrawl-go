@@ -1,12 +1,22 @@
 {
   "components": {
+    "headers": {
+      "RetryAfter": {
+        "description": "Seconds to wait before retrying after a 429 Capacity Exhausted response. ladder for base=200ms, cap=10s: [1, 1, 1, 2, 4, 7, 10] for consecutive denials 1. 7; clamps at 10 thereafter. Anonymous callers (no api_key + no client_ip) always receive 1.",
+        "schema": {
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+        }
+      }
+    },
     "schemas": {
       "AgentBudgetExceededEnvelope": {
-        "description": "per-session `max_total_llm_calls` budget exceeded. The session is tombstoned atomically inside `llm_provider.dispatch`; subsequent `/v1/agent` calls against the same session_id return 404 (session ended). Header `X-GhostCrawl-Warning: budget-exceeded` is copied to the actual HTTP response by the serving gateway.",
+        "description": "per-session `max_total_llm_calls` budget exceeded. The session is tombstoned atomically inside `llm_provider.dispatch`; subsequent `/v1/agent` calls against the same session_id return 404 (session ended). Header `X-Ghostcrawl-Warning: budget-exceeded` is copied to the actual HTTP response by the serving gateway.",
         "properties": {
           "headers": {
             "properties": {
-              "X-GhostCrawl-Warning": {
+              "X-Ghostcrawl-Warning": {
                 "enum": [
                   "budget-exceeded"
                 ],
@@ -162,49 +172,58 @@
         ],
         "type": "object"
       },
-      "AuthContext": {
+      "ArrivalBody": {
         "properties": {
-          "comp": {
-            "default": false,
-            "title": "Comp",
-            "type": "boolean"
-          },
-          "is_admin": {
-            "title": "Is Admin",
-            "type": "boolean"
-          },
-          "key_env": {
-            "title": "Key Env",
+          "dest_url": {
+            "title": "Dest Url",
             "type": "string"
           },
-          "team_id": {
-            "format": "uuid",
-            "title": "Team Id",
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "referrer_shape": {
+            "default": "origin",
+            "enum": [
+              "origin",
+              "full"
+            ],
+            "title": "Referrer Shape",
             "type": "string"
           },
-          "tier": {
-            "default": "free",
-            "title": "Tier",
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source_title": {
+            "default": "",
+            "title": "Source Title",
             "type": "string"
           },
-          "user_id": {
-            "title": "User Id",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
+          "source_url": {
+            "title": "Source Url",
             "type": "string"
           }
         },
         "required": [
-          "team_id",
-          "workspace_id",
-          "user_id",
-          "key_env",
-          "is_admin"
+          "dest_url",
+          "source_url"
         ],
-        "title": "AuthContext",
+        "title": "ArrivalBody",
         "type": "object"
       },
       "BatchScrapeRequest": {
@@ -424,6 +443,102 @@
         "title": "CdpFrameRequest",
         "type": "object"
       },
+      "CdpInputRequest": {
+        "description": "POST /v1/cdp/input body. Drives a live interactive session. ``step_type`` is one of navigate/click/type: * navigate → ``url`` * click → ``x``/``y`` (CSS px) + optional ``button`` * type → ``text``",
+        "properties": {
+          "button": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Button"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "step_type": {
+            "enum": [
+              "navigate",
+              "click",
+              "type"
+            ],
+            "title": "Step Type",
+            "type": "string"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "wait_until": {
+            "anyOf": [
+              {
+                "enum": [
+                  "commit",
+                  "domcontentloaded",
+                  "load",
+                  "networkidle"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wait Until"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
+          }
+        },
+        "required": [
+          "session_id",
+          "step_type"
+        ],
+        "title": "CdpInputRequest",
+        "type": "object"
+      },
       "CdpUrlRequest": {
         "properties": {
           "session_id": {
@@ -435,6 +550,41 @@
           "session_id"
         ],
         "title": "CdpUrlRequest",
+        "type": "object"
+      },
+      "ClosePopupsBody": {
+        "properties": {
+          "keep_host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keep Host"
+          },
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id"
+        ],
+        "title": "ClosePopupsBody",
         "type": "object"
       },
       "ContentRequest": {
@@ -461,6 +611,12 @@
             ],
             "title": "Format",
             "type": "string"
+          },
+          "geo_force": {
+            "default": false,
+            "description": "Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).",
+            "title": "Geo Force",
+            "type": "boolean"
           },
           "identity": {
             "anyOf": [
@@ -683,12 +839,23 @@
             "title": "Path"
           },
           "profile_id": {
-            "title": "Profile Id",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "session_id": {
+            "title": "Session Id",
             "type": "string"
           }
         },
         "required": [
-          "profile_id"
+          "session_id"
         ],
         "title": "CookiesDeleteBody",
         "type": "object"
@@ -703,12 +870,23 @@
             "type": "array"
           },
           "profile_id": {
-            "title": "Profile Id",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "session_id": {
+            "title": "Session Id",
             "type": "string"
           }
         },
         "required": [
-          "profile_id",
+          "session_id",
           "cookies"
         ],
         "title": "CookiesSetBody",
@@ -840,12 +1018,23 @@
       "DomSnapshotBody": {
         "properties": {
           "profile_id": {
-            "title": "Profile Id",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "session_id": {
+            "title": "Session Id",
             "type": "string"
           }
         },
         "required": [
-          "profile_id"
+          "session_id"
         ],
         "title": "DomSnapshotBody",
         "type": "object"
@@ -853,7 +1042,18 @@
       "DownloadBody": {
         "properties": {
           "profile_id": {
-            "title": "Profile Id",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "session_id": {
+            "title": "Session Id",
             "type": "string"
           },
           "trigger_selector": {
@@ -862,7 +1062,7 @@
           }
         },
         "required": [
-          "profile_id",
+          "session_id",
           "trigger_selector"
         ],
         "title": "DownloadBody",
@@ -903,7 +1103,7 @@
           "lane": {
             "type": "string"
           },
-          "mask_layer": {
+          "identity_layer": {
             "enum": [
               "managed"
             ],
@@ -936,7 +1136,7 @@
           "route",
           "lane",
           "engine_public_names",
-          "mask_layer",
+          "identity_layer",
           "runtime_dna",
           "issued_at"
         ],
@@ -1015,16 +1215,33 @@
       "EvalBody": {
         "properties": {
           "profile_id": {
-            "title": "Profile Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
           },
           "script": {
             "title": "Script",
             "type": "string"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
           }
         },
         "required": [
-          "profile_id",
           "script"
         ],
         "title": "EvalBody",
@@ -1052,7 +1269,7 @@
         "type": "object"
       },
       "ExtractRequest": {
-        "description": "POST /v1/extract request body, schema-driven extraction (deterministic) + bring-your-own-model extraction. Two extraction modes: - Deterministic (default, model_provider absent): CSS/regex/keyword extraction. Requires 'schema'. Returns {\"url\",\"data\",\"token_estimate\"}. - Bring-your-own-model (model_provider present): GhostCrawl fetches and prepares clean Markdown; your connected model performs the semantic extraction (you are not billed for model inference here, only the request quota). Returns {\"urls\",\"data\",\"token_estimate\"}. Security notes: - The 'schema' field is validated before any fetch (fail-fast input guard). - URLs are validated against private, loopback, and metadata targets before any fetch. - Error responses never echo the schema body, fetched content, or model credentials. - model_provider.api_key is request-scoped only: never persisted, logged, or returned in any response body or error message.",
+        "description": "POST /v1/extract request body, schema-driven extraction (deterministic) + bring-your-own-model extraction. Two extraction modes: - Deterministic (default, model_provider absent): native structured-data extraction, reads the schema.org JSON-LD / microdata / Open Graph a page already embeds and fills the schema (no model, no third party); returns whole priced product grids. Requires 'schema'. Returns {\"url\",\"data\",\"token_estimate\"}. - Bring-your-own-model (model_provider present): GhostCrawl fetches and prepares clean Markdown; your connected model performs the semantic extraction (you are not billed for model inference here, only the request quota). Returns {\"urls\",\"data\",\"token_estimate\"}. Security notes: - The 'schema' field is validated before any fetch (fail-fast input guard). - URLs are validated against private, loopback, and metadata targets before any fetch. - Error responses never echo the schema body, fetched content, or model credentials. - model_provider.api_key is request-scoped only: never persisted, logged, or returned in any response body or error message.",
         "properties": {
           "behavior_actions": {
             "anyOf": [
@@ -1067,7 +1284,7 @@
                 "type": "null"
               }
             ],
-            "description": "BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in human session. Sanitized + bounded server-side (max 256 actions). Available on every tier.",
+            "description": "BYO behavior: trusted-input actions replayed on the loaded page instead of the built-in browser session. Sanitized + bounded server-side (max 256 actions). Available on every tier.",
             "title": "Behavior Actions"
           },
           "engine": {
@@ -1082,6 +1299,12 @@
             "title": "Engine",
             "type": "string"
           },
+          "geo_force": {
+            "default": false,
+            "description": "Override geo-coherence: use `identity_country`'s geo (timezone + geolocation) REGARDLESS of the exit IP's country. Requires a pinned `identity_country` (and the geo_select tier). Off by default, the default is IP-coherent geo (the browser identity follows the exit). Forcing may create an IP<->timezone mismatch that some sites cross-check; opt-in at your own risk.",
+            "title": "Geo Force",
+            "type": "boolean"
+          },
           "identity_country": {
             "anyOf": [
               {
@@ -1095,6 +1318,19 @@
             ],
             "description": "Optional two-letter country code to pin (geo-filters the exit and derives timezone; tier-gated). Omitted = timezone follows the exit.",
             "title": "Identity Country"
+          },
+          "identity_spec": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Inline identity specification (Creates an ephemeral identity). Same shape as /v1/scrape: {operating system, browser, viewport|device_model}. Absent → default identity.",
+            "title": "Identity Spec"
           },
           "language": {
             "anyOf": [
@@ -1118,7 +1354,7 @@
                 "type": "null"
               }
             ],
-            "description": "BYO model credentials dict: {type, api_key, model, base_url?}. When present → BYO-LLM extraction path (GhostCrawl bills the request, not the inference tokens, inference runs on the user's connected model). When absent → deterministic CSS/regex/keyword extraction (default).",
+            "description": "BYO model credentials dict: {type, api_key, model, base_url?}. When present → BYO-LLM extraction path (GhostCrawl bills the request, not the inference tokens, inference runs on the user's connected model). When absent → deterministic native structured-data extraction (default): schema.org JSON-LD / microdata / Open Graph parsed into the schema, no model.",
             "title": "Model Provider"
           },
           "prompt": {
@@ -1130,7 +1366,7 @@
                 "type": "null"
               }
             ],
-            "description": "Free-form extraction instruction for BYO-LLM mode. Allowed without a schema (schema-less prose extraction). Ignored in deterministic mode (model_provider absent).",
+            "description": "Free-form extraction instruction. Requires a connected model: pass it WITH model_provider to run semantic extraction on your own AI/LLM. Sent WITHOUT model_provider it returns 422 model_provider_required (connect your AI/LLM). Allowed without a schema (schema-less prose extraction). GhostCrawl prepares the content; your model does the extraction.",
             "title": "Prompt"
           },
           "schema": {
@@ -1285,6 +1521,42 @@
         "title": "MapResponse",
         "type": "object"
       },
+      "MouseBody": {
+        "properties": {
+          "ops": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Ops",
+            "type": "array"
+          },
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "title": "MouseBody",
+        "type": "object"
+      },
       "PdfRequest": {
         "description": "POST /v1/pdf request body, render a URL to PDF. Renders the target URL to a PDF document. Supported on Chrome identities; requests that resolve to a Firefox or WebKit identity return 400 pdf_engine_unsupported. Security: - The URL is validated against private/loopback/metadata targets. - All traffic egresses through your configured proxy. - Subject to your daily request quota.",
         "properties": {
@@ -1299,6 +1571,12 @@
             ],
             "title": "Engine",
             "type": "string"
+          },
+          "geo_force": {
+            "default": false,
+            "description": "Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).",
+            "title": "Geo Force",
+            "type": "boolean"
           },
           "identity": {
             "anyOf": [
@@ -1456,7 +1734,7 @@
                 "type": "null"
               }
             ],
-            "description": "Public IdentityRequest spec (operating system, browser, device, viewport, locale, and timezone). The profile mints a STABLE deterministic identity_id from it, so every scrape with profile=<name> rehydrates the SAME fingerprint. When omitted, a default desktop-chrome identity is minted.",
+            "description": "Public IdentityRequest spec (operating system, browser, device, viewport, locale, and timezone). The profile mints a STABLE deterministic identity_id from it, so every scrape with profile=<name> rehydrates the SAME browser identity. When omitted, a default desktop-chrome identity is minted.",
             "title": "Identity Spec"
           },
           "name": {
@@ -1483,39 +1761,6 @@
           "name"
         ],
         "title": "ProfileCreateRequest",
-        "type": "object"
-      },
-      "ProfileUpdateRequest": {
-        "description": "PUT /v1/profiles/{name} body, rename and/or rebind storage_state.",
-        "properties": {
-          "name": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "New name (rename). Unique per org.",
-            "title": "Name"
-          },
-          "storage_state_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Rebind storage_state id. Pass null to keep; use empty string '' to clear.",
-            "title": "Storage State Id"
-          }
-        },
-        "title": "ProfileUpdateRequest",
         "type": "object"
       },
       "ProxyConfig": {
@@ -1684,7 +1929,7 @@
       },
       "ScrapePageResult": {
         "additionalProperties": true,
-        "description": "One per-URL scrape result inside ScrapeResult.results. ``extra=\"allow\"`` because the fleet/ attaches additional diagnostic members (headers, resolved_url, identity_id, result_error,.) that vary by engine + path; the documented core is what every SDK reads.",
+        "description": "One per-URL scrape result inside ScrapeResult.results. Additional diagnostic members (headers, resolved_url, identity_id, result_error,.) may be present and vary by engine; the documented core fields are what every SDK reads.",
         "properties": {
           "html": {
             "anyOf": [
@@ -1777,7 +2022,7 @@
                 "type": "null"
               }
             ],
-            "description": "BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in human session. Each item is {\"kind\":\"move\",\"x\":int,\"y\":int} | {\"kind\":\"wheel\",\"x\":int,\"y\":int,\"dy\":int} | {\"kind\":\"dwell\",\"ms\":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.",
+            "description": "BYO behavior: a list of trusted-input actions replayed on the loaded page instead of the built-in browser session. Each item is {\"kind\":\"move\",\"x\":int,\"y\":int} | {\"kind\":\"wheel\",\"x\":int,\"y\":int,\"dy\":int} | {\"kind\":\"dwell\",\"ms\":int}. Sanitized + bounded server-side (max 256 actions). Available on every tier.",
             "title": "Behavior Actions"
           },
           "chunk_tokens": {
@@ -1788,7 +2033,7 @@
           },
           "engine": {
             "default": "auto",
-            "description": "Engine override. 'auto' (default): the identity's fingerprint decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.",
+            "description": "Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.",
             "enum": [
               "auto",
               "chrome",
@@ -1813,6 +2058,12 @@
             "default": false,
             "description": "When screenshot=true, capture the FULL document height instead of just the visible viewport. Ignored when screenshot_selector is set.",
             "title": "Full Page",
+            "type": "boolean"
+          },
+          "geo_force": {
+            "default": false,
+            "description": "Override geo-coherence: use `identity_country`'s geo (timezone + geolocation) REGARDLESS of the exit IP's country. Requires a pinned `identity_country` (and the geo_select tier). Off by default, the default is IP-coherent geo (the browser identity follows the exit). Forcing may create an IP<->timezone mismatch that some sites cross-check; opt-in at your own risk.",
+            "title": "Geo Force",
             "type": "boolean"
           },
           "identity": {
@@ -1881,7 +2132,7 @@
                 "type": "null"
               }
             ],
-            "description": "Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ same deterministic fingerprint) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.",
+            "description": "Named persistent profile (multi-accounting). Resolves to a durable identity_id (→ the same browser identity every time) + optional saved storage_state (→ cookies/localStorage) for the calling org. Reuses the exact identity+cookies on every request, with no 30-minute sticky-session expiry. 404 if the named profile does not exist for the org.",
             "title": "Profile"
           },
           "proxy": {
@@ -1981,6 +2232,20 @@
               }
             ],
             "title": "Urls"
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "random",
+              "random_desktop",
+              "random_mobile",
+              "random_windows",
+              "random_android",
+              "random_ios"
+            ],
+            "title": "Device",
+            "description": "Device class for the population identity draw. 'random' (default) = unchanged. The random_* classes restrict which real-population devices may be drawn (weights inside the class unchanged); with engine 'auto' the engine follows the drawn device (iOS -> webkit always, android -> chrome). An engine the class cannot render on -> 422 device_engine_mismatch. Not combinable with identity / profile; identity_spec's operating system must lie inside the class. For a fixed device use profile=<name>. Cloud only: where no population draw runs (self-host / direct egress) a non-random class -> 422 device_unsupported.",
+            "default": "random"
           }
         },
         "title": "ScrapeRequest",
@@ -2105,6 +2370,12 @@
             "title": "Full Page",
             "type": "boolean"
           },
+          "geo_force": {
+            "default": false,
+            "description": "Bypass geo-coherence: claim identity_country's geo (timezone + geolocation) REGARDLESS of the exit IP. Requires a pinned identity_country + geo_select tier. Default off (geo follows the exit; forcing may create an IP<->timezone mismatch).",
+            "title": "Geo Force",
+            "type": "boolean"
+          },
           "identity": {
             "anyOf": [
               {
@@ -2205,6 +2476,7 @@
       "ScrollBody": {
         "properties": {
           "direction": {
+            "default": "down",
             "enum": [
               "up",
               "down",
@@ -2227,9 +2499,27 @@
             ],
             "title": "Distance Px"
           },
+          "dy": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dy"
+          },
           "profile_id": {
-            "title": "Profile Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
           },
           "selector": {
             "anyOf": [
@@ -2241,12 +2531,19 @@
               }
             ],
             "title": "Selector"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
           }
         },
-        "required": [
-          "profile_id",
-          "direction"
-        ],
         "title": "ScrollBody",
         "type": "object"
       },
@@ -2274,7 +2571,7 @@
                 "type": "null"
               }
             ],
-            "description": "Search engine to use: 'brave', 'tavily', 'google', 'bing', or 'yandex'. May also be passed via X-GhostCrawl-Search-Engine header.",
+            "description": "Search engine to use: 'brave', 'tavily', 'google', 'bing', or 'yandex'. May also be passed via X-Ghostcrawl-Search-Engine header.",
             "title": "Engine"
           },
           "extra_params": {
@@ -2357,7 +2654,20 @@
                 "type": "null"
               }
             ],
-            "title": "Identity Config"
+            "title": "Identity Config",
+            "description": "Explicit identity claim (IdentityRequest shape: operating system, browser, device_model, viewport, locale, timezone, reuse_identity_seed). viewport is optional: a desktop claim (windows/macos/linux) without viewport defaults to \"any\" (a prevalence-weighted real windowed size for that claim, the same draw as the population default). A mobile claim (ios/android) takes its viewport from device_model; without device_model a prevalence-weighted catalog device is drawn. Omit identity_config entirely to draw a population identity for the requested engine. reuse_identity_seed (returning visitor): send back the `reuse_identity_seed` value a previous create from YOUR org returned to get the same device again; it is scoped to your organization server-side (another org sending the same value gets an unrelated device). identity_id is NOT a replay handle; a non-integer value is ignored (fresh device)."
+          },
+          "identity_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Geo-pin for the residential exit (ISO country, e.g. 'US'). The session's timezone/geolocation follow the drawn exit's country (geo-coherence).",
+            "title": "Identity Country"
           },
           "profile": {
             "anyOf": [
@@ -2368,7 +2678,7 @@
                 "type": "null"
               }
             ],
-            "description": "Rehydrates the saved identity bundle for this session, same deterministic fingerprint as /v1/scrape with profile=<name>.",
+            "description": "Named persistent profile. Rehydrates the saved identity bundle for this session, the same browser identity as /v1/scrape with profile=<name>.",
             "title": "Profile"
           },
           "proxy": {
@@ -2382,6 +2692,35 @@
               }
             ],
             "title": "Proxy"
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "random",
+              "random_desktop",
+              "random_mobile",
+              "random_windows",
+              "random_android",
+              "random_ios",
+              "static"
+            ],
+            "title": "Device",
+            "description": "Device class for the population identity draw. 'random' (default) = the unchanged population draw for the requested engine. 'random_desktop' (windows/macos/linux), 'random_mobile' (ios/android), 'random_windows', 'random_android', 'random_ios' restrict WHICH real-population devices may be drawn; the weights inside the class stay the real OS/browser/device shares. When engine is omitted (or 'auto') the engine is routed from the drawn device: iOS -> webkit (always), android -> chrome, desktop -> chrome/firefox/webkit per the real browser share. An explicit engine the class cannot render on (e.g. random_ios + chrome) is rejected with 422 device_engine_mismatch, never re-routed. NOTE: an explicitly sent engine='chrome' counts as explicit even though it equals the default, so a client that always serializes engine must send 'auto' (or omit it) with random_ios / random_mobile. With identity_config/profile the operating system must lie inside the class (422 device_identity_mismatch). 'static' pins ONE fixed device: pass device_seed (the same seed always yields the same device and a byte-stable fingerprint), or a profile, or an identity_config carrying reuse_identity_seed (422 device_static_requires_seed otherwise).",
+            "default": "random"
+          },
+          "device_seed": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 9.223372036854776e+18,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Seed",
+            "description": "device='static' only: a stable non-negative integer, scoped to YOUR organization (the server derives the identity from org + seed, so another org's seed 1 is a different device). Seeds the population device draw AND pins the fingerprint, so every create from this org with the same seed (and engine) is the same device. Store it to bring the same device back."
           }
         },
         "title": "SessionCreateRequest",
@@ -2419,6 +2758,46 @@
         "title": "StorageStateDetachRequest",
         "type": "object"
       },
+      "TabVisitBody": {
+        "properties": {
+          "dwell_s": {
+            "default": 3,
+            "title": "Dwell S",
+            "type": "number"
+          },
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "TabVisitBody",
+        "type": "object"
+      },
       "TakeoverActionBody": {
         "description": "",
         "properties": {
@@ -2432,6 +2811,42 @@
           "action"
         ],
         "title": "TakeoverActionBody",
+        "type": "object"
+      },
+      "TouchBody": {
+        "properties": {
+          "ops": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Ops",
+            "type": "array"
+          },
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          }
+        },
+        "title": "TouchBody",
         "type": "object"
       },
       "UploadBody": {
@@ -2449,16 +2864,27 @@
             "type": "string"
           },
           "profile_id": {
-            "title": "Profile Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
           },
           "selector": {
             "title": "Selector",
             "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
           }
         },
         "required": [
-          "profile_id",
+          "session_id",
           "selector",
           "filename",
           "mime",
@@ -2470,8 +2896,15 @@
       "WaitBody": {
         "properties": {
           "profile_id": {
-            "title": "Profile Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id"
           },
           "selector": {
             "anyOf": [
@@ -2484,6 +2917,10 @@
             ],
             "title": "Selector"
           },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
           "timeout_ms": {
             "default": 30000,
             "maximum": 120000,
@@ -2493,7 +2930,7 @@
           }
         },
         "required": [
-          "profile_id"
+          "session_id"
         ],
         "title": "WaitBody",
         "type": "object"
@@ -2793,6 +3230,39 @@
         "title": "WebhookPublic",
         "type": "object"
       },
+      "ghostcrawl__api__routes__profiles__ProfileUpdateRequest": {
+        "description": "PUT /v1/profiles/{name} body, rename and/or rebind storage_state.",
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "New name (rename). Unique per org.",
+            "title": "Name"
+          },
+          "storage_state_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rebind storage_state id. Pass null to keep; use empty string '' to clear.",
+            "title": "Storage State Id"
+          }
+        },
+        "title": "ProfileUpdateRequest",
+        "type": "object"
+      },
       "ErrorCode": {
         "type": "string",
         "enum": [
@@ -2804,6 +3274,7 @@
           "conflict",
           "byo_proxy_invalid",
           "tier_unavailable",
+          "routing_mode_incoherent_claim_os",
           "rate_limited",
           "quota_backend_unavailable",
           "pool_exhausted",
@@ -2824,7 +3295,7 @@
       },
       "ResultError": {
         "type": "object",
-        "description": "Present inside a 200 response when the request ran but the target site could not be retrieved successfully (an HTTP error from the site, an anti-bot wall, a CAPTCHA, an unreachable host, or no extractable content). The result also carries `ok: false`.",
+        "description": "Present inside a 200 response when the request ran but the target site could not be retrieved successfully (an HTTP error from the site, a site block, a CAPTCHA, an unreachable host, or no extractable content). The result also carries `ok: false`.",
         "properties": {
           "code": {
             "allOf": [
@@ -2957,27 +3428,18 @@
           }
         }
       }
-    },
-    "headers": {
-      "RetryAfter": {
-        "description": "Seconds to wait before retrying after a 429 (capacity exhausted) or 503 response.",
-        "schema": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 10
-        }
-      }
     }
   },
   "info": {
     "description": "The GhostCrawl web data API: scrape, crawl, search, and extract any URL with real browser engines and consistent identity profiles.",
     "title": "GhostCrawl API",
-    "version": "2.3.0"
+    "version": "2.3.8"
   },
   "openapi": "3.1.0",
   "paths": {
     "/v1/agent": {
       "post": {
+        "description": "BETA / opt-in. The REST agent lane is disabled by default and returns 404 until enabled for your account/deployment, see the 404 response below. The agent capability is generally available via the MCP `ghostcrawl_agent` tool; this REST surface is still stabilising. Contact support to enable it.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3013,7 +3475,7 @@
                 }
               }
             },
-            "description": "Returned when the agent capability is not enabled for this account or deployment. The agent lane runs server-side orchestration, the navigate / act / observe steps execute on GhostCrawl's managed browser fleet, and calls your bring-your-own (BYO) LLM for the reasoning step via the `X-LLM-Api-Key` / `X-LLM-Provider` request headers. While the capability is not enabled the route returns 404 (indistinguishable from a non-existent route, for; once enabled it returns the agent execution envelope. The BYO LLM is the only part you supply, the orchestration itself is hosted."
+            "description": "Returned when the agent capability is not enabled for this account or deployment. The agent lane runs server-side orchestration, the navigate / act / observe steps execute on GhostCrawl's managed browsers, and calls your bring-your-own (BYO) LLM for the reasoning step via the `X-LLM-Api-Key` / `X-LLM-Provider` request headers. While the capability is not enabled the route returns 404 (indistinguishable from a non-existent route, for; once enabled it returns the agent execution envelope. The BYO LLM is the only part you supply, the orchestration itself is hosted."
           },
           "429": {
             "content": {
@@ -3030,12 +3492,12 @@
                 }
               }
             },
-            "description": "Either capacity exhausted (Retry-After header present, CapacityExhausted429 body) or per-session max_total_llm_calls budget exceeded (X-GhostCrawl-Warning: budget-exceeded).",
+            "description": "Either capacity exhausted (Retry-After header present, CapacityExhausted429 body) or per-session max_total_llm_calls budget exceeded (X-Ghostcrawl-Warning: budget-exceeded).",
             "headers": {
               "Retry-After": {
                 "$ref": "#/components/headers/RetryAfter"
               },
-              "X-GhostCrawl-Warning": {
+              "X-Ghostcrawl-Warning": {
                 "schema": {
                   "enum": [
                     "budget-exceeded"
@@ -3056,12 +3518,13 @@
             "description": "Startup config-preflight gate blocked request handling"
           }
         },
-        "summary": "Start agent lane request"
+        "summary": "Start agent lane request (beta, opt-in; 404 until enabled for your account)",
+        "x-beta": true
       }
     },
     "/v1/cdp/frame": {
       "post": {
-        "description": "Engine-agnostic live-view frame capture (cross-engine). Returns a single base64-encoded JPEG frame of a live interactive session, using the same capture path across Chromium, Firefox, and WebKit. Gating: 1. Tenant authentication 2. Revocation check 3. 4. Session ownership (the session must belong to the authenticated organisation) Returns 200 {\"format\":\"jpeg\",\"data\":\"<base64>\",\"engine\",\"width\",\"height\"} on success; 403 cdp_not_enabled (tier) / cdp_revoked; 404 session_not_found; 502 frame_failed.",
+        "description": "Capture a JPEG frame of a live browser session. Returns a single base64-encoded JPEG frame of a live interactive session. Gating: 1. Tenant authentication 2. Revocation check 3. 4. Session ownership (the session must belong to the authenticated organisation) Returns 200 {\"format\":\"jpeg\",\"data\":\"<base64>\",\"engine\",\"width\",\"height\"} on success; 403 cdp_not_enabled (tier) / cdp_revoked; 404 session_not_found; 502 frame_failed.",
         "operationId": "cdp_frame_v1_cdp_frame_post",
         "parameters": [
           {
@@ -3078,6 +3541,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -3123,6 +3602,86 @@
         ]
       }
     },
+    "/v1/cdp/input": {
+      "post": {
+        "description": "Drive a live interactive session. Dispatches a navigate/click/type step to the session: * navigate → {url} * click → {x, y, button} * type → {text} Returns 200 {\"ok\": true, \"step_type\":.} on success; 403 cdp_not_enabled / cdp_revoked; 404 session_not_found; 502 input_failed.",
+        "operationId": "cdp_input_v1_cdp_input_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CdpInputRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Drive a live session (navigate/click/type)",
+        "tags": [
+          "cdp",
+          "cdp"
+        ]
+      }
+    },
     "/v1/cdp/url": {
       "post": {
         "description": "Mint a short-TTL signed URL for cloud CDP access. Returns 200 {\"url\": \"wss://.\", \"expires_in_seconds\": 120} on success.",
@@ -3142,6 +3701,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -3206,6 +3781,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -3351,6 +3942,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -3400,6 +4007,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           },
           {
@@ -3482,7 +4105,7 @@
     },
     "/v1/crawl-runs/{run_id}": {
       "get": {
-        "description": "status, plus OPT-IN long-poll. Default (``wait`` absent/false): instant status snapshot, behavior unchanged. ``?wait=true&timeout_s=N``: BLOCKS event-driven (same cross-worker `` signal as start-and-wait) until the run reaches a terminal state (completed|cancelled|failed|failed_resumable) or ``timeout_s`` elapses, THEN returns the run record (results included when completed). A timeout returns the CURRENT non-terminal run as HTTP 200, a long-poll, NOT an error. ``timeout_s`` defaults to 300 and is capped at a server-configured maximum (default 600).",
+        "description": "status, plus OPT-IN long-poll. Default (``wait`` absent/false): instant status snapshot, behavior unchanged. ``?wait=true&timeout_s=N``: BLOCKS (event-driven, the same completion signal start-and-wait uses) until the run reaches a terminal state (completed|cancelled|failed|failed_resumable) or ``timeout_s`` elapses, THEN returns the run record (results included when completed). A timeout returns the CURRENT non-terminal run as HTTP 200, a long-poll, NOT an error. ``timeout_s`` defaults to 300 and is capped at a server-configured maximum (default 600).",
         "operationId": "get_crawl_run_v1_crawl_runs__run_id__get",
         "parameters": [
           {
@@ -3528,6 +4151,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -3613,6 +4252,22 @@
             }
           },
           {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
             "example": "01HX4RZPQ8XVWMQFGKN3JST7BZ",
             "in": "header",
             "name": "Idempotency-Key",
@@ -3687,6 +4342,22 @@
             }
           },
           {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
             "example": "01HX4RZPQ8XVWMQFGKN3JST7BZ",
             "in": "header",
             "name": "Idempotency-Key",
@@ -3750,6 +4421,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           },
           {
@@ -3835,6 +4522,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -3970,6 +4673,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -4020,6 +4739,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -4095,6 +4830,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -4154,6 +4905,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -4245,6 +5012,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -4306,6 +5089,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -4372,6 +5171,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -4436,6 +5251,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -4464,7 +5295,7 @@
         ]
       },
       "get": {
-        "description": "GET /v1/downloads/{id} → the download's signed retrieval link / metadata. we do not confirm existence of another tenant's artifact).",
+        "description": "GET /v1/downloads/{id} → the captured artifact bytes (or its metadata). When the capture banked its bytes (the producer path), stream them as an ``application/octet-stream`` attachment so the dashboard's blob download and the SDK both retrieve a real file. Falls back to the metadata JSON for a metadata-only capture. we do not confirm existence of another tenant's artifact).",
         "operationId": "get_download_v1_downloads__download_id__get",
         "parameters": [
           {
@@ -4492,6 +5323,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -4528,7 +5375,7 @@
     },
     "/v1/extract": {
       "post": {
-        "description": "structured extraction (deterministic default) + bring-your-own-model extraction. Two modes (selected by model_provider): DETERMINISTIC (model_provider absent, default): 1. The schema is validated (input guard). 2. The URL is validated against private/loopback/metadata targets. 3. The page is fetched and rendered. 4. Structured data is extracted via CSS/regex/keyword rules. 5. The result is validated against the schema, 422 on mismatch (field path only). Returns {\"url\",\"data\",\"token_estimate\"}. BRING-YOUR-OWN-MODEL (model_provider present): 1. Target URLs are resolved (urls or [url]). 2. The schema is validated if present. 3. At least one of prompt or schema is required, 400 prompt_or_schema_required otherwise. 4. Model credentials are validated, 400 invalid_model_provider on error (the message never echoes the key). 5. Every target URL is validated before fetching, 400 ssrf_blocked. 6. Each URL is fetched and converted to clean Markdown. 7. Your connected model performs the extraction. 8. With a schema present, the result is validated, 422 on mismatch. Returns {\"urls\",\"data\",\"token_estimate\"}. Security: 401 without a valid Bearer token. - model_provider.api_key is request-scoped: never persisted, logged, or echoed. - Error responses never echo the schema body, fetched content, or credentials.",
+        "description": "structured extraction: deterministic (no model) or connect-your-model. GhostCrawl is a HARNESS, not an AI provider: it fetches and prepares clean content; your OWN connected model does any semantic extraction. GhostCrawl never runs inference on an operator key. CONNECT-YOUR-AI (a prompt but NO model_provider): returns 422 model_provider_required, connect your AI/LLM (pass model_provider) to run semantic extraction. Never a silent empty. DETERMINISTIC (model_provider absent, default): 1. The schema is validated (input guard). 2. The URL is validated against private/loopback/metadata targets. 3. The page is fetched and rendered. 4. Structured data is read natively from the page's schema.org JSON-LD / microdata / Open Graph. 5. The result is validated against the schema, 422 on mismatch (field path only). Returns {\"url\",\"data\",\"token_estimate\"}. When the page embedded NO matching structured data (every field null/empty), the response also carries a non-fatal \"warnings\":[\"no_structured_data: …pass model_provider…\"] so an all-null 200 is not mistaken for a failure. BRING-YOUR-OWN-MODEL (model_provider present): 1. Target URLs are resolved (urls or [url]). 2. The schema is validated if present. 3. At least one of prompt or schema is required, 400 prompt_or_schema_required otherwise. 4. Model credentials are validated, 400 invalid_model_provider on error (the message never echoes the key). 5. Every target URL is validated before fetching, 400 ssrf_blocked. 6. Each URL is fetched and converted to clean Markdown. 7. Your connected model performs the extraction. 8. With a schema present, the result is validated, 422 on mismatch. Returns {\"urls\",\"data\",\"token_estimate\"}. Security: 401 without a valid Bearer token. - model_provider.api_key is request-scoped: never persisted, logged, or echoed. - Error responses never echo the schema body, fetched content, or credentials.",
         "operationId": "saas_extract_v1_extract_post",
         "parameters": [
           {
@@ -4545,6 +5392,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           },
           {
@@ -4656,6 +5519,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -4716,6 +5595,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -4775,6 +5670,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -4841,6 +5752,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "requestBody": {
@@ -4886,8 +5813,167 @@
         ]
       }
     },
+    "/v1/page/arrival": {
+      "post": {
+        "description": "Arrive at ``dest_url`` through a native link click from ``source_url``, engine-agnostic, so document.referrer, the Referer header and Sec-Fetch-* are produced natively by the click. Both URLs are validated server-side. Tier and ownership checks mirror /v1/cdp/input.",
+        "operationId": "page_arrival_v1_page_arrival_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArrivalBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Arrive at a page through a link click on a live session",
+        "tags": [
+          "page"
+        ]
+      }
+    },
+    "/v1/page/close-popups": {
+      "post": {
+        "description": "Close any popup tab opened on a live cloud session (works on every engine). Every non-primary, off-host http page is closed while the primary page and same-host tabs are kept. Returns ``{closed: [urls], count}``. Tier and ownership checks mirror the other page tools.",
+        "operationId": "page_close_popups_v1_page_close_popups_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClosePopupsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Close popup tabs on a live cloud session",
+        "tags": [
+          "page"
+        ]
+      }
+    },
     "/v1/page/cookies": {
       "delete": {
+        "description": "Delete cookies from the browser context of a live cloud session. With a name/domain/path filter only the matching cookies are removed; without a filter every cookie in the session is cleared.",
         "operationId": "page_cookies_delete_v1_page_cookies_delete",
         "parameters": [
           {
@@ -4904,6 +5990,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -4942,20 +6044,21 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Delete cookies",
+        "summary": "Delete cookies on a live cloud session",
         "tags": [
           "page"
         ]
       },
       "get": {
+        "description": "Read cookies from the browser context of a live cloud session. Optionally filter by cookie ``name`` and/or ``domain``.",
         "operationId": "page_cookies_get_v1_page_cookies_get",
         "parameters": [
           {
             "in": "query",
-            "name": "profile_id",
+            "name": "session_id",
             "required": true,
             "schema": {
-              "title": "Profile Id",
+              "title": "Session Id",
               "type": "string"
             }
           },
@@ -5006,6 +6109,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -5033,12 +6152,13 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get cookies",
+        "summary": "Get cookies from a live cloud session",
         "tags": [
           "page"
         ]
       },
       "post": {
+        "description": "Add cookies to the browser context of a live cloud session.",
         "operationId": "page_cookies_set_v1_page_cookies_post",
         "parameters": [
           {
@@ -5055,6 +6175,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -5093,7 +6229,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Set cookies",
+        "summary": "Set cookies on a live cloud session",
         "tags": [
           "page"
         ]
@@ -5101,7 +6237,7 @@
     },
     "/v1/page/dom_snapshot": {
       "post": {
-        "description": "Return ``page.content`` for the live session, capped at 5 MB. callers retry with finer scope or fall back to /v1/page/eval for selector-rooted extraction.",
+        "description": "Return the current HTML of the live session's page, capped at 5 MB. Over the cap the response is ``truncated=True`` with ``dom=None``; retry with a narrower scope or use /v1/page/eval to extract a fragment.",
         "operationId": "page_dom_snapshot_v1_page_dom_snapshot_post",
         "parameters": [
           {
@@ -5118,6 +6254,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -5156,7 +6308,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Capture page DOM snapshot",
+        "summary": "Capture a DOM snapshot of a live cloud session",
         "tags": [
           "observability"
         ]
@@ -5164,6 +6316,7 @@
     },
     "/v1/page/download": {
       "post": {
+        "description": "Trigger and capture a download on a live session. Clicks the trigger, captures the resulting file and returns its bytes as base64 (inline cap 10 MB; a larger file returns 403 ``too_large``). The captured file is also saved to your Downloads.",
         "operationId": "page_download_v1_page_download_post",
         "parameters": [
           {
@@ -5180,6 +6333,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -5218,7 +6387,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Trigger and capture a download",
+        "summary": "Trigger and capture a download from a live cloud session",
         "tags": [
           "page"
         ]
@@ -5243,6 +6412,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -5307,6 +6492,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "requestBody": {
@@ -5350,8 +6551,88 @@
         ]
       }
     },
+    "/v1/page/mouse": {
+      "post": {
+        "description": "Replay a mouse op-stream (move/down/up/wheel/dwell) natively on the live page of the pinned session. Engine-agnostic: every engine receives the same trusted pointer trajectory and settled click. Tier and ownership checks mirror /v1/cdp/input.",
+        "operationId": "page_mouse_v1_page_mouse_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MouseBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Replay a mouse op-stream on a live cloud session",
+        "tags": [
+          "page"
+        ]
+      }
+    },
     "/v1/page/scroll": {
       "post": {
+        "description": "Scroll the page of a live cloud session. Tier and ownership checks mirror /v1/cdp/input.",
         "operationId": "page_scroll_v1_page_scroll_post",
         "parameters": [
           {
@@ -5368,6 +6649,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -5406,7 +6703,165 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Scroll page",
+        "summary": "Scroll the page of a live cloud session",
+        "tags": [
+          "page"
+        ]
+      }
+    },
+    "/v1/page/tab-visit": {
+      "post": {
+        "description": "Visit ``url`` in a real new tab of the session's context: load it, read it briefly, then close it (the session continues on its original tab). Chrome engine only; other engines return ``unsupported``. The URL is validated server-side. Tier and ownership checks mirror /v1/cdp/input.",
+        "operationId": "page_tab_visit_v1_page_tab_visit_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TabVisitBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Open, read and close a new tab on a live session",
+        "tags": [
+          "page"
+        ]
+      }
+    },
+    "/v1/page/touch": {
+      "post": {
+        "description": "Replay a touch op-stream (start/move/end taps) natively on the live page of the pinned session, so a mobile identity issues real trusted taps. Engine-agnostic. Tier and ownership checks mirror /v1/page/mouse.",
+        "operationId": "page_touch_v1_page_touch_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TouchBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Replay a touch op-stream on a live cloud session (mobile)",
         "tags": [
           "page"
         ]
@@ -5414,6 +6869,7 @@
     },
     "/v1/page/upload": {
       "post": {
+        "description": "Set a file <input> on the page of a live session to caller-supplied bytes. The base64-decoded file is size-capped before it is applied to the input.",
         "operationId": "page_upload_v1_page_upload_post",
         "parameters": [
           {
@@ -5430,6 +6886,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -5468,7 +6940,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Upload a file to a file input",
+        "summary": "Upload a file to a file input on a live cloud session",
         "tags": [
           "page"
         ]
@@ -5476,6 +6948,7 @@
     },
     "/v1/page/wait": {
       "post": {
+        "description": "Wait for a selector (or a timed wait) on the page of a live cloud session. A selector that never appears returns 404 ``selector_not_found``; a plain timed wait returns ``state:\"timeout\"``.",
         "operationId": "page_wait_v1_page_wait_post",
         "parameters": [
           {
@@ -5492,6 +6965,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -5530,7 +7019,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Wait for selector / timeout",
+        "summary": "Wait for a selector or a timeout on a live cloud session",
         "tags": [
           "page"
         ]
@@ -5556,6 +7045,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "requestBody": {
@@ -5570,15 +7075,10 @@
         },
         "responses": {
           "200": {
-            "description": "Rendered PDF bytes (application/pdf).",
             "content": {
-              "application/pdf": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
+              "application/pdf": {}
+            },
+            "description": "Rendered PDF bytes (application/pdf)."
           },
           "422": {
             "content": {
@@ -5703,6 +7203,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -5753,6 +7269,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -5826,6 +7358,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -5886,6 +7434,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -5919,7 +7483,7 @@
         ]
       },
       "put": {
-        "description": "rename and/or rebind storage_state. The identity_id is IMMUTABLE (changing it would silently change the fingerprint and break multi-accounting coherence). 404 if absent; 409 on rename collision.",
+        "description": "rename and/or rebind storage_state. The identity_id is IMMUTABLE (changing it would silently change the browser identity and break multi-accounting coherence). 404 if absent; 409 on rename collision.",
         "operationId": "update_profile_v1_profiles__name__put",
         "parameters": [
           {
@@ -5946,13 +7510,29 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProfileUpdateRequest"
+                "$ref": "#/components/schemas/ghostcrawl__api__routes__profiles__ProfileUpdateRequest"
               }
             }
           },
@@ -6090,6 +7670,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -6152,6 +7748,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -6206,6 +7818,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -6269,18 +7897,24 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AuthContext"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -6369,18 +8003,24 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AuthContext"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -6442,18 +8082,24 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AuthContext"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "201": {
             "content": {
@@ -6515,18 +8161,24 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AuthContext"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "200": {
             "content": {
@@ -6579,6 +8231,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -6629,6 +8297,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -6702,6 +8386,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -6762,6 +8462,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -6797,7 +8513,7 @@
     },
     "/v1/schedules/{schedule_id}/runs": {
       "get": {
-        "description": "synthetic run history from last_run_at. Returns a list of run summary objects derived from the schedule's stored last_run_at + last_result_hash. A schedule that has never fired returns an empty list. One that has fired returns a single summary with status='completed'. Status values: 'completed' (ran and produced a hash), 'pending' (never ran). This endpoint allows callers to poll for schedule execution without a separate run-history table, the writes last_run_at on every successful fire.",
+        "description": "run history derived from last_run_at. Returns a list of run summary objects derived from the schedule's stored last_run_at + last_result_hash. A schedule that has never fired returns an empty list. One that has fired returns a single summary with status='completed'. Status values: 'completed' (ran and produced a hash), 'pending' (never ran). This endpoint allows callers to poll for schedule execution without a separate run-history table, the writes last_run_at on every successful fire.",
         "operationId": "list_schedule_runs_v1_schedules__schedule_id__runs_get",
         "parameters": [
           {
@@ -6823,6 +8539,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -6876,6 +8608,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           },
           {
@@ -7017,6 +8765,22 @@
             }
           },
           {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          },
+          {
             "example": "01HX4RZPQ8XVWMQFGKN3JST7BZ",
             "in": "header",
             "name": "Idempotency-Key",
@@ -7113,6 +8877,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "requestBody": {
@@ -7127,15 +8907,10 @@
         },
         "responses": {
           "200": {
-            "description": "Rendered PNG bytes (image/png).",
             "content": {
-              "image/png": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
+              "image/png": {}
+            },
+            "description": "Rendered PNG bytes (image/png)."
           },
           "422": {
             "content": {
@@ -7188,6 +8963,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -7223,7 +9014,7 @@
     },
     "/v1/search": {
       "post": {
-        "description": "multi-backend search. Engine selection: ``engine`` body field or ``X-GhostCrawl-Search-Engine`` header. Auth: tenant bearer + customer's search API key via ``X-Provider-Authorization: Bearer <key>`` (never persisted).",
+        "description": "multi-backend search. Engine selection: ``engine`` body field or ``X-Ghostcrawl-Search-Engine`` header. Auth: tenant bearer + customer's search API key via ``X-Provider-Authorization: Bearer <key>`` (never persisted).",
         "operationId": "search_v1_search_post",
         "parameters": [
           {
@@ -7240,6 +9031,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           },
           {
@@ -7320,7 +9127,7 @@
     },
     "/v1/search/jobs/{job_id}": {
       "get": {
-        "description": "200 + SearchResult when done (real result items = GREEN); 202 {status:\"running\"} while the extended rotation is still going (carrying ``deadline``/``poll_max_seconds`` so the client loop is bounded); 200 {status:\"open\", items:[]} on honest exhaustion (challenged/0-result, never a faked GREEN); 200 {status:\"temporarily_unavailable\"} when the deadline passes with the record still ``running`` (lost worker, retryable terminal); 404 if unknown/expired/foreign. Ownership-scoped: a job created by another tenant reads as 404. BOUNDED-TERMINAL CONTRACT (no infinite poll): every poll resolves to a terminal within the stamped deadline REGARDLESS of worker health. A 404 is TERMINAL, the job expired or is unknown; the query may be retried at a HUMAN pace after Retry-After, but a 404 must NEVER be auto-interpreted as \"resubmit the same query in a tight loop\" (that is the one behavior that turns a recoverable miss into an infinite loop). See the SDK/MCP wrapper.",
+        "description": "200 + SearchResult when done (real result items = GREEN); 202 {status:\"running\"} while the extended rotation is still going (carrying ``deadline``/``poll_max_seconds`` so the client loop is bounded); 200 {status:\"open\", items:[]} on honest exhaustion (challenged/0-result, never a faked GREEN); 200 {status:\"temporarily_unavailable\"} when the deadline passes with the record still ``running`` (retryable terminal); 404 if unknown/expired/foreign. Ownership-scoped: a job created by another tenant reads as 404. BOUNDED-TERMINAL CONTRACT (no infinite poll): every poll resolves to a terminal within the stamped deadline, whatever happens server-side. A 404 is TERMINAL, the job expired or is unknown; the query may be retried at a HUMAN pace after Retry-After, but a 404 must NEVER be auto-interpreted as \"resubmit the same query in a tight loop\" (that is the one behavior that turns a recoverable miss into an infinite loop). See the SDK/MCP wrapper.",
         "operationId": "search_job_poll_v1_search_jobs__job_id__get",
         "parameters": [
           {
@@ -7348,6 +9155,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -7528,7 +9351,7 @@
     },
     "/v1/sessions": {
       "get": {
-        "description": "cursor-paginated listing of active sessions. Sessions created by scrape workers and via the API are unified in the same listing, all sessions for your organisation are visible. Results are strictly; no cross-organisation sessions are returned.",
+        "description": "cursor-paginated listing of active sessions. Sessions opened by scrape jobs and via the API are unified in the same listing, all sessions for your organisation are visible. Results are strictly; no cross-organisation sessions are returned.",
         "operationId": "list_sessions_v1_sessions_get",
         "parameters": [
           {
@@ -7627,6 +9450,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -7679,6 +9518,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -7752,6 +9607,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -7814,6 +9685,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -7847,6 +9734,84 @@
         ]
       }
     },
+    "/v1/sessions/{session_id}": {
+      "get": {
+        "description": "return the session lease record (org-owned) or 404. Reads; a missing lease OR a cross-org lease → 404). tenant_id is not echoed.",
+        "operationId": "get_session_v1_sessions__session_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a session by id (lease)",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
     "/v1/sessions/{session_id}/extend": {
       "post": {
         "description": "extend the session TTL. Reads session, verifies org ownership, then bumps the TTL by body.ttl_seconds (or a default extension).",
@@ -7875,6 +9840,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -7948,6 +9929,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -8010,6 +10007,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -8045,7 +10058,7 @@
     },
     "/v1/sessions/{session_id}/takeover": {
       "post": {
-        "description": "POST /v1/sessions/{id}/takeover with {\"action\": \"mint\"} delegates to the HMAC-token mint logic (same as /takeover_token). {\"action\": \"release\"} delegates to the control flag release logic (same as /takeover_release). with an action discriminator, while the underlying REST surface exposes two dedicated sub-paths. Both entry points share identical auth, tier,",
+        "description": "Start or release an interactive takeover of a live browser session. Send ``{\"action\": \"mint\"}`` to begin a takeover: you receive a short-lived token you can use to open the interactive session and drive it yourself. Send ``{\"action\": \"release\"}`` to hand control back and return the session to view-only. Requires a paid plan and ownership of the session.",
         "operationId": "takeover_action_dispatch_v1_sessions__session_id__takeover_post",
         "parameters": [
           {
@@ -8072,6 +10085,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -8112,9 +10141,9 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Takeover action dispatch (mint/release)",
+        "summary": "Start or release an interactive session takeover",
         "tags": [
-          "debug-takeover"
+          "sessions"
         ]
       }
     },
@@ -8148,6 +10177,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -8177,7 +10222,7 @@
         ],
         "summary": "Takeover Release Endpoint",
         "tags": [
-          "debug-takeover"
+          "sessions"
         ]
       }
     },
@@ -8211,6 +10256,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -8240,7 +10301,85 @@
         ],
         "summary": "Mint Takeover Token Endpoint",
         "tags": [
-          "debug-takeover"
+          "sessions"
+        ]
+      }
+    },
+    "/v1/sessions/{session_id}/terminate": {
+      "post": {
+        "description": "end the session by deleting its lease. Owner-checked against the lease (cross-org → 404,. Unlike /release (which only unpins), terminate removes the lease so the session is gone; any live browser behind it is then torn down on the next cleanup sweep. Idempotent-ish: a second terminate → 404 (already gone).",
+        "operationId": "terminate_session_v1_sessions__session_id__terminate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Terminate a session (delete the lease)",
+        "tags": [
+          "sessions"
         ]
       }
     },
@@ -8292,6 +10431,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -8325,7 +10480,7 @@
         ]
       },
       "post": {
-        "description": "snapshot browser storage state from a live session. Captures the current cookies, localStorage, and session storage from the named active profile and saves it encrypted under the given name. Returns storage state metadata on success (credentials are never returned). Storage blobs over 5 MB return storage_state_too_large (400).",
+        "description": "snapshot browser storage state from a live session. Captures the current cookies, localStorage, and session storage from the named active profile and saves it encrypted under the given name. Returns storage state metadata on success (credentials are never returned). Storage blobs over 5 MB return storage_state_too_large (400). Pass ``session_id`` to capture from a live cloud session; on a self-hosted deployment ``profile_id`` alone captures from the local active page.",
         "operationId": "save_storage_state_v1_storage_states_post",
         "parameters": [
           {
@@ -8342,6 +10497,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -8407,6 +10578,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -8480,6 +10667,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -8539,6 +10742,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -8601,6 +10820,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -8746,6 +10981,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -8799,6 +11050,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -8875,6 +11142,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -8930,6 +11213,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],
@@ -9077,6 +11376,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -9151,6 +11466,22 @@
               ],
               "title": "Authorization"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
           }
         ],
         "responses": {
@@ -9215,6 +11546,22 @@
                 }
               ],
               "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Api-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
             }
           }
         ],

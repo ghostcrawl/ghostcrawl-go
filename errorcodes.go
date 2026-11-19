@@ -36,6 +36,7 @@ const (
 	CodeConflict                 = "conflict"
 	CodeByoProxyInvalid          = "byo_proxy_invalid"
 	CodeTierUnavailable          = "tier_unavailable"
+	CodeRoutingModeIncoherentClaimOs = "routing_mode_incoherent_claim_os"
 	CodeRateLimited              = "rate_limited"
 	CodeQuotaBackendUnavailable  = "quota_backend_unavailable"
 	CodePoolExhausted            = "pool_exhausted"

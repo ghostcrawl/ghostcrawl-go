@@ -39,7 +39,7 @@ func NewSearchRequestBuilder(rawUrl string, requestAdapter i2ae4187f7daee263371c
 func (m *SearchRequestBuilder) Jobs()(*SearchJobsRequestBuilder) {
     return NewSearchJobsRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
 }
-// Post multi-backend search. Engine selection: ``engine`` body field or ``X-GhostCrawl-Search-Engine`` header. Auth: tenant bearer + customer's search API key via ``X-Provider-Authorization: Bearer <key>`` (never persisted).
+// Post multi-backend search. Engine selection: ``engine`` body field or ``X-Ghostcrawl-Search-Engine`` header. Auth: tenant bearer + customer's search API key via ``X-Provider-Authorization: Bearer <key>`` (never persisted).
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 400 status code
 // returns a ProblemDetails error when the service returns a 401 status code
@@ -73,7 +73,7 @@ func (m *SearchRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d9daa
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToPostRequestInformation multi-backend search. Engine selection: ``engine`` body field or ``X-GhostCrawl-Search-Engine`` header. Auth: tenant bearer + customer's search API key via ``X-Provider-Authorization: Bearer <key>`` (never persisted).
+// ToPostRequestInformation multi-backend search. Engine selection: ``engine`` body field or ``X-Ghostcrawl-Search-Engine`` header. Auth: tenant bearer + customer's search API key via ``X-Provider-Authorization: Bearer <key>`` (never persisted).
 // returns a *RequestInformation when successful
 func (m *SearchRequestBuilder) ToPostRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.SearchRequestable, requestConfiguration *SearchRequestBuilderPostRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.POST, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

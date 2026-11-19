@@ -10,14 +10,174 @@ import (
 type SessionCreateRequest struct {
     // Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
     additionalData map[string]any
+    // Device class for the population identity draw. 'random' (default) = the unchanged population draw for the requested engine. 'random_desktop' (windows/macos/linux), 'random_mobile' (ios/android), 'random_windows', 'random_android', 'random_ios' restrict WHICH real-population devices may be drawn; the weights inside the class stay the real OS/browser/device shares. When engine is omitted (or 'auto') the engine is routed from the drawn device: iOS -> webkit (always), android -> chrome, desktop -> chrome/firefox/webkit per the real browser share. An explicit engine the class cannot render on (e.g. random_ios + chrome) is rejected with 422 device_engine_mismatch, never re-routed. NOTE: an explicitly sent engine='chrome' counts as explicit even though it equals the default, so a client that always serializes engine must send 'auto' (or omit it) with random_ios / random_mobile. With identity_config/profile the operating system must lie inside the class (422 device_identity_mismatch). 'static' pins ONE fixed device: pass device_seed (the same seed always yields the same device and a byte-stable fingerprint), or a profile, or an identity_config carrying reuse_identity_seed (422 device_static_requires_seed otherwise).
+    device *SessionCreateRequest_device
+    // device='static' only: a stable non-negative integer, scoped to YOUR organization (the server derives the identity from org + seed, so another org's seed 1 is a different device). Seeds the population device draw AND pins the fingerprint, so every create from this org with the same seed (and engine) is the same device. Store it to bring the same device back.
+    device_seed SessionCreateRequest_SessionCreateRequest_device_seedable
     // The engine property
     engine *SessionCreateRequest_engine
-    // The identity_config property
+    // Explicit identity claim (IdentityRequest shape: operating system, browser, device_model, viewport, locale, timezone, reuse_identity_seed). viewport is optional: a desktop claim (windows/macos/linux) without viewport defaults to "any" (a prevalence-weighted real windowed size for that claim, the same draw as the population default). A mobile claim (ios/android) takes its viewport from device_model; without device_model a prevalence-weighted catalog device is drawn. Omit identity_config entirely to draw a population identity for the requested engine. reuse_identity_seed (returning visitor): send back the `reuse_identity_seed` value a previous create from YOUR org returned to get the same device again; it is scoped to your organization server-side (another org sending the same value gets an unrelated device). identity_id is NOT a replay handle; a non-integer value is ignored (fresh device).
     identity_config i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
-    // Rehydrates the saved identity bundle for this session, same deterministic fingerprint as /v1/scrape with profile=<name>.
+    // Geo-pin for the residential exit (ISO country, e.g. 'US'). The session's timezone/geolocation follow the drawn exit's country (geo-coherence).
+    identity_country SessionCreateRequest_SessionCreateRequest_identity_countryable
+    // Named persistent profile. Rehydrates the saved identity bundle for this session, the same browser identity as /v1/scrape with profile=<name>.
     profile SessionCreateRequest_SessionCreateRequest_profileable
     // The proxy property
     proxy i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable
+}
+// SessionCreateRequest_SessionCreateRequest_device_seed composed type wrapper for classes int32, SessionCreateRequest_device_seedMember1able
+type SessionCreateRequest_SessionCreateRequest_device_seed struct {
+    // Composed type representation for type int32
+    integer *int32
+    // Composed type representation for type SessionCreateRequest_device_seedMember1able
+    sessionCreateRequest_device_seedMember1 SessionCreateRequest_device_seedMember1able
+}
+// NewSessionCreateRequest_SessionCreateRequest_device_seed instantiates a new SessionCreateRequest_SessionCreateRequest_device_seed and sets the default values.
+func NewSessionCreateRequest_SessionCreateRequest_device_seed()(*SessionCreateRequest_SessionCreateRequest_device_seed) {
+    m := &SessionCreateRequest_SessionCreateRequest_device_seed{
+    }
+    return m
+}
+// CreateSessionCreateRequest_SessionCreateRequest_device_seedFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateSessionCreateRequest_SessionCreateRequest_device_seedFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewSessionCreateRequest_SessionCreateRequest_device_seed()
+    if parseNode != nil {
+        if val, err := parseNode.GetInt32Value(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetInteger(val)
+        } else if val, err := parseNode.GetObjectValue(CreateSessionCreateRequest_device_seedMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(SessionCreateRequest_device_seedMember1able); ok {
+                result.SetSessionCreateRequestDeviceSeedMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *SessionCreateRequest_SessionCreateRequest_device_seed) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetInteger gets the integer property value. Composed type representation for type int32
+// returns a *int32 when successful
+func (m *SessionCreateRequest_SessionCreateRequest_device_seed) GetInteger()(*int32) {
+    return m.integer
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *SessionCreateRequest_SessionCreateRequest_device_seed) GetIsComposedType()(bool) {
+    return true
+}
+// GetSessionCreateRequestDeviceSeedMember1 gets the SessionCreateRequest_device_seedMember1 property value. Composed type representation for type SessionCreateRequest_device_seedMember1able
+// returns a SessionCreateRequest_device_seedMember1able when successful
+func (m *SessionCreateRequest_SessionCreateRequest_device_seed) GetSessionCreateRequestDeviceSeedMember1()(SessionCreateRequest_device_seedMember1able) {
+    return m.sessionCreateRequest_device_seedMember1
+}
+// Serialize serializes information the current object
+func (m *SessionCreateRequest_SessionCreateRequest_device_seed) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetInteger() != nil {
+        err := writer.WriteInt32Value("", m.GetInteger())
+        if err != nil {
+            return err
+        }
+    } else if m.GetSessionCreateRequestDeviceSeedMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetSessionCreateRequestDeviceSeedMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetInteger sets the integer property value. Composed type representation for type int32
+func (m *SessionCreateRequest_SessionCreateRequest_device_seed) SetInteger(value *int32)() {
+    m.integer = value
+}
+// SetSessionCreateRequestDeviceSeedMember1 sets the SessionCreateRequest_device_seedMember1 property value. Composed type representation for type SessionCreateRequest_device_seedMember1able
+func (m *SessionCreateRequest_SessionCreateRequest_device_seed) SetSessionCreateRequestDeviceSeedMember1(value SessionCreateRequest_device_seedMember1able)() {
+    m.sessionCreateRequest_device_seedMember1 = value
+}
+// SessionCreateRequest_SessionCreateRequest_identity_country composed type wrapper for classes SessionCreateRequest_identity_countryMember1able, string
+type SessionCreateRequest_SessionCreateRequest_identity_country struct {
+    // Composed type representation for type SessionCreateRequest_identity_countryMember1able
+    sessionCreateRequest_identity_countryMember1 SessionCreateRequest_identity_countryMember1able
+    // Composed type representation for type string
+    string *string
+}
+// NewSessionCreateRequest_SessionCreateRequest_identity_country instantiates a new SessionCreateRequest_SessionCreateRequest_identity_country and sets the default values.
+func NewSessionCreateRequest_SessionCreateRequest_identity_country()(*SessionCreateRequest_SessionCreateRequest_identity_country) {
+    m := &SessionCreateRequest_SessionCreateRequest_identity_country{
+    }
+    return m
+}
+// CreateSessionCreateRequest_SessionCreateRequest_identity_countryFromDiscriminatorValue creates a new instance of the appropriate class based on discriminator value
+// returns a Parsable when successful
+func CreateSessionCreateRequest_SessionCreateRequest_identity_countryFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
+    result := NewSessionCreateRequest_SessionCreateRequest_identity_country()
+    if parseNode != nil {
+        if val, err := parseNode.GetStringValue(); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            result.SetString(val)
+        } else if val, err := parseNode.GetObjectValue(CreateSessionCreateRequest_identity_countryMember1FromDiscriminatorValue); val != nil {
+            if err != nil {
+                return nil, err
+            }
+            if cast, ok := val.(SessionCreateRequest_identity_countryMember1able); ok {
+                result.SetSessionCreateRequestIdentityCountryMember1(cast)
+            }
+        }
+    }
+    return result, nil
+}
+// GetFieldDeserializers the deserialization information for the current model
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+func (m *SessionCreateRequest_SessionCreateRequest_identity_country) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
+    return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+}
+// GetIsComposedType determines if the current object is a wrapper around a composed type
+// returns a bool when successful
+func (m *SessionCreateRequest_SessionCreateRequest_identity_country) GetIsComposedType()(bool) {
+    return true
+}
+// GetSessionCreateRequestIdentityCountryMember1 gets the SessionCreateRequest_identity_countryMember1 property value. Composed type representation for type SessionCreateRequest_identity_countryMember1able
+// returns a SessionCreateRequest_identity_countryMember1able when successful
+func (m *SessionCreateRequest_SessionCreateRequest_identity_country) GetSessionCreateRequestIdentityCountryMember1()(SessionCreateRequest_identity_countryMember1able) {
+    return m.sessionCreateRequest_identity_countryMember1
+}
+// GetString gets the string property value. Composed type representation for type string
+// returns a *string when successful
+func (m *SessionCreateRequest_SessionCreateRequest_identity_country) GetString()(*string) {
+    return m.string
+}
+// Serialize serializes information the current object
+func (m *SessionCreateRequest_SessionCreateRequest_identity_country) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetString() != nil {
+        err := writer.WriteStringValue("", m.GetString())
+        if err != nil {
+            return err
+        }
+    } else if m.GetSessionCreateRequestIdentityCountryMember1() != nil {
+        err := writer.WriteObjectValue("", m.GetSessionCreateRequestIdentityCountryMember1())
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+// SetSessionCreateRequestIdentityCountryMember1 sets the SessionCreateRequest_identity_countryMember1 property value. Composed type representation for type SessionCreateRequest_identity_countryMember1able
+func (m *SessionCreateRequest_SessionCreateRequest_identity_country) SetSessionCreateRequestIdentityCountryMember1(value SessionCreateRequest_identity_countryMember1able)() {
+    m.sessionCreateRequest_identity_countryMember1 = value
+}
+// SetString sets the string property value. Composed type representation for type string
+func (m *SessionCreateRequest_SessionCreateRequest_identity_country) SetString(value *string)() {
+    m.string = value
 }
 // SessionCreateRequest_SessionCreateRequest_profile composed type wrapper for classes SessionCreateRequest_profileMember1able, string
 type SessionCreateRequest_SessionCreateRequest_profile struct {
@@ -54,7 +214,7 @@ func CreateSessionCreateRequest_SessionCreateRequest_profileFromDiscriminatorVal
     return result, nil
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *SessionCreateRequest_SessionCreateRequest_profile) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -96,6 +256,20 @@ func (m *SessionCreateRequest_SessionCreateRequest_profile) SetSessionCreateRequ
 func (m *SessionCreateRequest_SessionCreateRequest_profile) SetString(value *string)() {
     m.string = value
 }
+type SessionCreateRequest_SessionCreateRequest_device_seedable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetInteger()(*int32)
+    GetSessionCreateRequestDeviceSeedMember1()(SessionCreateRequest_device_seedMember1able)
+    SetInteger(value *int32)()
+    SetSessionCreateRequestDeviceSeedMember1(value SessionCreateRequest_device_seedMember1able)()
+}
+type SessionCreateRequest_SessionCreateRequest_identity_countryable interface {
+    i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetSessionCreateRequestIdentityCountryMember1()(SessionCreateRequest_identity_countryMember1able)
+    GetString()(*string)
+    SetSessionCreateRequestIdentityCountryMember1(value SessionCreateRequest_identity_countryMember1able)()
+    SetString(value *string)()
+}
 type SessionCreateRequest_SessionCreateRequest_profileable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
     GetSessionCreateRequestProfileMember1()(SessionCreateRequest_profileMember1able)
@@ -108,6 +282,8 @@ func NewSessionCreateRequest()(*SessionCreateRequest) {
     m := &SessionCreateRequest{
     }
     m.SetAdditionalData(make(map[string]any))
+    deviceValue := RANDOM_SESSIONCREATEREQUEST_DEVICE
+    m.SetDevice(&deviceValue)
     engineValue := CHROME_SESSIONCREATEREQUEST_ENGINE
     m.SetEngine(&engineValue)
     return m
@@ -122,15 +298,45 @@ func CreateSessionCreateRequestFromDiscriminatorValue(parseNode i878a80d2330e89d
 func (m *SessionCreateRequest) GetAdditionalData()(map[string]any) {
     return m.additionalData
 }
+// GetDevice gets the device property value. Device class for the population identity draw. 'random' (default) = the unchanged population draw for the requested engine. 'random_desktop' (windows/macos/linux), 'random_mobile' (ios/android), 'random_windows', 'random_android', 'random_ios' restrict WHICH real-population devices may be drawn; the weights inside the class stay the real OS/browser/device shares. When engine is omitted (or 'auto') the engine is routed from the drawn device: iOS -> webkit (always), android -> chrome, desktop -> chrome/firefox/webkit per the real browser share. An explicit engine the class cannot render on (e.g. random_ios + chrome) is rejected with 422 device_engine_mismatch, never re-routed. NOTE: an explicitly sent engine='chrome' counts as explicit even though it equals the default, so a client that always serializes engine must send 'auto' (or omit it) with random_ios / random_mobile. With identity_config/profile the operating system must lie inside the class (422 device_identity_mismatch). 'static' pins ONE fixed device: pass device_seed (the same seed always yields the same device and a byte-stable fingerprint), or a profile, or an identity_config carrying reuse_identity_seed (422 device_static_requires_seed otherwise).
+// returns a *SessionCreateRequest_device when successful
+func (m *SessionCreateRequest) GetDevice()(*SessionCreateRequest_device) {
+    return m.device
+}
+// GetDeviceSeed gets the device_seed property value. device='static' only: a stable non-negative integer, scoped to YOUR organization (the server derives the identity from org + seed, so another org's seed 1 is a different device). Seeds the population device draw AND pins the fingerprint, so every create from this org with the same seed (and engine) is the same device. Store it to bring the same device back.
+// returns a SessionCreateRequest_SessionCreateRequest_device_seedable when successful
+func (m *SessionCreateRequest) GetDeviceSeed()(SessionCreateRequest_SessionCreateRequest_device_seedable) {
+    return m.device_seed
+}
 // GetEngine gets the engine property value. The engine property
 // returns a *SessionCreateRequest_engine when successful
 func (m *SessionCreateRequest) GetEngine()(*SessionCreateRequest_engine) {
     return m.engine
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *SessionCreateRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
+    res["device"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetEnumValue(ParseSessionCreateRequest_device)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetDevice(val.(*SessionCreateRequest_device))
+        }
+        return nil
+    }
+    res["device_seed"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateSessionCreateRequest_SessionCreateRequest_device_seedFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetDeviceSeed(val.(SessionCreateRequest_SessionCreateRequest_device_seedable))
+        }
+        return nil
+    }
     res["engine"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
         val, err := n.GetEnumValue(ParseSessionCreateRequest_engine)
         if err != nil {
@@ -148,6 +354,16 @@ func (m *SessionCreateRequest) GetFieldDeserializers()(map[string]func(i878a80d2
         }
         if val != nil {
             m.SetIdentityConfig(val.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable))
+        }
+        return nil
+    }
+    res["identity_country"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateSessionCreateRequest_SessionCreateRequest_identity_countryFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetIdentityCountry(val.(SessionCreateRequest_SessionCreateRequest_identity_countryable))
         }
         return nil
     }
@@ -173,12 +389,17 @@ func (m *SessionCreateRequest) GetFieldDeserializers()(map[string]func(i878a80d2
     }
     return res
 }
-// GetIdentityConfig gets the identity_config property value. The identity_config property
+// GetIdentityConfig gets the identity_config property value. Explicit identity claim (IdentityRequest shape: operating system, browser, device_model, viewport, locale, timezone, reuse_identity_seed). viewport is optional: a desktop claim (windows/macos/linux) without viewport defaults to "any" (a prevalence-weighted real windowed size for that claim, the same draw as the population default). A mobile claim (ios/android) takes its viewport from device_model; without device_model a prevalence-weighted catalog device is drawn. Omit identity_config entirely to draw a population identity for the requested engine. reuse_identity_seed (returning visitor): send back the `reuse_identity_seed` value a previous create from YOUR org returned to get the same device again; it is scoped to your organization server-side (another org sending the same value gets an unrelated device). identity_id is NOT a replay handle; a non-integer value is ignored (fresh device).
 // returns a UntypedNodeable when successful
 func (m *SessionCreateRequest) GetIdentityConfig()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable) {
     return m.identity_config
 }
-// GetProfile gets the profile property value. Rehydrates the saved identity bundle for this session, same deterministic fingerprint as /v1/scrape with profile=<name>.
+// GetIdentityCountry gets the identity_country property value. Geo-pin for the residential exit (ISO country, e.g. 'US'). The session's timezone/geolocation follow the drawn exit's country (geo-coherence).
+// returns a SessionCreateRequest_SessionCreateRequest_identity_countryable when successful
+func (m *SessionCreateRequest) GetIdentityCountry()(SessionCreateRequest_SessionCreateRequest_identity_countryable) {
+    return m.identity_country
+}
+// GetProfile gets the profile property value. Named persistent profile. Rehydrates the saved identity bundle for this session, the same browser identity as /v1/scrape with profile=<name>.
 // returns a SessionCreateRequest_SessionCreateRequest_profileable when successful
 func (m *SessionCreateRequest) GetProfile()(SessionCreateRequest_SessionCreateRequest_profileable) {
     return m.profile
@@ -190,6 +411,19 @@ func (m *SessionCreateRequest) GetProxy()(i878a80d2330e89d26896388a3f487eef27b0a
 }
 // Serialize serializes information the current object
 func (m *SessionCreateRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
+    if m.GetDevice() != nil {
+        cast := (*m.GetDevice()).String()
+        err := writer.WriteStringValue("device", &cast)
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteObjectValue("device_seed", m.GetDeviceSeed())
+        if err != nil {
+            return err
+        }
+    }
     if m.GetEngine() != nil {
         cast := (*m.GetEngine()).String()
         err := writer.WriteStringValue("engine", &cast)
@@ -199,6 +433,12 @@ func (m *SessionCreateRequest) Serialize(writer i878a80d2330e89d26896388a3f487ee
     }
     {
         err := writer.WriteObjectValue("identity_config", m.GetIdentityConfig())
+        if err != nil {
+            return err
+        }
+    }
+    {
+        err := writer.WriteObjectValue("identity_country", m.GetIdentityCountry())
         if err != nil {
             return err
         }
@@ -227,15 +467,27 @@ func (m *SessionCreateRequest) Serialize(writer i878a80d2330e89d26896388a3f487ee
 func (m *SessionCreateRequest) SetAdditionalData(value map[string]any)() {
     m.additionalData = value
 }
+// SetDevice sets the device property value. Device class for the population identity draw. 'random' (default) = the unchanged population draw for the requested engine. 'random_desktop' (windows/macos/linux), 'random_mobile' (ios/android), 'random_windows', 'random_android', 'random_ios' restrict WHICH real-population devices may be drawn; the weights inside the class stay the real OS/browser/device shares. When engine is omitted (or 'auto') the engine is routed from the drawn device: iOS -> webkit (always), android -> chrome, desktop -> chrome/firefox/webkit per the real browser share. An explicit engine the class cannot render on (e.g. random_ios + chrome) is rejected with 422 device_engine_mismatch, never re-routed. NOTE: an explicitly sent engine='chrome' counts as explicit even though it equals the default, so a client that always serializes engine must send 'auto' (or omit it) with random_ios / random_mobile. With identity_config/profile the operating system must lie inside the class (422 device_identity_mismatch). 'static' pins ONE fixed device: pass device_seed (the same seed always yields the same device and a byte-stable fingerprint), or a profile, or an identity_config carrying reuse_identity_seed (422 device_static_requires_seed otherwise).
+func (m *SessionCreateRequest) SetDevice(value *SessionCreateRequest_device)() {
+    m.device = value
+}
+// SetDeviceSeed sets the device_seed property value. device='static' only: a stable non-negative integer, scoped to YOUR organization (the server derives the identity from org + seed, so another org's seed 1 is a different device). Seeds the population device draw AND pins the fingerprint, so every create from this org with the same seed (and engine) is the same device. Store it to bring the same device back.
+func (m *SessionCreateRequest) SetDeviceSeed(value SessionCreateRequest_SessionCreateRequest_device_seedable)() {
+    m.device_seed = value
+}
 // SetEngine sets the engine property value. The engine property
 func (m *SessionCreateRequest) SetEngine(value *SessionCreateRequest_engine)() {
     m.engine = value
 }
-// SetIdentityConfig sets the identity_config property value. The identity_config property
+// SetIdentityConfig sets the identity_config property value. Explicit identity claim (IdentityRequest shape: operating system, browser, device_model, viewport, locale, timezone, reuse_identity_seed). viewport is optional: a desktop claim (windows/macos/linux) without viewport defaults to "any" (a prevalence-weighted real windowed size for that claim, the same draw as the population default). A mobile claim (ios/android) takes its viewport from device_model; without device_model a prevalence-weighted catalog device is drawn. Omit identity_config entirely to draw a population identity for the requested engine. reuse_identity_seed (returning visitor): send back the `reuse_identity_seed` value a previous create from YOUR org returned to get the same device again; it is scoped to your organization server-side (another org sending the same value gets an unrelated device). identity_id is NOT a replay handle; a non-integer value is ignored (fresh device).
 func (m *SessionCreateRequest) SetIdentityConfig(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)() {
     m.identity_config = value
 }
-// SetProfile sets the profile property value. Rehydrates the saved identity bundle for this session, same deterministic fingerprint as /v1/scrape with profile=<name>.
+// SetIdentityCountry sets the identity_country property value. Geo-pin for the residential exit (ISO country, e.g. 'US'). The session's timezone/geolocation follow the drawn exit's country (geo-coherence).
+func (m *SessionCreateRequest) SetIdentityCountry(value SessionCreateRequest_SessionCreateRequest_identity_countryable)() {
+    m.identity_country = value
+}
+// SetProfile sets the profile property value. Named persistent profile. Rehydrates the saved identity bundle for this session, the same browser identity as /v1/scrape with profile=<name>.
 func (m *SessionCreateRequest) SetProfile(value SessionCreateRequest_SessionCreateRequest_profileable)() {
     m.profile = value
 }
@@ -246,12 +498,18 @@ func (m *SessionCreateRequest) SetProxy(value i878a80d2330e89d26896388a3f487eef2
 type SessionCreateRequestable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.AdditionalDataHolder
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
+    GetDevice()(*SessionCreateRequest_device)
+    GetDeviceSeed()(SessionCreateRequest_SessionCreateRequest_device_seedable)
     GetEngine()(*SessionCreateRequest_engine)
     GetIdentityConfig()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)
+    GetIdentityCountry()(SessionCreateRequest_SessionCreateRequest_identity_countryable)
     GetProfile()(SessionCreateRequest_SessionCreateRequest_profileable)
     GetProxy()(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)
+    SetDevice(value *SessionCreateRequest_device)()
+    SetDeviceSeed(value SessionCreateRequest_SessionCreateRequest_device_seedable)()
     SetEngine(value *SessionCreateRequest_engine)()
     SetIdentityConfig(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)()
+    SetIdentityCountry(value SessionCreateRequest_SessionCreateRequest_identity_countryable)()
     SetProfile(value SessionCreateRequest_SessionCreateRequest_profileable)()
     SetProxy(value i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable)()
 }

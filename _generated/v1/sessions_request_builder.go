@@ -14,7 +14,7 @@ import (
 type SessionsRequestBuilder struct {
     i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.BaseRequestBuilder
 }
-// SessionsRequestBuilderGetQueryParameters cursor-paginated listing of active sessions. Sessions created by scrape workers and via the API are unified in the same listing, all sessions for your organisation are visible. Results are strictly; no cross-organisation sessions are returned.
+// SessionsRequestBuilderGetQueryParameters cursor-paginated listing of active sessions. Sessions opened by scrape jobs and via the API are unified in the same listing, all sessions for your organisation are visible. Results are strictly; no cross-organisation sessions are returned.
 type SessionsRequestBuilderGetQueryParameters struct {
     Created_at_from *string "uriparametername:\"created_at_from\""
     Created_at_to *string "uriparametername:\"created_at_to\""
@@ -61,7 +61,7 @@ func NewSessionsRequestBuilder(rawUrl string, requestAdapter i2ae4187f7daee26337
 func (m *SessionsRequestBuilder) Create()(*SessionsCreateRequestBuilder) {
     return NewSessionsCreateRequestBuilderInternal(m.BaseRequestBuilder.PathParameters, m.BaseRequestBuilder.RequestAdapter)
 }
-// Get cursor-paginated listing of active sessions. Sessions created by scrape workers and via the API are unified in the same listing, all sessions for your organisation are visible. Results are strictly; no cross-organisation sessions are returned.
+// Get cursor-paginated listing of active sessions. Sessions opened by scrape jobs and via the API are unified in the same listing, all sessions for your organisation are visible. Results are strictly; no cross-organisation sessions are returned.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *SessionsRequestBuilder) Get(ctx context.Context, requestConfiguration *SessionsRequestBuilderGetRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -81,7 +81,7 @@ func (m *SessionsRequestBuilder) Get(ctx context.Context, requestConfiguration *
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToGetRequestInformation cursor-paginated listing of active sessions. Sessions created by scrape workers and via the API are unified in the same listing, all sessions for your organisation are visible. Results are strictly; no cross-organisation sessions are returned.
+// ToGetRequestInformation cursor-paginated listing of active sessions. Sessions opened by scrape jobs and via the API are unified in the same listing, all sessions for your organisation are visible. Results are strictly; no cross-organisation sessions are returned.
 // returns a *RequestInformation when successful
 func (m *SessionsRequestBuilder) ToGetRequestInformation(ctx context.Context, requestConfiguration *SessionsRequestBuilderGetRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.GET, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

@@ -5,11 +5,22 @@ Collect web data at scale — scrape, crawl, search, and extract structured data
 
 ## Install
 
+The current release is **2.3.8**, delivered as the Go module tag `v2.3.8`:
+
 ```bash
 go get github.com/GhostCrawl/ghostcrawl-go/v2@latest
 ```
 
-Requires Go 1.21+.
+Requires Go 1.25+ (set by the Kiota HTTP dependency). The real module path is
+`github.com/GhostCrawl/ghostcrawl-go/v2` — there is no separate installer.
+
+### First step: runtime setup
+
+The client talks to the GhostCrawl API (hosted cloud or your own machine). To run
+it locally, use the single unified terminal-install path — Docker, the three
+browser engines and your API key — documented at
+**https://docs.ghostcrawl.io/self-host**. One launcher covers Linux, macOS and
+Windows; no per-SDK installer is needed.
 
 ## Quickstart
 
@@ -31,7 +42,7 @@ func main() {
         log.Fatal(err)
     }
 
-    // Scrape a URL
+    // Scrape a URL — returns a typed *ScrapeResult.
     result, err := client.Scrape(context.Background(), ghostcrawl.ScrapeRequest{
         URL:    "https://example.com",
         Format: "markdown",
@@ -39,31 +50,97 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    fmt.Println(result["content"])
+    fmt.Println(result.Status, result.StatusCode)
+    fmt.Println(result.Content) // cross-format alias for the rendered output
+    // Any undeclared server field stays reachable on the raw map:
+    fmt.Println(result.Raw["identity_id"])
 
-    // Start a crawl run and wait for it to finish (see "Crawl runs" below)
-    run, err := client.CrawlRuns().Start(context.Background(), ghostcrawl.StartCrawlRunRequest{
-        URL:      "https://example.com",
-        MaxDepth: 2,
-        MaxPages: 50,
-    })
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println("run_id:", run["run_id"])
-
-    // Web search
+    // Web search — pass Wait to block until results are ready. On a warm rotation
+    // this returns immediately; on a cold one the SDK owns a bounded, ctx-aware
+    // poll of the search job for you (no poll loop to write).
     results, err := client.Search(context.Background(), ghostcrawl.SearchRequest{
         Query:  "latest AI research",
         Engine: "google",
         Limit:  10,
+        Wait:   true,
     })
     if err != nil {
         log.Fatal(err)
     }
-    fmt.Println(results["results"])
+    fmt.Println(results.Status, len(results.Results))
+    for _, r := range results.Results {
+        fmt.Println(r)
+    }
 }
 ```
+
+`Scrape`, `Search`, and `Crawl` return typed structs (`*ScrapeResult`,
+`*SearchResult`, `*CrawlRun`) with the canonical field names. Every result also
+carries a `Raw map[string]interface{}` holding the complete decoded response, so
+any field the typed struct does not name is still reachable via `result.Raw["..."]`.
+
+## Concurrency
+
+Every method blocks and takes a `context.Context` — that blocking, `ctx`-aware call
+**is** the idiomatic Go client; there is no separate async class to reach for. To run
+work in parallel, use Go's own concurrency primitives: launch goroutines and fan the
+results back in. The `context.Context` you pass bounds the whole batch (deadline or
+`cancel()`), and the client is safe to share across goroutines.
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    "sync"
+    "time"
+
+    ghostcrawl "github.com/GhostCrawl/ghostcrawl-go/v2"
+)
+
+func main() {
+    client, err := ghostcrawl.New("gck_live_YOUR_KEY")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // One deadline bounds the whole batch.
+    ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+    defer cancel()
+
+    urls := []string{
+        "https://example.com",
+        "https://example.org",
+        "https://example.net",
+    }
+
+    var wg sync.WaitGroup
+    results := make([]*ghostcrawl.ScrapeResult, len(urls))
+    errs := make([]error, len(urls))
+
+    for i, u := range urls {
+        wg.Add(1)
+        go func(i int, u string) {
+            defer wg.Done()
+            results[i], errs[i] = client.Scrape(ctx, ghostcrawl.ScrapeRequest{URL: u})
+        }(i, u)
+    }
+    wg.Wait()
+
+    for i, u := range urls {
+        if errs[i] != nil {
+            fmt.Printf("%s: %v\n", u, errs[i])
+            continue
+        }
+        fmt.Printf("%s: %s (%d bytes)\n", u, results[i].Status, results[i].Bytes)
+    }
+}
+```
+
+Prefer `golang.org/x/sync/errgroup` when you want the first error to cancel the rest —
+its `Group` carries a derived `context.Context` you pass straight into each call.
 
 ## Authentication
 
@@ -280,6 +357,23 @@ client, err := ghostcrawl.New("gck_live_YOUR_KEY", "http://localhost:8080")
 | Recordings | `client.Recordings()` | List, Get, Delete |
 | Key-Value Store | `client.KV()` | Get, Set, Delete |
 
+## Account & session persona
+
+`Me(ctx)` returns your account profile — including `max_concurrency`, the number of
+sessions your plan may run at once. `Usage(ctx, period)` reports the current billing
+window. `SessionPersona(ctx, sessionID)` returns a running session's customer-safe
+persona: a display-only whitelist of `device_class`, `os_class`, `browser_class`, and
+`locale` (never any raw or internal detail).
+
+```go
+me, _ := client.Me(ctx)
+fmt.Println(me["max_concurrency"])          // concurrent-session ceiling for your plan
+
+persona, _ := client.SessionPersona(ctx, sessionID)
+fmt.Println(persona["device_class"], persona["os_class"],
+    persona["browser_class"], persona["locale"])
+```
+
 ## License
 
-Proprietary — GhostCrawl Software License. See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).

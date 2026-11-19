@@ -21,11 +21,11 @@ type PageCookiesRequestBuilderDeleteRequestConfiguration struct {
     // Request options
     Options []i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestOption
 }
-// PageCookiesRequestBuilderGetQueryParameters get cookies
+// PageCookiesRequestBuilderGetQueryParameters read cookies from the browser context of a live cloud session. Optionally filter by cookie ``name`` and/or ``domain``.
 type PageCookiesRequestBuilderGetQueryParameters struct {
     Domain *string "uriparametername:\"domain\""
     Name *string "uriparametername:\"name\""
-    Profile_id *string "uriparametername:\"profile_id\""
+    Session_id *string "uriparametername:\"session_id\""
 }
 // PageCookiesRequestBuilderGetRequestConfiguration configuration for the request such as headers, query parameters, and middleware options.
 type PageCookiesRequestBuilderGetRequestConfiguration struct {
@@ -56,7 +56,7 @@ func NewPageCookiesRequestBuilder(rawUrl string, requestAdapter i2ae4187f7daee26
     urlParams["request-raw-url"] = rawUrl
     return NewPageCookiesRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Delete delete cookies
+// Delete delete cookies from the browser context of a live cloud session. With a name/domain/path filter only the matching cookies are removed; without a filter every cookie in the session is cleared.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *PageCookiesRequestBuilder) Delete(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.CookiesDeleteBodyable, requestConfiguration *PageCookiesRequestBuilderDeleteRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -76,7 +76,7 @@ func (m *PageCookiesRequestBuilder) Delete(ctx context.Context, body ib5cfef42d5
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// Get get cookies
+// Get read cookies from the browser context of a live cloud session. Optionally filter by cookie ``name`` and/or ``domain``.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *PageCookiesRequestBuilder) Get(ctx context.Context, requestConfiguration *PageCookiesRequestBuilderGetRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -96,7 +96,7 @@ func (m *PageCookiesRequestBuilder) Get(ctx context.Context, requestConfiguratio
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// Post set cookies
+// Post add cookies to the browser context of a live cloud session.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *PageCookiesRequestBuilder) Post(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.CookiesSetBodyable, requestConfiguration *PageCookiesRequestBuilderPostRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -116,7 +116,7 @@ func (m *PageCookiesRequestBuilder) Post(ctx context.Context, body ib5cfef42d548
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToDeleteRequestInformation delete cookies
+// ToDeleteRequestInformation delete cookies from the browser context of a live cloud session. With a name/domain/path filter only the matching cookies are removed; without a filter every cookie in the session is cleared.
 // returns a *RequestInformation when successful
 func (m *PageCookiesRequestBuilder) ToDeleteRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.CookiesDeleteBodyable, requestConfiguration *PageCookiesRequestBuilderDeleteRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.DELETE, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)
@@ -131,10 +131,10 @@ func (m *PageCookiesRequestBuilder) ToDeleteRequestInformation(ctx context.Conte
     }
     return requestInfo, nil
 }
-// ToGetRequestInformation get cookies
+// ToGetRequestInformation read cookies from the browser context of a live cloud session. Optionally filter by cookie ``name`` and/or ``domain``.
 // returns a *RequestInformation when successful
 func (m *PageCookiesRequestBuilder) ToGetRequestInformation(ctx context.Context, requestConfiguration *PageCookiesRequestBuilderGetRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
-    requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.GET, "{+baseurl}/v1/page/cookies?profile_id={profile_id}{&domain*,name*}", m.BaseRequestBuilder.PathParameters)
+    requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.GET, "{+baseurl}/v1/page/cookies?session_id={session_id}{&domain*,name*}", m.BaseRequestBuilder.PathParameters)
     if requestConfiguration != nil {
         if requestConfiguration.QueryParameters != nil {
             requestInfo.AddQueryParameters(*(requestConfiguration.QueryParameters))
@@ -145,7 +145,7 @@ func (m *PageCookiesRequestBuilder) ToGetRequestInformation(ctx context.Context,
     requestInfo.Headers.TryAdd("Accept", "application/json")
     return requestInfo, nil
 }
-// ToPostRequestInformation set cookies
+// ToPostRequestInformation add cookies to the browser context of a live cloud session.
 // returns a *RequestInformation when successful
 func (m *PageCookiesRequestBuilder) ToPostRequestInformation(ctx context.Context, body ib5cfef42d548d9daa383ff1f301f0dd73d527176adc637b33779039e2d129739.CookiesSetBodyable, requestConfiguration *PageCookiesRequestBuilderPostRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.POST, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)
