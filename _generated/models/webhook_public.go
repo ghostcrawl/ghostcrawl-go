@@ -32,9 +32,9 @@ type WebhookPublic struct {
     // The url property
     url *string
 }
-// WebhookPublic_WebhookPublic_secret_rotated_at composed type wrapper for classes i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time, WebhookPublic_secret_rotated_atMember1able
+// WebhookPublic_WebhookPublic_secret_rotated_at composed type wrapper for classes i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e. Time, WebhookPublic_secret_rotated_atMember1able
 type WebhookPublic_WebhookPublic_secret_rotated_at struct {
-    // Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time
+    // Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e. Time
     dateTimeOffset *i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time
     // Composed type representation for type WebhookPublic_secret_rotated_atMember1able
     webhookPublic_secret_rotated_atMember1 WebhookPublic_secret_rotated_atMember1able
@@ -66,13 +66,13 @@ func CreateWebhookPublic_WebhookPublic_secret_rotated_atFromDiscriminatorValue(p
     }
     return result, nil
 }
-// GetDateTimeOffset gets the DateTimeOffset property value. Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time
+// GetDateTimeOffset gets the DateTimeOffset property value. Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e. Time
 // returns a *Time when successful
 func (m *WebhookPublic_WebhookPublic_secret_rotated_at) GetDateTimeOffset()(*i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time) {
     return m.dateTimeOffset
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
 func (m *WebhookPublic_WebhookPublic_secret_rotated_at) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     return make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
 }
@@ -101,7 +101,7 @@ func (m *WebhookPublic_WebhookPublic_secret_rotated_at) Serialize(writer i878a80
     }
     return nil
 }
-// SetDateTimeOffset sets the DateTimeOffset property value. Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time
+// SetDateTimeOffset sets the DateTimeOffset property value. Composed type representation for type i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e. Time
 func (m *WebhookPublic_WebhookPublic_secret_rotated_at) SetDateTimeOffset(value *i336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e.Time)() {
     m.dateTimeOffset = value
 }
@@ -154,7 +154,7 @@ func (m *WebhookPublic) GetEventTypes()([]string) {
     return m.event_types
 }
 // GetFieldDeserializers the deserialization information for the current model
-// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
+// returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91. ParseNode)(error) when successful
 func (m *WebhookPublic) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
     res["active"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {

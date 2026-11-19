@@ -34,7 +34,7 @@ func NewSelfhostByoBehaviorRequestBuilder(rawUrl string, requestAdapter i2ae4187
     urlParams["request-raw-url"] = rawUrl
     return NewSelfhostByoBehaviorRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Put **Self-host deployments only.** Validate + persist a BYO behavior JSON, then report the sanitized count. Contract: ``{"human_actions": [ {kind,.},. ]}``. ``human_actions`` MUST be a list; it is passed through byo_behavior.sanitize_actions (allow-list + clamp). A non-empty input that sanitizes to an EMPTY plan (every action an invalid kind) → 422 invalid_behavior_json (nothing valid to apply). Success → write ~/.ghostcrawl/behavior.json + {reloaded, actions}.
+// Put **Self-host deployments only.** Validate + persist a BYO behavior JSON, then report the sanitized count. Contract: ``{"browser_actions": [ {kind,.},. ]}``. ``browser_actions`` MUST be a list; it is passed through byo_behavior.sanitize_actions (allow-list + clamp). A non-empty input that sanitizes to an EMPTY plan (every action an invalid kind) → 422 invalid_behavior_json (nothing valid to apply). Success → write ~/.ghostcrawl/behavior.json + {reloaded, actions}.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *SelfhostByoBehaviorRequestBuilder) Put(ctx context.Context, body SelfhostByoBehaviorPutRequestBodyable, requestConfiguration *SelfhostByoBehaviorRequestBuilderPutRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -54,7 +54,7 @@ func (m *SelfhostByoBehaviorRequestBuilder) Put(ctx context.Context, body Selfho
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToPutRequestInformation **Self-host deployments only.** Validate + persist a BYO behavior JSON, then report the sanitized count. Contract: ``{"human_actions": [ {kind,.},. ]}``. ``human_actions`` MUST be a list; it is passed through byo_behavior.sanitize_actions (allow-list + clamp). A non-empty input that sanitizes to an EMPTY plan (every action an invalid kind) → 422 invalid_behavior_json (nothing valid to apply). Success → write ~/.ghostcrawl/behavior.json + {reloaded, actions}.
+// ToPutRequestInformation **Self-host deployments only.** Validate + persist a BYO behavior JSON, then report the sanitized count. Contract: ``{"browser_actions": [ {kind,.},. ]}``. ``browser_actions`` MUST be a list; it is passed through byo_behavior.sanitize_actions (allow-list + clamp). A non-empty input that sanitizes to an EMPTY plan (every action an invalid kind) → 422 invalid_behavior_json (nothing valid to apply). Success → write ~/.ghostcrawl/behavior.json + {reloaded, actions}.
 // returns a *RequestInformation when successful
 func (m *SelfhostByoBehaviorRequestBuilder) ToPutRequestInformation(ctx context.Context, body SelfhostByoBehaviorPutRequestBodyable, requestConfiguration *SelfhostByoBehaviorRequestBuilderPutRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.PUT, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

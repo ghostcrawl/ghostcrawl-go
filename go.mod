@@ -1,9 +1,9 @@
 module github.com/GhostCrawl/ghostcrawl-go/v2
 
-// sdk-version: 2.3.8 (Go modules version by git tag, not an in-source constant;
+// sdk-version: 2.3.9 (Go modules version by git tag, not an in-source constant;
 // this comment line is the mechanical version-stamp gate source of truth for
-// check_version_stamp.sh — keep it in sync with the v2.3.6 tag on publish).
-go 1.25.0
+// check_version_stamp.sh — keep it in sync with the v2.3.9 tag on publish).
+go 1.26.0
 
 retract [v2.2.0, v2.3.3] // superseded — upgrade to the latest release
 

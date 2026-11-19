@@ -5,7 +5,7 @@ Collect web data at scale — scrape, crawl, search, and extract structured data
 
 ## Install
 
-The current release is **2.3.8**, delivered as the Go module tag `v2.3.8`:
+The current release is **2.3.9**, delivered as the Go module tag `v2.3.9`:
 
 ```bash
 go get github.com/GhostCrawl/ghostcrawl-go/v2@latest

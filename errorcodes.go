@@ -28,28 +28,28 @@ const (
 // by every GhostCrawl surface and SDK.
 const (
 	// Channel: problem (our failure → non-2xx application/problem+json)
-	CodeBadRequest               = "bad_request"
-	CodeUnauthorized             = "unauthorized"
-	CodeForbidden                = "forbidden"
-	CodePaymentRequired          = "payment_required"
-	CodeNotFound                 = "not_found"
-	CodeConflict                 = "conflict"
-	CodeByoProxyInvalid          = "byo_proxy_invalid"
-	CodeTierUnavailable          = "tier_unavailable"
+	CodeBadRequest                   = "bad_request"
+	CodeUnauthorized                 = "unauthorized"
+	CodeForbidden                    = "forbidden"
+	CodePaymentRequired              = "payment_required"
+	CodeNotFound                     = "not_found"
+	CodeConflict                     = "conflict"
+	CodeByoProxyInvalid              = "byo_proxy_invalid"
+	CodeTierUnavailable              = "tier_unavailable"
 	CodeRoutingModeIncoherentClaimOs = "routing_mode_incoherent_claim_os"
-	CodeRateLimited              = "rate_limited"
-	CodeQuotaBackendUnavailable  = "quota_backend_unavailable"
-	CodePoolExhausted            = "pool_exhausted"
-	CodeEgressIntegrityFailed    = "egress_integrity_failed"
-	CodeRenderHung               = "render_hung"
-	CodeEngineCrashed            = "engine_crashed"
-	CodeRenderTimeout            = "render_timeout"
-	CodeEngineTimeout             = "engine_timeout"
-	CodeServiceUnavailable       = "service_unavailable"
-	CodeInternalError            = "internal_error"
+	CodeRateLimited                  = "rate_limited"
+	CodeQuotaBackendUnavailable      = "quota_backend_unavailable"
+	CodePoolExhausted                = "pool_exhausted"
+	CodeEgressIntegrityFailed        = "egress_integrity_failed"
+	CodeRenderHung                   = "render_hung"
+	CodeEngineCrashed                = "engine_crashed"
+	CodeRenderTimeout                = "render_timeout"
+	CodeEngineTimeout                = "engine_timeout"
+	CodeServiceUnavailable           = "service_unavailable"
+	CodeInternalError                = "internal_error"
 
 	// Channel: result (target failure → HTTP 200 + result_error)
-	CodeTargetHTTPError = "target_http_error"
+	CodeTargetHTTPError  = "target_http_error"
 	CodeNavigationFailed = "navigation_failed"
 	CodeBlocked          = "blocked"
 	CodeCaptchaRequired  = "captcha_required"
@@ -66,29 +66,30 @@ type errorCodeSpec struct {
 
 // errorCatalog mirrors codes.json. Keyed by code for O(1) lookup.
 var errorCatalog = map[string]errorCodeSpec{
-	CodeBadRequest:              {CodeBadRequest, 400, false, ChannelProblem},
-	CodeUnauthorized:            {CodeUnauthorized, 401, false, ChannelProblem},
-	CodeForbidden:               {CodeForbidden, 403, false, ChannelProblem},
-	CodePaymentRequired:         {CodePaymentRequired, 402, false, ChannelProblem},
-	CodeNotFound:                {CodeNotFound, 404, false, ChannelProblem},
-	CodeConflict:                {CodeConflict, 409, false, ChannelProblem},
-	CodeByoProxyInvalid:         {CodeByoProxyInvalid, 422, false, ChannelProblem},
-	CodeTierUnavailable:         {CodeTierUnavailable, 400, false, ChannelProblem},
-	CodeRateLimited:             {CodeRateLimited, 429, true, ChannelProblem},
-	CodeQuotaBackendUnavailable: {CodeQuotaBackendUnavailable, 503, true, ChannelProblem},
-	CodePoolExhausted:           {CodePoolExhausted, 503, true, ChannelProblem},
-	CodeEgressIntegrityFailed:   {CodeEgressIntegrityFailed, 503, true, ChannelProblem},
-	CodeRenderHung:              {CodeRenderHung, 503, true, ChannelProblem},
-	CodeEngineCrashed:           {CodeEngineCrashed, 503, true, ChannelProblem},
-	CodeRenderTimeout:           {CodeRenderTimeout, 504, true, ChannelProblem},
-	CodeEngineTimeout:            {CodeEngineTimeout, 504, true, ChannelProblem},
-	CodeServiceUnavailable:      {CodeServiceUnavailable, 503, true, ChannelProblem},
-	CodeInternalError:           {CodeInternalError, 500, true, ChannelProblem},
-	CodeTargetHTTPError:         {CodeTargetHTTPError, 200, false, ChannelResult},
-	CodeNavigationFailed:        {CodeNavigationFailed, 200, false, ChannelResult},
-	CodeBlocked:                 {CodeBlocked, 200, true, ChannelResult},
-	CodeCaptchaRequired:         {CodeCaptchaRequired, 200, true, ChannelResult},
-	CodeEmptyContent:            {CodeEmptyContent, 200, false, ChannelResult},
+	CodeBadRequest:                   {CodeBadRequest, 400, false, ChannelProblem},
+	CodeUnauthorized:                 {CodeUnauthorized, 401, false, ChannelProblem},
+	CodeForbidden:                    {CodeForbidden, 403, false, ChannelProblem},
+	CodePaymentRequired:              {CodePaymentRequired, 402, false, ChannelProblem},
+	CodeNotFound:                     {CodeNotFound, 404, false, ChannelProblem},
+	CodeConflict:                     {CodeConflict, 409, false, ChannelProblem},
+	CodeByoProxyInvalid:              {CodeByoProxyInvalid, 422, false, ChannelProblem},
+	CodeTierUnavailable:              {CodeTierUnavailable, 400, false, ChannelProblem},
+	CodeRoutingModeIncoherentClaimOs: {CodeRoutingModeIncoherentClaimOs, 400, false, ChannelProblem},
+	CodeRateLimited:                  {CodeRateLimited, 429, true, ChannelProblem},
+	CodeQuotaBackendUnavailable:      {CodeQuotaBackendUnavailable, 503, true, ChannelProblem},
+	CodePoolExhausted:                {CodePoolExhausted, 503, true, ChannelProblem},
+	CodeEgressIntegrityFailed:        {CodeEgressIntegrityFailed, 503, true, ChannelProblem},
+	CodeRenderHung:                   {CodeRenderHung, 503, true, ChannelProblem},
+	CodeEngineCrashed:                {CodeEngineCrashed, 503, true, ChannelProblem},
+	CodeRenderTimeout:                {CodeRenderTimeout, 504, true, ChannelProblem},
+	CodeEngineTimeout:                {CodeEngineTimeout, 504, true, ChannelProblem},
+	CodeServiceUnavailable:           {CodeServiceUnavailable, 503, true, ChannelProblem},
+	CodeInternalError:                {CodeInternalError, 500, true, ChannelProblem},
+	CodeTargetHTTPError:              {CodeTargetHTTPError, 200, false, ChannelResult},
+	CodeNavigationFailed:             {CodeNavigationFailed, 200, false, ChannelResult},
+	CodeBlocked:                      {CodeBlocked, 200, true, ChannelResult},
+	CodeCaptchaRequired:              {CodeCaptchaRequired, 200, true, ChannelResult},
+	CodeEmptyContent:                 {CodeEmptyContent, 200, false, ChannelResult},
 }
 
 // codeForStatus maps an HTTP status to the canonical problem-channel code that
