@@ -19,7 +19,7 @@ type ScrapeRequest struct {
     chunk_tokens *int32
     // Engine override. 'auto' (default): the identity's browser decides the engine. 'chrome'|'firefox'|'webkit': force that engine, enforced only if coherent with the identity (e.g. iOS identities are always webkit); incoherent picks are rejected, never coerced to a hybrid.
     engine *ScrapeRequest_engine
-    // Response format. 'html' (default): the fully rendered DOM. 'markdown': returns a {markdown, chunks, citations, token_estimate} envelope with prompt-injection-neutralized, token-budgeted output. 'pdf': returns application/pdf bytes (Chrome identities only; Firefox and WebKit return 400 pdf_engine_unsupported).
+    // Response format. 'html' (default): the fully rendered DOM. 'markdown': returns a {markdown, chunks, citations, token_estimate} envelope with prompt-injection-neutralized, token-budgeted output. 'pdf': returns application/pdf bytes. The PDF-capable engine is selected automatically for any requested engine (capability pin).
     format *ScrapeRequest_format
     // When screenshot=true, capture the FULL document height instead of just the visible viewport. Ignored when screenshot_selector is set.
     full_page *bool
@@ -1267,7 +1267,7 @@ func (m *ScrapeRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d
     }
     return res
 }
-// GetFormat gets the format property value. Response format. 'html' (default): the fully rendered DOM. 'markdown': returns a {markdown, chunks, citations, token_estimate} envelope with prompt-injection-neutralized, token-budgeted output. 'pdf': returns application/pdf bytes (Chrome identities only; Firefox and WebKit return 400 pdf_engine_unsupported).
+// GetFormat gets the format property value. Response format. 'html' (default): the fully rendered DOM. 'markdown': returns a {markdown, chunks, citations, token_estimate} envelope with prompt-injection-neutralized, token-budgeted output. 'pdf': returns application/pdf bytes. The PDF-capable engine is selected automatically for any requested engine (capability pin).
 // returns a *ScrapeRequest_format when successful
 func (m *ScrapeRequest) GetFormat()(*ScrapeRequest_format) {
     return m.format
@@ -1512,7 +1512,7 @@ func (m *ScrapeRequest) SetChunkTokens(value *int32)() {
 func (m *ScrapeRequest) SetEngine(value *ScrapeRequest_engine)() {
     m.engine = value
 }
-// SetFormat sets the format property value. Response format. 'html' (default): the fully rendered DOM. 'markdown': returns a {markdown, chunks, citations, token_estimate} envelope with prompt-injection-neutralized, token-budgeted output. 'pdf': returns application/pdf bytes (Chrome identities only; Firefox and WebKit return 400 pdf_engine_unsupported).
+// SetFormat sets the format property value. Response format. 'html' (default): the fully rendered DOM. 'markdown': returns a {markdown, chunks, citations, token_estimate} envelope with prompt-injection-neutralized, token-budgeted output. 'pdf': returns application/pdf bytes. The PDF-capable engine is selected automatically for any requested engine (capability pin).
 func (m *ScrapeRequest) SetFormat(value *ScrapeRequest_format)() {
     m.format = value
 }

@@ -147,7 +147,7 @@ func peHandle(ctx context.Context, client *Client, row peRow) (peResult, error) 
 		r, err := client.Screenshot(ctx, ScreenshotRequest{URL: peTarget})
 		return peGreen("screenshot", ep, r), err
 	case "pdf":
-		// PDF is Chrome-only; pin a chrome identity so the server's random draw is
+		// PDF is capability-pinned; pin a chrome identity so the server's random draw is
 		// deterministic (engine="chrome" alone passes the guard but the draw can still
 		// resolve non-chrome and 400) → reproducible GREEN.
 		r, err := client.Pdf(ctx, PdfRequest{URL: peTarget, Engine: "chrome", Extra: map[string]interface{}{

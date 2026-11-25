@@ -5,13 +5,13 @@ Collect web data at scale — scrape, crawl, search, and extract structured data
 
 ## Install
 
-The current release is **2.3.9**, delivered as the Go module tag `v2.3.9`:
+The current release is **2.4.0**, delivered as the Go module tag `v2.4.0`:
 
 ```bash
 go get github.com/GhostCrawl/ghostcrawl-go/v2@latest
 ```
 
-Requires Go 1.25+ (set by the Kiota HTTP dependency). The real module path is
+Requires Go 1.26+ (set by the Kiota HTTP dependency). The real module path is
 `github.com/GhostCrawl/ghostcrawl-go/v2` — there is no separate installer.
 
 ### First step: runtime setup
@@ -153,7 +153,7 @@ client, err := ghostcrawl.New("gck_live_YOUR_KEY")
 client, err := ghostcrawl.New("")
 ```
 
-Every request sends `Authorization: Bearer <token>`. This is the only auth scheme the API accepts.
+Every request sends `Authorization: Bearer <token>` by default. The API also accepts the same account key in an `X-Api-Key` header (set it as a custom header); if both are present, `Authorization` wins. See the [authentication guide](https://docs.ghostcrawl.io/authentication) for details.
 
 ## Extract structured data
 
@@ -198,8 +198,8 @@ if err != nil {
 }
 _ = os.WriteFile("page.png", png, 0o644)
 
-// PDF — returns raw application/pdf bytes (Chrome-only; a Firefox/WebKit identity
-// is rejected with a 400 pdf_engine_unsupported error)
+// PDF — returns raw application/pdf bytes (any engine; the PDF-capable engine is selected automatically, so a Firefox/WebKit identity
+// still receives real PDF bytes (capability pin)
 pdf, err := client.Pdf(context.Background(), ghostcrawl.PdfRequest{
     URL:         "https://example.com",
     PaperFormat: "a4",
@@ -346,7 +346,7 @@ client, err := ghostcrawl.New("gck_live_YOUR_KEY", "http://localhost:8080")
 | URL map | `client.Map(ctx, req)` | Discover all reachable URLs |
 | Content | `client.Content(ctx, req)` | Rendered content JSON envelope |
 | Screenshot | `client.Screenshot(ctx, req)` | Capture a URL to PNG bytes |
-| PDF | `client.Pdf(ctx, req)` | Render a URL to PDF bytes (Chrome-only) |
+| PDF | `client.Pdf(ctx, req)` | Render a URL to PDF bytes (any engine) |
 | Agent (BYO) | `client.Agent(ctx, task)` | NL browser task — account-gated, BYO model |
 | Crawl runs | `client.CrawlRuns()` | Start, WaitForCompletion, List, Get, Cancel |
 | Sessions | `client.Sessions()` | Create, List, Extend, Release |

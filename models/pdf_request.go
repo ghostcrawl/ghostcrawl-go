@@ -7,11 +7,11 @@ import (
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91 "github.com/microsoft/kiota-abstractions-go/serialization"
 )
 
-// PdfRequest pOST /v1/pdf request body, render a URL to PDF. Renders the target URL to a PDF document. Supported on Chrome identities; requests that resolve to a Firefox or WebKit identity return 400 pdf_engine_unsupported. Security: - The URL is validated against private/loopback/metadata targets. - All traffic egresses through your configured proxy. - Subject to your daily request quota.
+// PdfRequest pOST /v1/pdf request body, render a URL to PDF. Renders the target URL to a PDF document. Any requested engine produces real PDF bytes — the PDF-capable engine is selected automatically (capability pin). Security: - The URL is validated against private/loopback/metadata targets. - All traffic egresses through your configured proxy. - Subject to your daily request quota.
 type PdfRequest struct {
     // Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.
     additionalData map[string]any
-    // Engine override. PDF is chrome-only; 'firefox' or 'webkit' returns 400 pdf_engine_unsupported immediately (before dispatch).
+    // Engine override. Engine override. PDF output is produced by the PDF-capable engine regardless of the requested value (transparent capability pin).
     engine *PdfRequest_engine
     // Re-use a persisted identity.
     identity PdfRequest_PdfRequest_identityable
@@ -467,7 +467,7 @@ func CreatePdfRequestFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3
 func (m *PdfRequest) GetAdditionalData()(map[string]any) {
     return m.additionalData
 }
-// GetEngine gets the engine property value. Engine override. PDF is chrome-only; 'firefox' or 'webkit' returns 400 pdf_engine_unsupported immediately (before dispatch).
+// GetEngine gets the engine property value. Engine override. Engine override. PDF output is produced by the PDF-capable engine regardless of the requested value (transparent capability pin).
 // returns a *PdfRequest_engine when successful
 func (m *PdfRequest) GetEngine()(*PdfRequest_engine) {
     return m.engine
@@ -656,7 +656,7 @@ func (m *PdfRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c
 func (m *PdfRequest) SetAdditionalData(value map[string]any)() {
     m.additionalData = value
 }
-// SetEngine sets the engine property value. Engine override. PDF is chrome-only; 'firefox' or 'webkit' returns 400 pdf_engine_unsupported immediately (before dispatch).
+// SetEngine sets the engine property value. Engine override. Engine override. PDF output is produced by the PDF-capable engine regardless of the requested value (transparent capability pin).
 func (m *PdfRequest) SetEngine(value *PdfRequest_engine)() {
     m.engine = value
 }

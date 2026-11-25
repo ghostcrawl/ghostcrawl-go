@@ -749,8 +749,8 @@ type PdfRequest struct {
 	PaperFormat string
 	// Landscape renders in landscape orientation. Default false.
 	Landscape bool
-	// Engine is the browser engine. PDF is Chrome-only; "firefox" / "webkit" are
-	// rejected with 400 pdf_engine_unsupported. Default "auto" (resolves to Chrome).
+	// Engine is the browser engine. PDF is capability-pinned; "firefox" / "webkit" are
+	// accepted and served real PDF bytes via the PDF-capable engine. Default "auto" (resolves to Chrome).
 	Engine string
 	Extra  map[string]interface{}
 }
@@ -1149,6 +1149,12 @@ func (c *SessionsClient) RecordingStart(ctx context.Context, profileID string, b
 // /v1/sessions/{profile_id}/recording/stop.
 func (c *SessionsClient) RecordingStop(ctx context.Context, profileID string) (map[string]interface{}, error) {
 	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(profileID)+"/recording/stop", nil)
+}
+
+// Step drives one navigate/act step on a live session — POST
+// /v1/sessions/{session_id}/step.
+func (c *SessionsClient) Step(ctx context.Context, sessionID string, body map[string]interface{}) (map[string]interface{}, error) {
+	return c.req.do(ctx, abstractions.POST, "/v1/sessions/"+url.PathEscape(sessionID)+"/step", body)
 }
 
 // ProfilesClient manages identity profiles — /v1/profiles.
@@ -2320,8 +2326,8 @@ func (c *Client) Map(ctx context.Context, req MapRequest) (map[string]interface{
 //	if err != nil { log.Fatal(err) }
 //	os.WriteFile("page.pdf", data, 0o644)
 //
-// PDF output is Chrome-only; a request that resolves to a Firefox or WebKit
-// identity is rejected with a *ProblemError (StatusCode 400 pdf_engine_unsupported).
+// PDF output is produced by the PDF-capable engine for any requested engine; a Firefox or WebKit
+// identity still receives real PDF bytes (capability-pinned).
 //
 // /v1/pdf has no generated typed builder, so this uses the shared Kiota request
 // adapter (same Bearer token + base URL + middleware pipeline as the modeled calls).

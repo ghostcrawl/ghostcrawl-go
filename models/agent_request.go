@@ -8,8 +8,6 @@ import (
 )
 
 type AgentRequest struct {
-    // The api_key property
-    api_key *string
     // The callback_url property
     callback_url *string
     // The mode property
@@ -20,10 +18,8 @@ type AgentRequest struct {
     proxy ProxyConfigable
     // Agent task payload; URL fields are policy-validated when present.
     task AgentRequest_taskable
-    // The tenant_id property
-    tenant_id *string
-    // The workspace_id property
-    workspace_id *string
+    // Bring-your-own LLM connection settings for this request. Tenant and workspace are derived from your authenticated credentials and cannot be overridden here.
+    provider_config AgentRequest_provider_configable
 }
 // NewAgentRequest instantiates a new AgentRequest and sets the default values.
 func NewAgentRequest()(*AgentRequest) {
@@ -38,10 +34,10 @@ func NewAgentRequest()(*AgentRequest) {
 func CreateAgentRequestFromDiscriminatorValue(parseNode i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable, error) {
     return NewAgentRequest(), nil
 }
-// GetApiKey gets the api_key property value. The api_key property
-// returns a *string when successful
-func (m *AgentRequest) GetApiKey()(*string) {
-    return m.api_key
+// GetProviderConfig gets the provider_config property value. Bring-your-own LLM connection settings for this request. Tenant and workspace are derived from your authenticated credentials and cannot be overridden here.
+// returns a AgentRequest_provider_configable when successful
+func (m *AgentRequest) GetProviderConfig()(AgentRequest_provider_configable) {
+    return m.provider_config
 }
 // GetCallbackUrl gets the callback_url property value. The callback_url property
 // returns a *string when successful
@@ -52,16 +48,6 @@ func (m *AgentRequest) GetCallbackUrl()(*string) {
 // returns a map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error) when successful
 func (m *AgentRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error)) {
     res := make(map[string]func(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode)(error))
-    res["api_key"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
-        val, err := n.GetStringValue()
-        if err != nil {
-            return err
-        }
-        if val != nil {
-            m.SetApiKey(val)
-        }
-        return nil
-    }
     res["callback_url"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
         val, err := n.GetStringValue()
         if err != nil {
@@ -92,6 +78,16 @@ func (m *AgentRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d2
         }
         return nil
     }
+    res["provider_config"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
+        val, err := n.GetObjectValue(CreateAgentRequest_provider_configFromDiscriminatorValue)
+        if err != nil {
+            return err
+        }
+        if val != nil {
+            m.SetProviderConfig(val.(AgentRequest_provider_configable))
+        }
+        return nil
+    }
     res["proxy"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
         val, err := n.GetObjectValue(CreateProxyConfigFromDiscriminatorValue)
         if err != nil {
@@ -109,26 +105,6 @@ func (m *AgentRequest) GetFieldDeserializers()(map[string]func(i878a80d2330e89d2
         }
         if val != nil {
             m.SetTask(val.(AgentRequest_taskable))
-        }
-        return nil
-    }
-    res["tenant_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
-        val, err := n.GetStringValue()
-        if err != nil {
-            return err
-        }
-        if val != nil {
-            m.SetTenantId(val)
-        }
-        return nil
-    }
-    res["workspace_id"] = func (n i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.ParseNode) error {
-        val, err := n.GetStringValue()
-        if err != nil {
-            return err
-        }
-        if val != nil {
-            m.SetWorkspaceId(val)
         }
         return nil
     }
@@ -154,24 +130,8 @@ func (m *AgentRequest) GetProxy()(ProxyConfigable) {
 func (m *AgentRequest) GetTask()(AgentRequest_taskable) {
     return m.task
 }
-// GetTenantId gets the tenant_id property value. The tenant_id property
-// returns a *string when successful
-func (m *AgentRequest) GetTenantId()(*string) {
-    return m.tenant_id
-}
-// GetWorkspaceId gets the workspace_id property value. The workspace_id property
-// returns a *string when successful
-func (m *AgentRequest) GetWorkspaceId()(*string) {
-    return m.workspace_id
-}
 // Serialize serializes information the current object
 func (m *AgentRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.SerializationWriter)(error) {
-    {
-        err := writer.WriteStringValue("api_key", m.GetApiKey())
-        if err != nil {
-            return err
-        }
-    }
     {
         err := writer.WriteStringValue("callback_url", m.GetCallbackUrl())
         if err != nil {
@@ -192,6 +152,12 @@ func (m *AgentRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e
         }
     }
     {
+        err := writer.WriteObjectValue("provider_config", m.GetProviderConfig())
+        if err != nil {
+            return err
+        }
+    }
+    {
         err := writer.WriteObjectValue("proxy", m.GetProxy())
         if err != nil {
             return err
@@ -203,23 +169,11 @@ func (m *AgentRequest) Serialize(writer i878a80d2330e89d26896388a3f487eef27b0a0e
             return err
         }
     }
-    {
-        err := writer.WriteStringValue("tenant_id", m.GetTenantId())
-        if err != nil {
-            return err
-        }
-    }
-    {
-        err := writer.WriteStringValue("workspace_id", m.GetWorkspaceId())
-        if err != nil {
-            return err
-        }
-    }
     return nil
 }
-// SetApiKey sets the api_key property value. The api_key property
-func (m *AgentRequest) SetApiKey(value *string)() {
-    m.api_key = value
+// SetProviderConfig sets the provider_config property value. Bring-your-own LLM connection settings for this request. Tenant and workspace are derived from your authenticated credentials and cannot be overridden here.
+func (m *AgentRequest) SetProviderConfig(value AgentRequest_provider_configable)() {
+    m.provider_config = value
 }
 // SetCallbackUrl sets the callback_url property value. The callback_url property
 func (m *AgentRequest) SetCallbackUrl(value *string)() {
@@ -241,30 +195,18 @@ func (m *AgentRequest) SetProxy(value ProxyConfigable)() {
 func (m *AgentRequest) SetTask(value AgentRequest_taskable)() {
     m.task = value
 }
-// SetTenantId sets the tenant_id property value. The tenant_id property
-func (m *AgentRequest) SetTenantId(value *string)() {
-    m.tenant_id = value
-}
-// SetWorkspaceId sets the workspace_id property value. The workspace_id property
-func (m *AgentRequest) SetWorkspaceId(value *string)() {
-    m.workspace_id = value
-}
 type AgentRequestable interface {
     i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.Parsable
-    GetApiKey()(*string)
     GetCallbackUrl()(*string)
     GetMode()(*AgentRequest_mode)
     GetProfileId()(*string)
     GetProxy()(ProxyConfigable)
+    GetProviderConfig()(AgentRequest_provider_configable)
     GetTask()(AgentRequest_taskable)
-    GetTenantId()(*string)
-    GetWorkspaceId()(*string)
-    SetApiKey(value *string)()
     SetCallbackUrl(value *string)()
     SetMode(value *AgentRequest_mode)()
     SetProfileId(value *string)()
     SetProxy(value ProxyConfigable)()
+    SetProviderConfig(value AgentRequest_provider_configable)()
     SetTask(value AgentRequest_taskable)()
-    SetTenantId(value *string)()
-    SetWorkspaceId(value *string)()
 }

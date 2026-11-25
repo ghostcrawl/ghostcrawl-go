@@ -2,7 +2,7 @@
 // Changes may cause incorrect behavior and will be lost if the code is regenerated.
 
 package models
-// Engine override. PDF is chrome-only; 'firefox' or 'webkit' returns 400 pdf_engine_unsupported immediately (before dispatch).
+// Engine override. Engine override. PDF output is produced by the PDF-capable engine regardless of the requested value (transparent capability pin).
 type PdfRequest_engine int
 
 const (
