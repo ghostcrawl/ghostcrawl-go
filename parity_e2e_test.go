@@ -1,6 +1,6 @@
 // go lane parity-e2e runner (real execution).
 //
-// Exercises EVERY user-surface row in scripts/phase178/rowset.json ONCE against
+// Exercises EVERY user-surface row in the parity rowset ONCE against
 // the REAL ghostcrawl backend (the cloud test tenant) and writes one transcript
 // per row to:
 //
@@ -20,7 +20,7 @@
 // → real RED; any 429/503 self-throttle → RED FAIL-to-root-cause.
 //
 // Run via `make -C sdks/go parity-e2e` (which wraps this in the shared flock
-// run-lock scripts/phase178/parity-run.sh so concurrent lanes serialize their hits
+// run-lock the shared parity run-lock so concurrent lanes serialize their hits
 // to the single shared tenant — W2). This is a live-network integration run and is
 // EXPECTED to exceed the 30s soft-latency guidance (network-bound, not a hang — W5).
 package ghostcrawl
@@ -381,7 +381,7 @@ func TestParityE2E(t *testing.T) {
 		t.Logf("[parity-e2e:go] base URL from %s (value not echoed)", peBaseVar)
 	}
 
-	rowsetPath := filepath.Join(peRepoRoot(), "scripts", "phase178", "rowset.json")
+	rowsetPath := filepath.Join(peRepoRoot(), "parity", "rowset.json")
 	raw, err := os.ReadFile(rowsetPath)
 	if err != nil {
 		t.Fatalf("read rowset: %v", err)

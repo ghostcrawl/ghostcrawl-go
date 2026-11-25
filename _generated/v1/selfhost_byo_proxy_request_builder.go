@@ -34,7 +34,7 @@ func NewSelfhostByoProxyRequestBuilder(rawUrl string, requestAdapter i2ae4187f7d
     urlParams["request-raw-url"] = rawUrl
     return NewSelfhostByoProxyRequestBuilderInternal(urlParams, requestAdapter)
 }
-// Put **Self-host deployments only.** Validate + persist a BYO proxy JSON document, then reload the provider. Contract: ``{"proxies": [ {url, operating system,.},. ]}``. Each entry MUST carry a ``url`` and ``operating system`` (CLAUDE.md residential-proxy rule). Malformed → 422 invalid_proxy_json (no write). Success → write to the proxies.json target + reload via LocalProxyProvider → {reloaded, count}.
+// Put **Self-host deployments only.** Validate + persist a BYO proxy JSON document, then reload the provider. Contract: ``{"proxies": [ {url, operating system,.},. ]}``. Each entry MUST carry a ``url`` and ``operating system``. Malformed → 422 invalid_proxy_json (no write). Success → write to the proxies.json target + reload via LocalProxyProvider → {reloaded, count}.
 // returns a UntypedNodeable when successful
 // returns a ProblemDetails error when the service returns a 422 status code
 func (m *SelfhostByoProxyRequestBuilder) Put(ctx context.Context, body SelfhostByoProxyPutRequestBodyable, requestConfiguration *SelfhostByoProxyRequestBuilderPutRequestConfiguration)(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable, error) {
@@ -54,7 +54,7 @@ func (m *SelfhostByoProxyRequestBuilder) Put(ctx context.Context, body SelfhostB
     }
     return res.(i878a80d2330e89d26896388a3f487eef27b0a0e6c010c493bf80be1452208f91.UntypedNodeable), nil
 }
-// ToPutRequestInformation **Self-host deployments only.** Validate + persist a BYO proxy JSON document, then reload the provider. Contract: ``{"proxies": [ {url, operating system,.},. ]}``. Each entry MUST carry a ``url`` and ``operating system`` (CLAUDE.md residential-proxy rule). Malformed → 422 invalid_proxy_json (no write). Success → write to the proxies.json target + reload via LocalProxyProvider → {reloaded, count}.
+// ToPutRequestInformation **Self-host deployments only.** Validate + persist a BYO proxy JSON document, then reload the provider. Contract: ``{"proxies": [ {url, operating system,.},. ]}``. Each entry MUST carry a ``url`` and ``operating system``. Malformed → 422 invalid_proxy_json (no write). Success → write to the proxies.json target + reload via LocalProxyProvider → {reloaded, count}.
 // returns a *RequestInformation when successful
 func (m *SelfhostByoProxyRequestBuilder) ToPutRequestInformation(ctx context.Context, body SelfhostByoProxyPutRequestBodyable, requestConfiguration *SelfhostByoProxyRequestBuilderPutRequestConfiguration)(*i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.RequestInformation, error) {
     requestInfo := i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.NewRequestInformationWithMethodAndUrlTemplateAndPathParameters(i2ae4187f7daee263371cb1c977df639813ab50ffa529013b7437480d1ec0158f.PUT, m.BaseRequestBuilder.UrlTemplate, m.BaseRequestBuilder.PathParameters)

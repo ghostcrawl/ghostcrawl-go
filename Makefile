@@ -1,13 +1,13 @@
 # go lane one-command parity runner.
 #
 # `make parity-e2e` runs the TestParityE2E sweep in parity_e2e_test.go, which
-# exercises EVERY user-surface row in scripts/phase178/rowset.json ONCE against the
-# REAL cloud test tenant and writes one transcript per row to 178-EVIDENCE/go/
-# (per scripts/phase178/TRANSCRIPT-SCHEMA.md).
+# exercises EVERY user-surface row in the parity rowset ONCE against the
+# dedicated test tenant and writes one transcript per row to 178-EVIDENCE/go/
+# (per the transcript schema).
 #
 # Secrets: the token is read from GHOSTCRAWL_API_KEY (NEVER hardcoded); if
 # it is unset the test SKIPS and fabricates nothing. The real-backend sweep is
-# wrapped in the shared flock run-lock (scripts/phase178/parity-run.sh) so
+# wrapped in the shared flock run-lock (the shared parity run-lock) so
 # concurrent-wave lanes serialize their hits to the single shared tenant (W2).
 # NOTE: this is a live-network integration run and is EXPECTED to exceed the 30s
 # soft-latency guidance — network-bound, not a hang (W5).
@@ -27,4 +27,4 @@ build:
 # -count=1 disables the test cache so every invocation is a real live-network sweep.
 # -timeout 30m matches the live-network budget (W5). ROW is threaded to the runner env.
 parity-e2e:
-	@ROW="$(ROW)" $(REPO_ROOT)/scripts/phase178/parity-run.sh go -- go test -run TestParityE2E -count=1 -timeout 30m -v ./
+	@ROW="$(ROW)" $(REPO_ROOT)/the shared parity run-lock go -- go test -run TestParityE2E -count=1 -timeout 30m -v ./
